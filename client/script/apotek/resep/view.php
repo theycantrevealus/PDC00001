@@ -103,13 +103,15 @@
         }
 
         $.ajax({
-            url:__HOSTAPI__ + "/Apotek/detail_resep_2/" + __PAGES__[3],
+            url:__HOSTAPI__ + "/Apotek/detail_resep_3/" + __PAGES__[3],
             async:false,
             beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
             },
             type:"GET",
             success:function(response) {
+                console.log("aaaa")
+                console.log(response);
                 var data = response.response_package[0];
 
                 currentAsesmen = data.asesmen.uid;
@@ -2752,7 +2754,6 @@
                                 },
                                 success:function(response) {
                                     $("#btnSelesai").prop("disabled", false).removeClass("btn-warning").addClass("btn-success");
-
                                     if(response.response_package.antrian.response_result > 0) {
                                         if(currentMetaData.departemen.uid === __POLI_IGD__) {
                                             Swal.fire(

@@ -11,7 +11,7 @@
     var currentStatusOpname = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
     var allowProcess = false;
     $.ajax({
-      url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + resepUID,
+      url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator_3/" + resepUID,
       async: false,
       beforeSend: function(request) {
         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -780,7 +780,7 @@
 
       //Load Resep Detail
       $.ajax({
-        url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + resepUID,
+        url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator_3/" + resepUID,
         async: false,
         beforeSend: function(request) {
           request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -1036,7 +1036,7 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
               },
               data: {
-                request: "proses_resep",
+                request: "proses_resep_2",
                 resep: resepUID,
                 //antrian: antrian,
                 nama_pasien: selectedRMPasien + " - " + selectedNamaPasien,
