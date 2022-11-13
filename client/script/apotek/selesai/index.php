@@ -685,7 +685,7 @@
 
             //Load Resep Detail
             $.ajax({
-                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator_4/" + uid,
+                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator_2/" + uid,
                 async:false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -2054,7 +2054,7 @@
 
             //Load Resep Detail
             $.ajax({
-                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator_3/" + uid,
+                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + uid,
                 async:false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);

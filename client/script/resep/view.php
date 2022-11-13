@@ -399,7 +399,7 @@
             //Simpan Data
             Swal.fire({
                 title: 'Selesai Membuat Resep?',
-                text: 'Resep akan dikirimkan kepada verifikator apotek menggantikan resep sebelumnya. Segala alasan perubahan data resep akan dilaporkan',
+                text: 'Resep tambahan akan dikirimkan kepada verifikator apotek. Segala alasan perubahan data resep akan dilaporkan',
                 showDenyButton: true,
                 //showCancelButton: true,
                 confirmButtonText: `Ya`,
@@ -440,7 +440,8 @@
                             keteranganRacikan: keteranganRacikanData,
                             resep: resep,
                             racikan: racikan,
-                            alasan: alasan
+                            alasan: alasan,
+                            kodeResep: targetKodeResep
                         },
                         beforeSend: function(request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -612,7 +613,7 @@
             //TODO: Create New Resep
         } else {
             $.ajax({
-                url: __HOSTAPI__ + "/Apotek/detail_resep_2/" + __PAGES__[2],
+                url: __HOSTAPI__ + "/Apotek/detail_resep_3/" + __PAGES__[2],
                 async: false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -620,22 +621,22 @@
                 type: "GET",
                 success: function(response) {
                     var data = response.response_package[0];
-                    // console.clear();
+                    console.clear();
                     console.log(data);
 
                     asesmen = data.asesmen_uid;
-                        kunjungan = data.asesmen.kunjungan;
-                        antrian = data.asesmen.antrian;
-                        penjamin = data.detail.penjamin.uid;
-                        pasien_penjamin_uid = data.detail.penjamin.uid;
-                        pasien = data.detail.pasien.uid;
-                        allowEdit = data.detail.allow_edit;
-                        currentAsesmen = data.asesmen.uid;
-                        targetKodeResep = data.kode;
+                    kunjungan = data.detail.kunjungan;
+                    antrian = data.detail.uid;
+                    penjamin = data.detail.penjamin.uid;
+                    pasien_penjamin_uid = data.detail.penjamin.uid;
+                    pasien = data.detail.pasien.uid;
+                    allowEdit = data.detail.allow_edit;
+                    currentAsesmen = data.asesmen_uid;
+                    targetKodeResep = data.kode;
 
 
 
-                        ClassicEditor
+                    ClassicEditor
                             .create(document.querySelector("#txt_keterangan_resep"), {
                                 extraPlugins: [MyCustomUploadAdapterPlugin],
                                 placeholder: "Keterangan Resep",
@@ -649,7 +650,7 @@
                                 //console.error( err.stack );
                             });
 
-                        ClassicEditor
+                    ClassicEditor
                             .create(document.querySelector("#txt_keterangan_resep_racikan"), {
                                 extraPlugins: [MyCustomUploadAdapterPlugin],
                                 placeholder: "Keterangan Racikan",
@@ -766,26 +767,27 @@
                     //     }
 
 
-                    //     if (data.resep !== undefined) {
-                            currentMetaData = data.detail;
-                            if (
-                                currentMetaData.departemen === undefined ||
-                                currentMetaData.departemen === null
-                            ) {
-                                currentMetaData.departemen = {
-                                    uid: __POLI_INAP__,
-                                    nama: "Rawat Inap"
-                                };
-                            }
-                            $(".nama_pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
-                            $(".jk_pasien").html((currentMetaData.pasien.jenkel_detail !== undefined && currentMetaData.pasien.jenkel_detail !== null) ? currentMetaData.pasien.jenkel_detail.nama : "");
-                            $(".tanggal_lahir_pasien").html(currentMetaData.pasien.tanggal_lahir_parsed);
-                            $(".penjamin_pasien").html(currentMetaData.penjamin.nama);
-                            $(".poliklinik").html(currentMetaData.departemen.nama);
-                            $(".dokter").html(currentMetaData.dokter.nama);
-                            $("#copy-resep-dokter").html(currentMetaData.dokter.nama);
-                            $("#copy-resep-pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
-                            $("#copy-resep-tanggal").html(data.created_at_parsed);
+                    if (data.resep !== undefined) {
+                        currentMetaData = data.detail;
+                        if (
+                            currentMetaData.departemen === undefined ||
+                            currentMetaData.departemen === null
+                        ) {
+                            currentMetaData.departemen = {
+                                uid: __POLI_INAP__,
+                                nama: "Rawat Inap"
+                            };
+                        }
+
+                        $(".nama_pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
+                        $(".jk_pasien").html((currentMetaData.pasien.jenkel_detail !== undefined && currentMetaData.pasien.jenkel_detail !== null) ? currentMetaData.pasien.jenkel_detail.nama : "");
+                        $(".tanggal_lahir_pasien").html(currentMetaData.pasien.tanggal_lahir_parsed);
+                        $(".penjamin_pasien").html(currentMetaData.penjamin.nama);
+                        $(".poliklinik").html(currentMetaData.departemen.nama);
+                        $(".dokter").html(currentMetaData.dokter.nama);
+                        $("#copy-resep-dokter").html(currentMetaData.dokter.nama);
+                        $("#copy-resep-pasien").html((currentMetaData.pasien.panggilan_name !== null) ? currentMetaData.pasien.panggilan_name.nama + " " + currentMetaData.pasien.nama : currentMetaData.pasien.nama);
+                        $("#copy-resep-tanggal").html(data.created_at_parsed);    
 
                     //         if (data.resep.length > 0) {
 
@@ -894,7 +896,7 @@
 
                     //         $("#total_biaya_obat").html("Rp. " + number_format((totalResep + totalRacikan), 2, ".", ","));
                     //     }
-                    // }
+                    }
 
 
                     if (cppt === "true") {

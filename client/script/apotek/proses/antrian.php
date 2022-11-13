@@ -11,7 +11,7 @@
     var currentStatusOpname = checkStatusGudang(__GUDANG_APOTEK__, "#warning_allow_transact_opname");
     var allowProcess = false;
     $.ajax({
-      url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator_3/" + resepUID,
+      url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + resepUID,
       async: false,
       beforeSend: function(request) {
         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -32,7 +32,7 @@
         $("#nama-pasien").attr({
           "set-penjamin": targettedData.antrian.penjamin_data.uid
         }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name.nama !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
-        $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_nama);
+        $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_detail.nama);
         $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
         //$("#verifikator").html(targettedData.verifikator.nama);
         loadDetailResep(targettedData);
@@ -780,7 +780,7 @@
 
       //Load Resep Detail
       $.ajax({
-        url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator_3/" + resepUID,
+        url: __HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + resepUID,
         async: false,
         beforeSend: function(request) {
           request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -1036,7 +1036,7 @@
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
               },
               data: {
-                request: "proses_resep_2",
+                request: "proses_resep",
                 resep: resepUID,
                 //antrian: antrian,
                 nama_pasien: selectedRMPasien + " - " + selectedNamaPasien,

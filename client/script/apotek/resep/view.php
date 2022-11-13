@@ -110,11 +110,9 @@
             },
             type:"GET",
             success:function(response) {
-                console.log("aaaa")
                 console.log(response);
                 var data = response.response_package[0];
 
-                currentAsesmen = data.asesmen.uid;
                 targetKodeResep = data.kode;
 
 
@@ -132,50 +130,55 @@
                     $("#no-data-alergi-obat").show();
                 }
 
-                if((data.asesmen.diagnosa_kerja !== undefined && data.asesmen.diagnosa_kerja !== "" && data.asesmen.diagnosa_kerja !== null) || data.asesmen.icd_kerja.length > 0) {
-                    $("#diagnosa_utama").html(data.asesmen.diagnosa_kerja);
-                    $("#no-data-diagnosa-utama").hide();
-                } else {
-                    $("#no-data-diagnosa-utama").show();
-                }
+                if(data.asesmen !== undefined && data.asesmen !== null){
+                    
+                    currentAsesmen = data.asesmen.uid;
 
-                if((data.asesmen.diagnosa_banding !== undefined && data.asesmen.diagnosa_banding !== "" && data.asesmen.diagnosa_banding !== null) || data.asesmen.icd_banding.length > 0) {
-                    $("#diagnosa_banding").html(data.asesmen.diagnosa_banding);
-                    $("#no-data-diagnosa-banding").hide();
-                } else {
-                    $("#no-data-diagnosa-banding").show();
+                    if((data.asesmen.diagnosa_kerja !== undefined && data.asesmen.diagnosa_kerja !== "" && data.asesmen.diagnosa_kerja !== null) || data.asesmen.icd_kerja.length > 0) {
+                        $("#diagnosa_utama").html(data.asesmen.diagnosa_kerja);
+                        $("#no-data-diagnosa-utama").hide();
+                    } else {
+                        $("#no-data-diagnosa-utama").show();
+                    }
+
+                    if((data.asesmen.diagnosa_banding !== undefined && data.asesmen.diagnosa_banding !== "" && data.asesmen.diagnosa_banding !== null) || data.asesmen.icd_banding.length > 0) {
+                        $("#diagnosa_banding").html(data.asesmen.diagnosa_banding);
+                        $("#no-data-diagnosa-banding").hide();
+                    } else {
+                        $("#no-data-diagnosa-banding").show();
+                    }
+
+                    if(data.asesmen.icd_kerja !== undefined && data.asesmen.icd_kerja !== null) {
+                        var icd_kerja = data.asesmen.icd_kerja;
+                        if(icd_kerja !== undefined && icd_kerja !== null) {
+                            for(var icdA in icd_kerja) {
+                                if(icd_kerja[icdA] !== undefined && icd_kerja[icdA] !== null) {
+                                    $("#icd_utama").append("<li>" +
+                                        "<b><span class=\"text-info\">" + icd_kerja[icdA].kode + "</span> - " + icd_kerja[icdA].nama + "</b>" +
+                                        "</li>");
+                                }
+                            }
+                        }
+                    }
+
+                    if(data.asesmen.icd_banding !== undefined && data.asesmen.icd_banding !== null) {
+                        var icd_banding = data.asesmen.icd_banding;
+                        if(icd_banding !== undefined && icd_banding !== null) {
+                            for(var icdB in icd_banding) {
+                                if(icd_banding[icdB] !== undefined && icd_banding[icdB] !== null) {
+                                    $("#icd_banding").append("<li>" +
+                                        "<b><span class=\"text-info\">" + icd_banding[icdB].kode + "</span> - " + icd_banding[icdB].nama + "</b>" +
+                                        "</li>");
+                                }
+                            }
+                        }
+                    }
+
                 }
 
                 $("#txt_keterangan_resep").html((data.keterangan !== "" && data.keterangan !== undefined && data.keterangan !== null) ? data.keterangan : "-");
                 $("#txt_keterangan_resep_racikan").html((data.keterangan_racikan !== "" && data.keterangan_racikan !== undefined && data.keterangan_racikan !== null) ? data.keterangan_racikan : "-");
 
-                if(data.asesmen.icd_kerja !== undefined && data.asesmen.icd_kerja !== null) {
-                    var icd_kerja = data.asesmen.icd_kerja;
-                    if(icd_kerja !== undefined && icd_kerja !== null) {
-                        for(var icdA in icd_kerja) {
-                            if(icd_kerja[icdA] !== undefined && icd_kerja[icdA] !== null) {
-                                $("#icd_utama").append("<li>" +
-                                    "<b><span class=\"text-info\">" + icd_kerja[icdA].kode + "</span> - " + icd_kerja[icdA].nama + "</b>" +
-                                    "</li>");
-                            }
-                        }
-                    }
-                }
-
-
-
-                if(data.asesmen.icd_banding !== undefined && data.asesmen.icd_banding !== null) {
-                    var icd_banding = data.asesmen.icd_banding;
-                    if(icd_banding !== undefined && icd_banding !== null) {
-                        for(var icdB in icd_banding) {
-                            if(icd_banding[icdB] !== undefined && icd_banding[icdB] !== null) {
-                                $("#icd_banding").append("<li>" +
-                                    "<b><span class=\"text-info\">" + icd_banding[icdB].kode + "</span> - " + icd_banding[icdB].nama + "</b>" +
-                                    "</li>");
-                            }
-                        }
-                    }
-                }
 
 
                 if(data.resep !== undefined) {

@@ -44,12 +44,6 @@ class Apotek extends Utility
         case 'detail_resep_verifikator_2':
           return self::detail_resep_verifikator_2($parameter[2]);
           break;
-        case 'detail_resep_verifikator_3':
-          return self::detail_resep_verifikator_3($parameter[2]);
-          break;
-        case 'detail_resep_verifikator_4':
-          return self::detail_resep_verifikator_4($parameter[2]);
-          break;
         case 'detail_resep_2':
           return self::detail_resep_2($parameter[2]);
           break;
@@ -173,9 +167,6 @@ class Apotek extends Utility
           break;
         case 'proses_resep':
           return self::proses_resep($parameter);
-          break;
-        case 'proses_resep_2':
-          return self::proses_resep_2($parameter);
           break;
         case 'panggil_antrian_selesai':
           return self::panggil_antrian_selesai($parameter);
@@ -3013,86 +3004,26 @@ class Apotek extends Utility
       $dataResponse['keterangan'] = $value['keterangan'];
       $dataResponse['keterangan_racikan'] = $value['keterangan_racikan'];
 
-      if(
-        $AntrianDetail['response_data'][$AKey]['departemen'] == __POLI_INAP__ ||
-        $AntrianDetail['response_data'][$AKey]['departemen'] == __POLI_IGD__
-        ){
-          //Racikan Detail 
-          $racikan = self::$query->select('racikan', array(
-            'uid',
-            'asesmen',
-            'kode',
-            'keterangan',
-            'aturan_pakai',
-            'iterasi',
-            'signa_qty',
-            'signa_pakai',
-            'qty',
-            'satuan_konsumsi',
-            'total'
-          ))
-            ->where(array(
-              'racikan.asesmen' => '= ?'
-            ), array(
-              $value['asesmen']
-            ))
-            ->execute();
-      }else {
-        // Cek Resep Tambahan
-        $resepTambahan = self::$query->select('resep_tambahan',array(
-          'asesmen',
-          'resep',
-          'racikan',
-          'created_at'
-        ))
+      //Racikan Detail 
+      $racikan = self::$query->select('racikan', array(
+        'uid',
+        'asesmen',
+        'kode',
+        'keterangan',
+        'aturan_pakai',
+        'iterasi',
+        'signa_qty',
+        'signa_pakai',
+        'qty',
+        'satuan_konsumsi',
+        'total'
+      ))
         ->where(array(
-          'resep_tambahan.asesmen' => '=?',
-          'AND',
-          'resep_tambahan.resep' => '= ?'
-        ),array(
-          $value['asesmen'],
-          $value['uid']
+          'racikan.asesmen' => '= ?'
+        ), array(
+          $value['asesmen']
         ))
-        ->execute();
-
-        if(count($resepTambahan['response_data']) > 0){
-          //Racikan Detail Tambahan
-          $racikan = self::$query->select('racikan', array(
-            'uid',
-            'asesmen',
-            'kode',
-            'keterangan',
-            'aturan_pakai',
-            'iterasi',
-            'signa_qty',
-            'signa_pakai',
-            'qty',
-            'satuan_konsumsi',
-            'total'
-          )) ->join('resep_tambahan', array(
-            'resep'
-          ))
-          ->on(array(
-            array(
-              'racikan.uid', '=', 'resep_tambahan.racikan'
-            )
-          ))
-            ->where(array(
-              'resep_tambahan.resep' => '= ?'
-            ), array(
-              $value['uid']
-            ))
-            ->execute();
-        }else {
-          //JIKA RESEP BUKAN TAMBAHAN
-          $racikan['response_data'] = self::$pdo->query("SELECT uid,asesmen,kode,keterangan,aturan_pakai,iterasi,signa_qty,signa_pakai,qty,satuan_konsumsi,total 
-                FROM racikan WHERE racikan.uid 
-                NOT IN (SELECT resep_tambahan.racikan FROM resep_tambahan WHERE resep_tambahan.asesmen ='".$value['asesmen']."') 
-                AND racikan.asesmen ='".$value['asesmen']."'")
-                            ->fetchAll(\PDO::FETCH_ASSOC);
-        }
-      }        
-   
+        ->execute();    
 
 
       foreach ($racikan['response_data'] as $RacikanKey => $RacikanValue) {
@@ -3142,26 +3073,27 @@ class Apotek extends Utility
           $value['asesmen']
         ))
         ->execute();
-      foreach ($Asesmen['response_data'] as $asesmen_key => $asesmen_value) {
-        $ICD10Kerja = array();
-        $SplitKerja = explode(',', $asesmen_value['icd10_kerja']);
-        foreach ($SplitKerja as $ICD10K => $ICD10V) {
-          array_push($ICD10Kerja, $ICD10->get_icd_detail('master_icd_10', $ICD10V)['response_data'][0]);
-        }
-        $Asesmen['response_data'][$asesmen_key]['icd_kerja'] = $ICD10Kerja;
 
-        $ICD10Banding = array();
-        $SplitBanding = explode(',', $asesmen_value['icd10_banding']);
-        foreach ($SplitBanding as $ICD10K => $ICD10V) {
-          array_push($ICD10Banding, $ICD10->get_icd_detail('master_icd_10', $ICD10V)['response_data'][0]);
+      if($Asesmen['response_result'] > 0){
+        foreach ($Asesmen['response_data'] as $asesmen_key => $asesmen_value) {
+          $ICD10Kerja = array();
+          $SplitKerja = explode(',', $asesmen_value['icd10_kerja']);
+          foreach ($SplitKerja as $ICD10K => $ICD10V) {
+            array_push($ICD10Kerja, $ICD10->get_icd_detail('master_icd_10', $ICD10V)['response_data'][0]);
+          }
+          $Asesmen['response_data'][$asesmen_key]['icd_kerja'] = $ICD10Kerja;
+
+          $ICD10Banding = array();
+          $SplitBanding = explode(',', $asesmen_value['icd10_banding']);
+          foreach ($SplitBanding as $ICD10K => $ICD10V) {
+            array_push($ICD10Banding, $ICD10->get_icd_detail('master_icd_10', $ICD10V)['response_data'][0]);
+          }
+          $Asesmen['response_data'][$asesmen_key]['icd_banding'] = $ICD10Banding;
         }
-        $Asesmen['response_data'][$asesmen_key]['icd_banding'] = $ICD10Banding;
+
       }
-
       $dataResponse['asesmen'] = $Asesmen['response_data'][0];
     }
-
-
 
     return array($dataResponse);
   }
@@ -6780,27 +6712,8 @@ class Apotek extends Utility
     if (count($parameter['resep']) > 0 || count($parameter['racikan']) > 0 || isset($parameter['isnew'])) {
 
       if(isset($parameter['uid']) &&  count($parameter['uid']) > 0 ){
-        $resep = self::$query->select('resep', array(
-          'uid',
-          'kode'
-        ))
-          ->where(array(
-            'resep.uid' => '= ?',
-            'AND',
-            '(resep.status_resep' => '= ?',
-            'OR',
-            'resep.status_resep' => '= ?)',
-            'AND',
-            'resep.deleted_at' => 'IS NULL'
-          ), array(
-            $parameter['uid'],
-            'N',
-            'C'
-          ))
-          ->execute();
-
         $uid = $parameter['uid'];
-        $Kode = $resep['response_data'][0]['kode'];
+        $Kode = $parameter['kodeResep'];
 
         //Update resep master
         $Resep = self::$query->update('resep', array(
@@ -6819,41 +6732,78 @@ class Apotek extends Utility
             $parameter['uid']
           ))
           ->execute();
-      }else{
-          //New Resep
-          $uid = parent::gen_uuid();
-
-          $lastNumber = self::$query->select('resep', array(
-            'uid'
+      }else {
+          //Old Asesmen
+          $oldAsesmen = self::$query->select('asesmen', array(
+            'uid',
+            'poli',
+            'kunjungan',
+            'antrian',
+            'pasien',
+            'dokter',
+            'status',
+            'created_at',
+            'updated_at'
           ))
-            ->where(array(
-              'EXTRACT(month FROM created_at)' => '= ?'
-            ), array(
-              intval(date('m'))
+          ->where(array(
+            'asesmen.uid' => '= ?',
+          ), array(
+            $parameter['asesmen']
+          ))
+          ->execute();
+
+          if ($oldAsesmen['response_result'] > 0) {
+            //New Asesmen
+            $asesmen_uid = parent::gen_uuid();
+            $asesmen = self::$query->insert('asesmen', array(
+              'uid' => $asesmen_uid,
+              'poli' => $oldAsesmen['response_data'][0]['poli'],
+              'kunjungan' => $oldAsesmen['response_data'][0]['kunjungan'],
+              'antrian' => $oldAsesmen['response_data'][0]['antrian'],
+              'pasien' => $oldAsesmen['response_data'][0]['pasien'],
+              'dokter' => $UserData['data']->uid,
+              'status' => 'D',
+              'created_at' => parent::format_date(),
+              'updated_at' => parent::format_date()
             ))
-            ->execute();
-          $Kode = 'RSP-' . date('Y/m') . '-' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT);
+              ->execute();
+        
+            //New Resep
+            $uid = parent::gen_uuid();
 
-          $Resep = self::$query->insert('resep', array(
-            'uid' => $uid,
-            'kode' => $Kode,
-            'kunjungan' => $parameter['kunjungan'],
-            'antrian' => $parameter['antrian'],
-            'keterangan' => $parameter['keteranganResep'],
-            'keterangan_racikan' => $parameter['keteranganRacikan'],
-            'asesmen' => $parameter['asesmen'],
-            'dokter' => $UserData['data']->uid,
-            'pasien' => $parameter['pasien'],
-            'alergi_obat' => (isset($parameter['editorAlergiObat']) && !is_null($parameter['editorAlergiObat']) && !empty($parameter['editorAlergiObat'])) ? $parameter['editorAlergiObat'] : '',
-            'total' => 0,
-            'iterasi' => (isset($parameter['iterasi'])) ? intval($parameter['iterasi']) : 0,
-            'alasan_tambahan' => $parameter['alasan'],
-            'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
-            'created_at' => parent::format_date(),
-            'updated_at' => parent::format_date()
-          ))
-            ->execute();
+            $lastNumber = self::$query->select('resep', array(
+              'uid'
+            ))
+              ->where(array(
+                'EXTRACT(month FROM created_at)' => '= ?'
+              ), array(
+                intval(date('m'))
+              ))
+              ->execute();
+            $Kode = 'RSP-' . date('Y/m') . '-' . str_pad(strval(count($lastNumber['response_data']) + 1), 4, '0', STR_PAD_LEFT);
+
+            $Resep = self::$query->insert('resep', array(
+              'uid' => $uid,
+              'kode' => $Kode,
+              'kunjungan' => $parameter['kunjungan'],
+              'antrian' => $parameter['antrian'],
+              'keterangan' => $parameter['keteranganResep'],
+              'keterangan_racikan' => $parameter['keteranganRacikan'],
+              'asesmen' => $asesmen_uid,
+              'dokter' => $UserData['data']->uid,
+              'pasien' => $parameter['pasien'],
+              'alergi_obat' => (isset($parameter['editorAlergiObat']) && !is_null($parameter['editorAlergiObat']) && !empty($parameter['editorAlergiObat'])) ? $parameter['editorAlergiObat'] : '',
+              'total' => 0,
+              'iterasi' => (isset($parameter['iterasi'])) ? intval($parameter['iterasi']) : 0,
+              'alasan_tambahan' => $parameter['alasan'],
+              'status_resep' => ($parameter['charge_invoice'] === 'Y') ? 'N' : 'C',
+              'created_at' => parent::format_date(),
+              'updated_at' => parent::format_date()
+            ))
+              ->execute();
+          }
       } 
+      
 
       if ($Resep['response_result'] > 0) {
         $resep_detail_error = array();
@@ -6903,14 +6853,6 @@ class Apotek extends Utility
             ))
               ->execute();
 
-            //Resep Tambah
-            $ResepTambahan = self::$query->insert('resep_tambahan', array(
-              'asesmen' => $parameter['asesmen'],
-              'resep' => $uid,
-              'racikan' => $uid_racikan,
-              'created_at' => parent::format_date(),
-              'updated_at' => parent::format_date()
-            ))->execute();
 
             if ($newRacikan['response_result'] > 0) {
               /*$newResepDetail = self::$pdo->insert('resep_detail', array(
@@ -6948,18 +6890,8 @@ class Apotek extends Utility
             }
           }
 
-        }else {
-          if(isset($parameter['uid']) &&  count($parameter['uid']) > 0 ){
-            //Resep Tambah
-            $ResepTambahan = self::$query->insert('resep_tambahan', array(
-              'asesmen' => $parameter['asesmen'],
-              'resep' => $uid,
-              'created_at' => parent::format_date(),
-              'updated_at' => parent::format_date()
-            ))->execute();
-          }
         }
-
+     
       }
 
 
@@ -7082,9 +7014,13 @@ class Apotek extends Utility
         'AND',
         '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
         'OR',
-        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+        'AND',
+        '(antrian.departemen' => '!= ?',
+        'AND',
+        'antrian.departemen' => '!= ?)'
       );
-      $paramValue = array($UserData['data']->uid,date('Y-m-d'));
+      $paramValue = array($UserData['data']->uid,date('Y-m-d'),__POLI_INAP__,__POLI_IGD__);
     } else {
       $paramData = array(
         'master_penjamin.deleted_at' => 'IS NULL',
@@ -7096,9 +7032,12 @@ class Apotek extends Utility
         '(resep.status_resep' => '= ?',
         'OR',
         'resep.status_resep' => '= ?)',
-        
+        'AND',
+        '(antrian.departemen' => '!= ?',
+        'AND',
+        'antrian.departemen' => '!= ?)'
       );
-      $paramValue = array($UserData['data']->uid,date('Y-m-d'),'N','C');
+      $paramValue = array($UserData['data']->uid,date('Y-m-d'),'N','C',__POLI_INAP__,__POLI_IGD__);
     }
 
     if ($parameter['length'] < 0) {
@@ -7893,27 +7832,41 @@ class Apotek extends Utility
         $data['response_data'][$key]['response_time'] = (isset($value['waktu_panggil']) && $value['waktu_panggil'] !== '' && !empty($value['waktu_panggil'])) ? str_pad($since_start->h, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->i, 2, '0', STR_PAD_LEFT) . ':' . str_pad($since_start->s, 2, '0', STR_PAD_LEFT) : '-';
         $data['response_data'][$key]['response_to'] = $value['waktu_panggil'];
 
+        $poli = self::$query->select('master_poli', array(
+          'tindakan_konsultasi',
+          'poli_asesmen',
+      ))
+          ->where(array(
+              'master_poli.deleted_at' => 'IS NULL',
+              'AND',
+              'master_poli.uid' => '= ?'
+          ), array(
+            $value['departemen']
+          ))
+          ->execute();
 
         // Cek Resep Tambahan
-        $ResepTambahan = self::$query->select('resep_tambahan',array(
-          'id'
+        $ResepTambahan = self::$query->select('asesmen_medis_' . $poli['response_data'][0]['poli_asesmen'], array(
+          'uid',
+          'kunjungan',
+          'antrian',
+          'diagnosa_kerja',
+          'diagnosa_banding',
+          'icd10_kerja',
+          'icd10_banding'
         ))
-        ->where(array(
-          'resep_tambahan.asesmen' => '= ?',
-          'AND', 
-          'resep_tambahan.resep' => '= ?'
-        ),array(
-          $value['asesmen'],
-          $value['uid']
-        ))
-        ->execute();
+          ->where(array(
+            'asesmen_medis_' . $poli['response_data'][0]['poli_asesmen'] . '.asesmen' => '= ?'
+          ), array(
+            $value['asesmen']
+          ))
+          ->execute();
 
         if($ResepTambahan["response_result"] > 0){
-          $data['response_data'][$key]['resep_tambahan'] = 1;
-        }else {
           $data['response_data'][$key]['resep_tambahan'] = 0;
+        }else {
+          $data['response_data'][$key]['resep_tambahan'] = 1;
         }
-        $data['response_data'][$key]['resep_tambahan_count'] = $ResepTambahan["response_result"];
       }
 
       $minutes = $since_start->days * 24 * 60;

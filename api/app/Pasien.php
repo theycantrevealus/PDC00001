@@ -1330,7 +1330,8 @@ class Pasien extends Utility
                 'nama', 'no_rm'
             ))
             ->join('antrian', array(
-                'penjamin'
+                'penjamin',
+                'departemen'
             ))
             ->on(array(
                 array('asesmen.pasien', '=', 'pasien.uid'),
@@ -1343,9 +1344,9 @@ class Pasien extends Utility
                 'OR',
                 'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')',
                 'AND',
-                '(asesmen.poli' => '!= ?',
-                'OR',
-                'asesmen.poli' => '!= ?)',
+                '(antrian.departemen' => '!= ?',
+                'AND',
+                'antrian.departemen' => '!= ?)',
             ), array(date('Y-m-d'),__POLI_IGD__,__POLI_INAP__))
             /*->order(array(
                 'created_at' => 'DESC'
