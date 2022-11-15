@@ -45,10 +45,10 @@ class Radiologi extends Utility
           return self::get_tindakan_detail($parameter[2]);
           break;
         case 'antrian':
-          return self::get_antrian();
+          return self::get_antrian_2();
           break;
         case 'verifikasi':
-          return self::get_antrian('V');
+          return self::get_antrian_2('V');
           break;
         case 'get-order-detail':
           return self::get_radiologi_order_detail($parameter[2]);
@@ -608,6 +608,84 @@ class Radiologi extends Utility
         'antrian.departemen' => '!= ?'
       ), array(
         $status, __POLI_INAP__
+      ))
+      ->order(
+        array(
+          'rad_order.waktu_order' => 'ASC'
+        )
+      )
+      ->execute();
+
+    $autonum = 1;
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order'])) . ' - [' . date('H:i', strtotime($value['waktu_order'])) . ']';
+      $autonum++;
+    }
+
+    return $data;
+  }
+
+  private function get_antrian_2($status = 'P')
+  {
+    $data = self::$query
+      ->select('rad_order', array(
+        'uid',
+        'asesmen as uid_asesmen',
+        'waktu_order'
+      ))
+      ->join('rad_order_detail', array(
+        'id as uid_rad_order_detail'
+      ))
+      ->join('asesmen', array(
+        'antrian as uid_antrian'
+      ))
+      ->join('antrian', array(
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk'
+      ))
+      ->join('pasien', array(
+        'nama as pasien',
+        'no_rm'
+      ))
+      ->join('master_poli', array(
+        'nama as departemen'
+      ))
+      ->join('pegawai', array(
+        'nama as dokter'
+      ))
+      ->join('master_penjamin', array(
+        'nama as penjamin'
+      ))
+      ->join(
+        'kunjungan',
+        array(
+          'pegawai as uid_resepsionis'
+        )
+      )
+      ->on(
+        array(
+          array('rad_order.uid', '=', 'rad_order_detail.radiologi_order'),
+          array('rad_order.asesmen', '=', 'asesmen.uid'),
+          array('asesmen.antrian', '=', 'antrian.uid'),
+          array('pasien.uid', '=', 'antrian.pasien'),
+          array('master_poli.uid', '=', 'antrian.departemen'),
+          array('pegawai.uid', '=', 'antrian.dokter'),
+          array('master_penjamin.uid', '=', 'antrian.penjamin'),
+          array('kunjungan.uid', '=', 'antrian.kunjungan')
+        )
+      )
+      ->where(array(
+        'rad_order.status'  => '= ?',
+        'AND',
+        'rad_order.deleted_at' => 'IS NULL',
+        // 'AND',
+        // 'antrian.departemen' => '!= ?'
+      ), array(
+        $status//, __POLI_INAP__
       ))
       ->order(
         array(
