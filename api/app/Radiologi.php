@@ -744,6 +744,9 @@ class Radiologi extends Utility
       $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['created_at']));
       $data['response_data'][$key]['jam_order'] = date('H:i', strtotime($value['created_at']));
 
+      $data['response_data'][$key]['keterangan'] = $value['keterangan'];
+      $data['response_data'][$key]['kesimpulan'] = $value['kesimpulan'];
+
       $data['response_data'][$key]['mitra'] = $Mitra->get_mitra_detail($value['mitra'])['response_data'][0];
 
       $data['response_data'][$key]['autonum'] = $autonum;
