@@ -634,9 +634,6 @@ class Radiologi extends Utility
         'asesmen as uid_asesmen',
         'waktu_order'
       ))
-      ->join('rad_order_detail', array(
-        'id as uid_rad_order_detail'
-      ))
       ->join('asesmen', array(
         'antrian as uid_antrian'
       ))
@@ -668,7 +665,6 @@ class Radiologi extends Utility
       )
       ->on(
         array(
-          array('rad_order.uid', '=', 'rad_order_detail.radiologi_order'),
           array('rad_order.asesmen', '=', 'asesmen.uid'),
           array('asesmen.antrian', '=', 'antrian.uid'),
           array('pasien.uid', '=', 'antrian.pasien'),
