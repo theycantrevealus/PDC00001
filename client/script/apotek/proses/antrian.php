@@ -32,7 +32,7 @@
         $("#nama-pasien").attr({
           "set-penjamin": targettedData.antrian.penjamin_data.uid
         }).html(((targettedData.antrian.pasien_info.panggilan_name !== undefined && targettedData.antrian.pasien_info.panggilan_name.nama !== null) ? targettedData.antrian.pasien_info.panggilan_name.nama : "") + " " + targettedData.antrian.pasien_info.nama + "<b class=\"text-success\"> [" + targettedData.antrian.penjamin_data.nama + "]</b>");
-        $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_nama);
+        $("#jk-pasien").html(targettedData.antrian.pasien_info.jenkel_detail.nama);
         $("#tanggal-lahir-pasien").html(targettedData.antrian.pasien_info.tanggal_lahir + " (" + targettedData.antrian.pasien_info.usia + " tahun)");
         //$("#verifikator").html(targettedData.verifikator.nama);
         loadDetailResep(targettedData);
@@ -1076,6 +1076,13 @@
             });
           }
         });
+      }else{
+        Swal.fire({
+                    title: "Stock Apotek Tidak Mencukupi",
+                    text: "Silahkan Lakukan Proses Amprah telebih dahulu sebeum memproses resep!",
+                    showDenyButton: false,
+                    confirmButtonText: "Oke",
+        })
       }
     });
   });

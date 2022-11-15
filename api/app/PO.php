@@ -291,65 +291,101 @@ class PO extends Utility {
 		}
 
 		if ($parameter['length'] < 0) {
-			$data = self::$query->select('inventori_po', array(
-				'uid',
-				'nomor_po',
-				'pegawai',
-				'tanggal_po',
-				'total',
-				'total_after_disc',
-				'supplier',
-				'sumber_dana',
-				'keterangan'
-			))
-			->order(array(
-				'inventori_po.created_at' => 'DESC'
-			))
-			->join('master_supplier', array(
-				'nama as nama_supplier'
-			))
-			->on(array(
-				array('inventori_po.supplier', '=', 'master_supplier.uid')
-			))
-			->where($paramData, $paramValue)
-			->execute();
+			// $data = self::$query->select('inventori_po', array(
+			// 	'uid',
+			// 	'nomor_po',
+			// 	'pegawai',
+			// 	'tanggal_po',
+			// 	'total',
+			// 	'total_after_disc',
+			// 	'supplier',
+			// 	'sumber_dana',
+			// 	'keterangan'
+			// ))
+			// ->order(array(
+			// 	'inventori_po.created_at' => 'DESC'
+			// ))
+			// ->join('master_supplier', array(
+			// 	'nama as nama_supplier'
+			// ))
+			// ->on(array(
+			// 	array('inventori_po.supplier', '=', 'master_supplier.uid')
+			// ))
+			// ->where($paramData, $paramValue)
+			// ->execute();
+			$paramSearch = $parameter['search']['value'];
+			$dataQueryPoDo = self::$pdo->query("SELECT uid,nomor_po,pegawai,tanggal_po,total,
+			total_after_disc,supplier,sumber_dana,keterangan, nama_supplier, created_at
+			FROM
+				(SELECT inventori_po.uid,inventori_po.nomor_po,inventori_po.pegawai,inventori_po.tanggal_po,inventori_po.total, inventori_po.total_after_disc,inventori_po.supplier,inventori_po.sumber_dana,inventori_po.keterangan, inventori_po.created_at, master_supplier.nama as nama_supplier
+				, (select sum(qty) from inventori_po_detail where inventori_po_detail.po = inventori_po.uid group by inventori_po_detail.po) as qty_pesan
+				, (select sum(qty) from inventori_do_detail where inventori_do_detail.po = inventori_po.uid group by inventori_do_detail.po) as qty_sampai
+				FROM inventori_po  
+				JOIN inventori_po_detail ON inventori_po_detail.po = inventori_po.uid
+				JOIN master_supplier ON inventori_po.supplier = master_supplier.uid  
+				WHERE master_supplier.deleted_at IS NULL
+				AND inventori_po.deleted_at IS NULL
+				AND inventori_po.nomor_po ILIKE '%$paramSearch%'
+				GROUP BY inventori_po.uid, inventori_po_detail.po, master_supplier.uid
+				ORDER BY inventori_po.created_at DESC) y
+			where y.qty_sampai is null or y.qty_pesan != y.qty_sampai")
+			->fetchAll(\PDO::FETCH_ASSOC);
 		} else {
-			$data = self::$query->select('inventori_po', array(
-				'uid',
-				'nomor_po',
-				'pegawai',
-				'tanggal_po',
-				'total',
-				'total_after_disc',
-				'supplier',
-				'sumber_dana',
-				'keterangan'
-			))
-			->order(array(
-				'inventori_po.created_at' => 'DESC'
-			))
-			->join('master_supplier', array(
-				'nama as nama_supplier'
-			))
-			->on(array(
-				array('inventori_po.supplier', '=', 'master_supplier.uid')
-			))
-			->offset(intval($parameter['start']))
-			->limit(intval($parameter['length']))
-			->where($paramData, $paramValue)
-			->execute();
+			// $data = self::$query->select('inventori_po', array(
+			// 	'uid',
+			// 	'nomor_po',
+			// 	'pegawai',
+			// 	'tanggal_po',
+			// 	'total',
+			// 	'total_after_disc',
+			// 	'supplier',
+			// 	'sumber_dana',
+			// 	'keterangan'
+			// ))
+			// ->order(array(
+			// 	'inventori_po.created_at' => 'DESC'
+			// ))
+			// ->join('master_supplier', array(
+			// 	'nama as nama_supplier'
+			// ))
+			// ->on(array(
+			// 	array('inventori_po.supplier', '=', 'master_supplier.uid')
+			// ))
+			// ->offset(intval($parameter['start']))
+			// ->limit(intval($parameter['length']))
+			// ->where($paramData, $paramValue)
+			// ->execute();
+			$dataQueryPoDo = self::$pdo->query("SELECT uid,nomor_po,pegawai,tanggal_po,total,
+			total_after_disc,supplier,sumber_dana,keterangan, nama_supplier, created_at
+			FROM
+				(SELECT inventori_po.uid,inventori_po.nomor_po,inventori_po.pegawai,inventori_po.tanggal_po,inventori_po.total, inventori_po.total_after_disc,inventori_po.supplier,inventori_po.sumber_dana,inventori_po.keterangan, inventori_po.created_at, master_supplier.nama as nama_supplier
+				, (select sum(qty) from inventori_po_detail where inventori_po_detail.po = inventori_po.uid group by inventori_po_detail.po) as qty_pesan
+				, (select sum(qty) from inventori_do_detail where inventori_do_detail.po = inventori_po.uid group by inventori_do_detail.po) as qty_sampai
+				FROM inventori_po  
+				JOIN inventori_po_detail ON inventori_po_detail.po = inventori_po.uid
+				JOIN master_supplier ON inventori_po.supplier = master_supplier.uid  
+				WHERE master_supplier.deleted_at IS NULL 
+				AND inventori_po.deleted_at IS NULL
+				GROUP BY inventori_po.uid, inventori_po_detail.po, master_supplier.uid
+				ORDER BY inventori_po.created_at DESC) y
+			where y.qty_sampai is null or y.qty_pesan != y.qty_sampai 
+			LIMIT ".intval($parameter['length'])." OFFSET ".intval($parameter['start'])."")
+			->fetchAll(\PDO::FETCH_ASSOC);
 		}
 
-		$data['response_draw'] = $parameter['draw'];
+		$data['response_draw'] = intval($parameter['draw']);
         $autonum = intval($parameter['start']) + 1;
 
 		$Terminologi = new Terminologi(self::$pdo);
         $Supplier = new Supplier(self::$pdo);
         $Pegawai = new Pegawai(self::$pdo);
+		$dataResult = array();
 
-		foreach ($data['response_data'] as $key => $value) {
-			$data['response_data'][$key]['autonum'] = $autonum;
-			$data['response_data'][$key]['sumber_dana'] = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['sumber_dana'])['response_data'][0];
+
+		foreach ($dataQueryPoDo as $key => $value) {
+			$dataResult[$key] = $value;
+			$dataResult[$key]['autonum'] = $autonum;
+			$dataResult[$key]['sumber_dana'] = $Terminologi->get_terminologi_items_detail('terminologi_item', $value['sumber_dana'])['response_data'][0];
 
 			$InfoPegawai = $Pegawai->get_info($value['pegawai']);
 
@@ -373,30 +409,51 @@ class PO extends Utility {
 				))
 				->execute();
 
-			$data['response_data'][$key]['tanggal_po'] = date("d F Y, H:i", strtotime($value['tanggal_po']));
-			$data['response_data'][$key]['pegawai'] = $InfoPegawai['response_data'][0];
-
+			$dataResult[$key]['tanggal_po'] = date("d F Y, H:i", strtotime($value['tanggal_po']));
+			$dataResult[$key]['pegawai'] = $InfoPegawai['response_data'][0];
 			$autonum++;
 		}
 
 
-		$itemTotal = self::$query->select('inventori_po', array(
-            'uid'
-        ))
-			->join('master_supplier', array(
-				'nama as nama_supplier'
-			))
-			->on(array(
-				array('inventori_po.supplier', '=', 'master_supplier.uid')
-			))
-            ->where(array(
-				'master_supplier.deleted_at' => 'IS NULL',
-				'AND',
-				'inventori_po.deleted_at' => 'IS NULL'
-			), array())
-            ->execute();
+		// $itemTotal = self::$query->select('inventori_po', array(
+        //     'uid'
+        // ))
+		// 	->join('master_supplier', array(
+		// 		'nama as nama_supplier'
+		// 	))
+		// 	->on(array(
+		// 		array('inventori_po.supplier', '=', 'master_supplier.uid')
+		// 	))
+        //     ->where(array(
+		// 		'master_supplier.deleted_at' => 'IS NULL',
+		// 		'AND',
+		// 		'inventori_po.deleted_at' => 'IS NULL'
+		// 	), array())
+        //     ->execute();
 
-		$data['recordsTotal'] = count($itemTotal['response_data']);
+		$itemTotal = self::$pdo->query("SELECT uid,nomor_po,pegawai,tanggal_po,total,
+		total_after_disc,supplier,sumber_dana,keterangan,
+		 nama_supplier, created_at
+		FROM
+			(SELECT inventori_po.uid,inventori_po.nomor_po,inventori_po.pegawai,inventori_po.tanggal_po,inventori_po.total,
+			inventori_po.total_after_disc,inventori_po.supplier,inventori_po.sumber_dana,inventori_po.keterangan, inventori_po.created_at,
+			master_supplier.nama as nama_supplier
+			, (select sum(qty) from inventori_po_detail where inventori_po_detail.po = inventori_po.uid group by inventori_po_detail.po) as qty_pesan
+			, (select sum(qty) from inventori_do_detail where inventori_do_detail.po = inventori_po.uid group by inventori_do_detail.po) as qty_sampai
+			FROM inventori_po  
+			JOIN inventori_po_detail ON inventori_po_detail.po = inventori_po.uid
+			JOIN master_supplier ON inventori_po.supplier = master_supplier.uid  
+			WHERE master_supplier.deleted_at IS NULL 
+			AND inventori_po.deleted_at IS NULL
+			GROUP BY inventori_po.uid, inventori_po_detail.po, master_supplier.uid
+			ORDER BY inventori_po.created_at DESC) y
+		where y.qty_sampai is null or y.qty_pesan != y.qty_sampai")
+		->fetchAll(\PDO::FETCH_ASSOC);
+
+		// $data['recordsTotal'] = count($itemTotal['response_data']);
+		// $data['recordsFiltered'] = count($data['response_data']);
+		$data['response_data'] = $dataResult;
+		$data['recordsTotal'] = count($itemTotal);
 		$data['recordsFiltered'] = count($data['response_data']);
 		$data['length'] = intval($parameter['length']);
 		$data['start'] = intval($parameter['start']);

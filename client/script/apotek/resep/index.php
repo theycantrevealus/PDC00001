@@ -152,7 +152,7 @@
                 },
                 dataSrc:function(response) {
 
-                    console.clear();
+                    // console.clear();
                     console.log(response);
                     var resepDataRaw = response.response_package.response_data;
                     var parsedData = [];
@@ -197,8 +197,13 @@
                 {"targets":0, "className":"dt-body-left"}
             ],
             "rowCallback": function ( row, data, index ) {
+                console.log(data);
                 if(data.departemen.uid === __POLI_IGD__) {
                     $("td", row).addClass("bg-danger-custom text-danger");
+                }
+
+                if(data.resep_tambahan > 0 ){
+                    $("td", row).css({"background-color":"#9de0f6!important","color":"#1d353f","font-weight":"bold"})
                 }
             },
             "columns" : [

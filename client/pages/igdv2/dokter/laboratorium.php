@@ -16,8 +16,7 @@
 									<th class="wrap_content">No</th>
 									<th class="wrap_content">Item Order</th>
                                     <th>Waktu Order</th>
-									<th>Dokter Penanggung Jawab</th>
-									<th class="wrap_content">Aksi</th>
+									<th>Pemeriksaan</th>
 								</tr>
 							</thead>
 							<tbody>

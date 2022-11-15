@@ -1330,19 +1330,24 @@ class Pasien extends Utility
                 'nama', 'no_rm'
             ))
             ->join('antrian', array(
-                'penjamin'
+                'penjamin',
+                'departemen'
             ))
             ->on(array(
                 array('asesmen.pasien', '=', 'pasien.uid'),
                 array('asesmen.antrian', '=', 'antrian.uid')
             ))
             ->where(array(
-                // 'asesmen.created_at' => '>= now()::date + interval \'1h\'',
-                // 'AND',
+                'DATE(antrian.waktu_masuk)' => '= ?',
+                'AND',
                 '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
                 'OR',
-                'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')'
-            ), array())
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')',
+                'AND',
+                '(antrian.departemen' => '!= ?',
+                'AND',
+                'antrian.departemen' => '!= ?)',
+            ), array(date('Y-m-d'),__POLI_IGD__,__POLI_INAP__))
             /*->order(array(
                 'created_at' => 'DESC'
             ))

@@ -2061,6 +2061,7 @@
                 },
                 type:"GET",
                 success:function(response) {
+                    console.log(response);
                     targettedData = response.response_package.response_data[0];
                     $("#nama-pasien").attr({
                         "set-penjamin": targettedData.antrian.penjamin_data.uid
@@ -2095,7 +2096,7 @@
 
             //Load Resep Detail
             $.ajax({
-                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator/" + uid,
+                url:__HOSTAPI__ + "/Apotek/detail_resep_verifikator_3/" + uid,
                 async:false,
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);

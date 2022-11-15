@@ -2026,172 +2026,172 @@
     }
 
     function autoRacikan(setter = {
-      "nama": "",
-      "keterangan": "",
-      "signaKonsumsi": "",
-      "signaTakar": "",
-      "signaHari": "",
-      "aturan_pakai": "",
-      "iterasi": 0,
-      "item": []
+        "nama": "",
+        "keterangan": "",
+        "signaKonsumsi": "",
+        "signaTakar": "",
+        "signaHari": "",
+        "aturan_pakai": "",
+        "iterasi": 0,
+        "item": []
     }) {
-      $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
-      var newRacikanRow = document.createElement("TR");
-      $(newRacikanRow).addClass("last-racikan racikan-master");
+        $("#table-resep-racikan tbody.racikan tr").removeClass("last-racikan");
+        var newRacikanRow = document.createElement("TR");
+        $(newRacikanRow).addClass("last-racikan racikan-master");
 
-      var newRacikanCellID = document.createElement("TD");
-      var newRacikanCellNama = document.createElement("TD");
-      var newRacikanCellSignaA = document.createElement("TD");
-      var newRacikanCellSignaX = document.createElement("TD");
-      var newRacikanCellSignaB = document.createElement("TD");
-      var newRacikanCellJlh = document.createElement("TD");
-      var newRacikanCellAksi = document.createElement("TD");
+        var newRacikanCellID = document.createElement("TD");
+        var newRacikanCellNama = document.createElement("TD");
+        var newRacikanCellSignaA = document.createElement("TD");
+        var newRacikanCellSignaX = document.createElement("TD");
+        var newRacikanCellSignaB = document.createElement("TD");
+        var newRacikanCellJlh = document.createElement("TD");
+        var newRacikanCellAksi = document.createElement("TD");
 
-      $(newRacikanCellID).addClass("master-racikan-cell");
-      $(newRacikanCellNama).addClass("master-racikan-cell");
-      $(newRacikanCellSignaA).addClass("master-racikan-cell");
-      $(newRacikanCellSignaX).addClass("master-racikan-cell");
-      $(newRacikanCellSignaB).addClass("master-racikan-cell");
-      $(newRacikanCellJlh).addClass("master-racikan-cell");
-      $(newRacikanCellAksi).addClass("master-racikan-cell");
+        $(newRacikanCellID).addClass("master-racikan-cell");
+        $(newRacikanCellNama).addClass("master-racikan-cell");
+        $(newRacikanCellSignaA).addClass("master-racikan-cell");
+        $(newRacikanCellSignaX).addClass("master-racikan-cell");
+        $(newRacikanCellSignaB).addClass("master-racikan-cell");
+        $(newRacikanCellJlh).addClass("master-racikan-cell");
+        $(newRacikanCellAksi).addClass("master-racikan-cell");
 
-      var newRacikanNama = document.createElement("INPUT");
-      $(newRacikanCellNama).append(newRacikanNama);
-      $(newRacikanNama).addClass("form-control nama_racikan").css({
-        "margin-bottom": "20px"
-      }).attr({
-        "placeholder": "Nama Racikan"
-      }).val(setter.nama);
+        var newRacikanNama = document.createElement("INPUT");
+        $(newRacikanCellNama).append(newRacikanNama);
+        $(newRacikanNama).addClass("form-control nama_racikan").css({
+          "margin-bottom": "20px"
+        }).attr({
+          "placeholder": "Nama Racikan"
+        }).val(setter.nama);
 
-      $(newRacikanCellNama).append(
-        "<h6 style=\"padding-bottom: 10px;\">" +
-        "Komposisi:" +
-        "<button style=\"margin-left: 20px;\" class=\"btn btn-sm btn-info tambahKomposisi\"" +
-        "<i class=\"fa fa-plus\"></i> Tambah" +
-        "</button>" +
-        "</h6>" +
-        "<table class=\"table table-bordered komposisi-racikan largeDataType\" style=\"margin-top: 10px;\">" +
-        "<thead class=\"thead-dark\">" +
-        "<tr>" +
-        "<th class=\"wrap_content\">No</th>" +
-        "<th>Obat</th>" +
-        /*"<th class=\"wrap_content\">@</th>" +*/
-        /*"<th>Takaran</th>" +*/
-        "<th>Kekuatan</th>" +
-        "<th class=\"wrap_content\">Aksi</th>" +
-        "<tr>" +
-        "</thead>" +
-        "<tbody class=\"komposisi-item\"></tbody>" +
-        "</table>"
-      );
+        $(newRacikanCellNama).append(
+          "<h6 style=\"padding-bottom: 10px;\">" +
+          "Komposisi:" +
+          "<button style=\"margin-left: 20px;\" class=\"btn btn-sm btn-info tambahKomposisi\"" +
+          "<i class=\"fa fa-plus\"></i> Tambah" +
+          "</button>" +
+          "</h6>" +
+          "<table class=\"table table-bordered komposisi-racikan largeDataType\" style=\"margin-top: 10px;\">" +
+          "<thead class=\"thead-dark\">" +
+          "<tr>" +
+          "<th class=\"wrap_content\">No</th>" +
+          "<th>Obat</th>" +
+          /*"<th class=\"wrap_content\">@</th>" +*/
+          /*"<th>Takaran</th>" +*/
+          "<th>Kekuatan</th>" +
+          "<th class=\"wrap_content\">Aksi</th>" +
+          "<tr>" +
+          "</thead>" +
+          "<tbody class=\"komposisi-item\"></tbody>" +
+          "</table>"
+        );
 
-      var newAturanPakaiRacikan = document.createElement("SELECT");
+        var newAturanPakaiRacikan = document.createElement("SELECT");
 
-      var dataAturanPakai = autoAturanPakai();
+        var dataAturanPakai = autoAturanPakai();
 
-      $(newAturanPakaiRacikan).addClass("form-control aturan-pakai-racikan");
-
-
-
-      var newKeteranganRacikan = document.createElement("TEXTAREA");
-      //$(newRacikanCellNama).append("<br /><span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<br /><br /><span>Keterangan</span>").append(newKeteranganRacikan);
-      var satuanKonsumsi = document.createElement("INPUT");
-      $(satuanKonsumsi).addClass("form-control satuan_konsumsi").attr({
-        "placeholder": "Ex : PULV, PUFF"
-      });
-      $(newRacikanCellNama).append("<br /><span>Satuan Pemakaian</span>").append(satuanKonsumsi).append("<br /><br /><span>Keterangan / Aturan Pakai</span>").append(newKeteranganRacikan);
-      $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
-      for (var aturanPakaiKey in dataAturanPakai) {
-        $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
-      }
-      $(newKeteranganRacikan).addClass("form-control").attr({
-        "placeholder": "Keterangan racikan"
-      }).val(setter.keterangan);
-
-      var newIterasiRacikan = document.createElement("INPUT");
-      $(newIterasiRacikan).inputmask({
-        alias: 'decimal',
-        rightAlign: true,
-        placeholder: "0.00",
-        prefix: "",
-        autoGroup: false,
-        digitsOptional: true
-      }).addClass("form-control racikan_iterasi").attr({
-        "placeholder": "0"
-      }).val((parseInt(setter.iterasi) === 0) ? "" : parseInt(setter.iterasi));
-
-      $(newRacikanCellNama).append("<br /><span>Iterasi</span>").append(newIterasiRacikan);
+        $(newAturanPakaiRacikan).addClass("form-control aturan-pakai-racikan");
 
 
 
-      /*var newRacikanObat = document.createElement("SELECT");
-      var newObatTakar = document.createElement("INPUT");
-      $(newRacikanCellObat).append(newRacikanObat);
-      var addAnother = load_product_resep(newRacikanObat, "");
-      $(newRacikanCellObat).append("<br /><b>Takaran</b>");
-      $(newRacikanCellObat).append(newObatTakar);
-      $(newRacikanObat).addClass("form-control").select2();
-      $(newObatTakar).addClass("form-control");*/
+        var newKeteranganRacikan = document.createElement("TEXTAREA");
+        //$(newRacikanCellNama).append("<br /><span>Aturan Pakai</span>").append(newAturanPakaiRacikan).append("<br /><br /><span>Keterangan</span>").append(newKeteranganRacikan);
+        var satuanKonsumsi = document.createElement("INPUT");
+        $(satuanKonsumsi).addClass("form-control satuan_konsumsi").attr({
+          "placeholder": "Ex : PULV, PUFF"
+        });
+        $(newRacikanCellNama).append("<br /><span>Satuan Pemakaian</span>").append(satuanKonsumsi).append("<br /><br /><span>Keterangan / Aturan Pakai</span>").append(newKeteranganRacikan);
+        $(newAturanPakaiRacikan).append("<option value=\"none\">Pilih Aturan Pakai</option>").select2();
+        for (var aturanPakaiKey in dataAturanPakai) {
+          $(newAturanPakaiRacikan).append("<option " + ((dataAturanPakai[aturanPakaiKey].id == setter.aturan_pakai) ? "selected=\"selected\"" : "") + " value=\"" + dataAturanPakai[aturanPakaiKey].id + "\">" + dataAturanPakai[aturanPakaiKey].nama + "</option>")
+        }
+        $(newKeteranganRacikan).addClass("form-control").attr({
+          "placeholder": "Keterangan racikan"
+        }).val(setter.keterangan);
 
-      var newRacikanSignaA = document.createElement("INPUT");
-      $(newRacikanCellSignaA).append(newRacikanSignaA);
-      $(newRacikanSignaA).addClass("form-control racikan_signa_a").attr({
-        "placeholder": "0"
-      }).val(setter.signaKonsumsi)
-      /*.inputmask({
-                      alias: 'decimal',
-                      rightAlign: true,
-                      placeholder: "0.00",
-                      prefix: "",
-                      autoGroup: false,
-                      digitsOptional: true
-                  })*/
-      ;
+        var newIterasiRacikan = document.createElement("INPUT");
+        $(newIterasiRacikan).inputmask({
+          alias: 'decimal',
+          rightAlign: true,
+          placeholder: "0.00",
+          prefix: "",
+          autoGroup: false,
+          digitsOptional: true
+        }).addClass("form-control racikan_iterasi").attr({
+          "placeholder": "0"
+        }).val((parseInt(setter.iterasi) === 0) ? "" : parseInt(setter.iterasi));
 
-      $(newRacikanCellSignaX).html("<i class=\"fa fa-times signa-sign\"></i>");
+        $(newRacikanCellNama).append("<br /><span>Iterasi</span>").append(newIterasiRacikan);
 
-      var newRacikanSignaB = document.createElement("INPUT");
-      $(newRacikanCellSignaB).append(newRacikanSignaB);
-      $(newRacikanSignaB).addClass("form-control racikan_signa_b").attr({
-        "placeholder": "0"
-      }).val(setter.signaTakar)
-      /*.inputmask({
-                      alias: 'decimal',
-                      rightAlign: true,
-                      placeholder: "0.00",
-                      prefix: "",
-                      autoGroup: false,
-                      digitsOptional: true
-                  })*/
-      ;
 
-      var newRacikanJlh = document.createElement("INPUT");
-      $(newRacikanCellJlh).append(newRacikanJlh);
-      $(newRacikanJlh).addClass("form-control racikan_signa_jlh").attr({
-        "placeholder": "0"
-      }).val(setter.signaHari).inputmask({
-        alias: 'decimal',
-        rightAlign: true,
-        placeholder: "0.00",
-        prefix: "",
-        autoGroup: false,
-        digitsOptional: true
-      });
 
-      var newRacikanDelete = document.createElement("BUTTON");
-      $(newRacikanCellAksi).append(newRacikanDelete);
-      $(newRacikanDelete).addClass("btn btn-danger btn-sm btn-delete-racikan").html("<i class=\"fa fa-ban\"></i>");
+        /*var newRacikanObat = document.createElement("SELECT");
+        var newObatTakar = document.createElement("INPUT");
+        $(newRacikanCellObat).append(newRacikanObat);
+        var addAnother = load_product_resep(newRacikanObat, "");
+        $(newRacikanCellObat).append("<br /><b>Takaran</b>");
+        $(newRacikanCellObat).append(newObatTakar);
+        $(newRacikanObat).addClass("form-control").select2();
+        $(newObatTakar).addClass("form-control");*/
 
-      $(newRacikanRow).append(newRacikanCellID);
-      $(newRacikanRow).append(newRacikanCellNama);
-      $(newRacikanRow).append(newRacikanCellSignaA);
-      $(newRacikanRow).append(newRacikanCellSignaX);
-      $(newRacikanRow).append(newRacikanCellSignaB);
-      $(newRacikanRow).append(newRacikanCellJlh);
-      $(newRacikanRow).append(newRacikanCellAksi);
+        var newRacikanSignaA = document.createElement("INPUT");
+        $(newRacikanCellSignaA).append(newRacikanSignaA);
+        $(newRacikanSignaA).addClass("form-control racikan_signa_a").attr({
+          "placeholder": "0"
+        }).val(setter.signaKonsumsi)
+        /*.inputmask({
+                        alias: 'decimal',
+                        rightAlign: true,
+                        placeholder: "0.00",
+                        prefix: "",
+                        autoGroup: false,
+                        digitsOptional: true
+                    })*/
+        ;
 
-      $("#table-resep-racikan tbody.racikan").append(newRacikanRow);
-      rebaseRacikan();
+        $(newRacikanCellSignaX).html("<i class=\"fa fa-times signa-sign\"></i>");
+
+        var newRacikanSignaB = document.createElement("INPUT");
+        $(newRacikanCellSignaB).append(newRacikanSignaB);
+        $(newRacikanSignaB).addClass("form-control racikan_signa_b").attr({
+          "placeholder": "0"
+        }).val(setter.signaTakar)
+        /*.inputmask({
+                        alias: 'decimal',
+                        rightAlign: true,
+                        placeholder: "0.00",
+                        prefix: "",
+                        autoGroup: false,
+                        digitsOptional: true
+                    })*/
+        ;
+
+        var newRacikanJlh = document.createElement("INPUT");
+        $(newRacikanCellJlh).append(newRacikanJlh);
+        $(newRacikanJlh).addClass("form-control racikan_signa_jlh").attr({
+          "placeholder": "0"
+        }).val(setter.signaHari).inputmask({
+          alias: 'decimal',
+          rightAlign: true,
+          placeholder: "0.00",
+          prefix: "",
+          autoGroup: false,
+          digitsOptional: true
+        });
+
+        var newRacikanDelete = document.createElement("BUTTON");
+        $(newRacikanCellAksi).append(newRacikanDelete);
+        $(newRacikanDelete).addClass("btn btn-danger btn-sm btn-delete-racikan").html("<i class=\"fa fa-ban\"></i>");
+
+        $(newRacikanRow).append(newRacikanCellID);
+        $(newRacikanRow).append(newRacikanCellNama);
+        $(newRacikanRow).append(newRacikanCellSignaA);
+        $(newRacikanRow).append(newRacikanCellSignaX);
+        $(newRacikanRow).append(newRacikanCellSignaB);
+        $(newRacikanRow).append(newRacikanCellJlh);
+        $(newRacikanRow).append(newRacikanCellAksi);
+
+        $("#table-resep-racikan tbody.racikan").append(newRacikanRow);
+        rebaseRacikan();
     }
 
     function rebaseRacikan() {

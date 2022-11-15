@@ -75,7 +75,7 @@
 							Resep
 						</a>
 					</li>
-					<!--li class="nav-item">
+					<li class="nav-item">
 						<a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false" disabled>
 							<span class="nav-link__count">
 								<i class="fa fa-flask"></i>
@@ -98,7 +98,7 @@
 							</span>
 							CPPT
 						</a>
-                    </li-->
+					</li>
                     <li class="nav-item">
 						<a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">

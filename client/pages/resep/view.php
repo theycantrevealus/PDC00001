@@ -172,7 +172,7 @@
                         <i class="fa fa-ban"></i> Kembali
                     </a>
                     <button type="button" class="btn btn-success pull-right" id="btnSelesai">
-                        <i class="fa fa-check-circle"></i> Edit
+                        <i class="fa fa-check-circle"></i> Selesai
                     </button>
                 </div>
             </div>

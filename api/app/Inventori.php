@@ -3045,6 +3045,37 @@ class Inventori extends Utility
       return $t1 - $t2;
     });
 
+    /**
+     * ------------------------------------------------------------------
+     *    - Getting Temporary verification SUM stok obat On Apotek -
+     * ------------------------------------------------------------------
+     * @devAg
+     * 
+     */
+    $data_stock_apotek = self::$query->select( 'resep',array(
+      'uid, qty'
+    ))
+      ->join('resep_detail')
+      ->on(array(
+        array('(resep_detail.resep', '=', 'resep.uid)')
+      ))
+      ->where(array(
+        'resep_detail.obat' => '= ?',
+        'AND',
+        '( status_resep' => " = 'L'",
+        'OR',
+        'status_resep' => "= 'K')"
+      ), array(
+        $parameter
+      ))
+      ->execute();
+    $sum_stock_apotek = 0;
+    foreach ($data_stock_apotek['response_data'] as $key => $value) {
+        $sum_stock_apotek = $data_stock_apotek['response_data']['sum_apotek'] += floatval($value['qty']);
+      }
+    $data['apotek'] = $sum_stock_apotek;
+    // ------------------------- end code ------------------------------
+
     $data['response_data'] = $original;
     return $data;
   }
@@ -3079,7 +3110,7 @@ class Inventori extends Utility
                           'created_at', master_inv_satuan.created_at,
                           'updated_at', master_inv_satuan.updated_at) FROM master_inv_satuan 
                         WHERE master_inv_satuan.deleted_at IS NULL AND master_inv_satuan.uid = master_inv.satuan_terkecil),
-              'stok', (SELECT COALESCE(stok.sum,0) FROM (SELECT SUM(COALESCE(inventori_stok.stok_terkini, 0)) FROM inventori_stok JOIN inventori_batch ON inventori_stok.batch = inventori_batch.uid WHERE inventori_batch.expired_date >= CURRENT_DATE AND inventori_stok.barang = master_inv.uid) stok),
+              'stok', (SELECT COALESCE(stok.sum,0) FROM (SELECT SUM(COALESCE(inventori_stok.stok_terkini, 0)) FROM inventori_stok JOIN inventori_batch ON inventori_stok.batch = inventori_batch.uid WHERE inventori_stok.gudang = 'e7273646-1d2e-40e8-bcbc-028f6a8ce1e0' AND  inventori_batch.expired_date >= CURRENT_DATE AND inventori_stok.barang = master_inv.uid) stok),
               'created_at', master_inv.created_at,
               'updated_at', master_inv.updated_at
             ) response_data FROM master_inv 
@@ -9755,6 +9786,8 @@ class Inventori extends Utility
       $paramData = array(
         'inventori_mutasi.deleted_at' => 'IS NULL',
         'AND',
+        '(inventori_mutasi.tanggal' => 'BETWEEN ? AND ?)',
+        'AND',
         '(inventori_mutasi.dari' => '= ?',
         'OR',
         'inventori_mutasi.ke' => '= ?)',
@@ -9766,17 +9799,27 @@ class Inventori extends Utility
         'inventori_mutasi.keterangan' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
       );
 
-      $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      // $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      $paramValue = array(
+        $parameter['from'], $parameter['to'],
+        $UserData['data']->gudang, $UserData['data']->gudang
+      );
     } else {
       $paramData = array(
         'inventori_mutasi.deleted_at' => 'IS NULL',
         'AND',
+        '(inventori_mutasi.tanggal' => 'BETWEEN ? AND ?)',
+        'AND',
         '(inventori_mutasi.dari' => '= ?',
         'OR',
-        'inventori_mutasi.ke' => '= ?)'
+        'inventori_mutasi.ke' => '= ?)',
       );
-
-      $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      
+      // $paramValue = array($UserData['data']->gudang, $UserData['data']->gudang);
+      $paramValue = array(
+        $parameter['from'], $parameter['to'],
+        $UserData['data']->gudang, $UserData['data']->gudang
+      );
     }
 
 

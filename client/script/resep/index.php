@@ -146,19 +146,25 @@
 
                     for (var resepKey in resepDataRaw) {
                         if (resepDataRaw[resepKey].antrian.departemen !== undefined && resepDataRaw[resepKey].antrian.departemen !== null) {
-                            if (
-                                resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__
-                            ) {
-                                if (resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
-                                    IGD.push(resepDataRaw[resepKey]);
-                                }
-                            } else if (
-                                resepDataRaw[resepKey].antrian.departemen.uid === __POLI_INAP__
-                            ) {
-                                if (resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
-                                    INAP.push(resepDataRaw[resepKey]);
-                                }
-                            } else {
+                            // if (
+                            //     resepDataRaw[resepKey].antrian.departemen.uid === __POLI_IGD__
+                            // ) {
+                            //     if (resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
+                            //         IGD.push(resepDataRaw[resepKey]);
+                            //     }
+                            // } else if (
+                            //     resepDataRaw[resepKey].antrian.departemen.uid === __POLI_INAP__
+                            // ) {
+                            //     if (resepDataRaw[resepKey].ns_detail !== undefined && resepDataRaw[resepKey].ns_detail !== null) {
+                            //         INAP.push(resepDataRaw[resepKey]);
+                            //     }
+                            // } else {
+                            //     parsedData.push(resepDataRaw[resepKey]);
+                            // }
+                            if(
+                                resepDataRaw[resepKey].antrian.departemen.uid != __POLI_IGD__ &&
+                                resepDataRaw[resepKey].antrian.departemen.uid != __POLI_INAP__
+                            ){
                                 parsedData.push(resepDataRaw[resepKey]);
                             }
                         }
@@ -234,17 +240,17 @@
                     render: function(data, type, row, meta) {
                         return row.penjamin.nama;
                     }
-                },
-                {
-                    "data": null,
-                    render: function(data, type, row, meta) {
-                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                            "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/resep/view/" + row.uid + "\">" +
-                            "<span><i class=\"fa fa-pencil-alt\"></i> Detail</span>" +
-                            "</a>" +
-                            "</div>";
-                    }
                 }
+                // {
+                //     "data": null,
+                //     render: function(data, type, row, meta) {
+                //         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                //             "<a class=\"btn btn-info btn-sm btn-edit-mesin " + ((row.departemen.uid === __POLI_IGD__) ? "blob blue" : "") + "\" href=\"" + __HOSTNAME__ + "/resep/view/" + row.uid + "\">" +
+                //             "<span><i class=\"fa fa-pencil-alt\"></i> Detail</span>" +
+                //             "</a>" +
+                //             "</div>";
+                //     }
+                // }
             ]
         });
 
@@ -273,7 +279,7 @@
                     cache: true,
                     processResults: function(response) {
                         var data = response.response_package.response_data;
-                        console.clear();
+                        // console.clear();
                         console.log(response);
                         return {
                             results: $.map(data, function(item) {
@@ -311,8 +317,16 @@
             var antrian = $("#pasien_saya option:selected").attr("antrian");
             var penjamin = $("#pasien_saya option:selected").attr("penjamin");
 
+            if(pasien === null) {
+                alert('Form pasien tidak boleh kosong!');
+                return;
+            }else if(alasan === ""){
+                alert('Form alasan tidak boleh kosong');
+                return;
+            }
+
             var protocol = {
-                request: "extend_resep",
+                request: "extend_resep_2",
                 asesmen: asesmen,
                 kunjungan: kunjungan,
                 antrian: antrian,
@@ -357,7 +371,7 @@
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-large-title">Perubahan/Penambahan Resep</h5>
+                <h5 class="modal-title" id="modal-large-title">Penambahan Resep</h5>
                 <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button> -->

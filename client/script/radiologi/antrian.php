@@ -37,8 +37,8 @@
 
       if (forSave["tindakan_" + tindakanID] === undefined) {
         forSave["tindakan_" + tindakanID] = {
-          keterangan: "",
-          kesimpulan: ""
+          keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
+          kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
         };
       } else {
         console.log(forSave);
