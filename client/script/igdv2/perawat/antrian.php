@@ -278,7 +278,7 @@
             simpanAsesmen(allData, dataPasien, $("#btnSelesai"));
         }
 
-        function simpanAsesmen(allData, dataPasien, btnSelesai) {
+        function simpanAsesmen(allData, dataPasien, btnSelesai,  redirect = "N") {
             $(".inputan").each(function(){
                 var value = $(this).val();
 
@@ -373,8 +373,10 @@
                         response.response_package.response_result > 0 ||
                         response.response_package.asesmen.response_result > 0
                     ) {
-                        notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
-                        location.href = __HOSTNAME__ + "/igdv2/perawat/asesmen-detail/" + dataPasien.pasien.uid + "/" + dataPasien.antrian.kunjungan + "/" + dataPasien.antrian.penjamin;
+                        if(redirect === "Y") {  
+                            notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
+                            location.href = __HOSTNAME__ + "/igdv2/perawat/asesmen-detail/" + dataPasien.pasien.uid + "/" + dataPasien.antrian.kunjungan + "/" + dataPasien.antrian.penjamin;
+                        }
                     } else {
                         notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
@@ -403,7 +405,7 @@
                 denyButtonColor: `#ff2a2a`
             }).then((result) => {
                 if (result.isConfirmed) {
-                    simpanAsesmen(allData, dataPasien, btnSelesai);
+                    simpanAsesmen(allData, dataPasien, btnSelesai, "Y");
 
 
 
