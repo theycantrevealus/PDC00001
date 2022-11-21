@@ -1659,6 +1659,7 @@ class IGD extends Utility
             'prioritas' => 36,
             'dokter' => $UserData['data']->uid
         );
+        
         $AntrianProses = $Antrian::tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
 
         return $AntrianProses;

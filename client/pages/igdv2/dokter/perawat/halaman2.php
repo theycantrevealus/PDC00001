@@ -1,610 +1,1213 @@
-<!-- <div class="row">
-	<div class="col-lg">
-		<div class="card">
-			<div class="card-header bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0"><i class="material-icons mr-3">info_outline</i> Informasi Pasien</h5>
-			</div>
-			<div class="card-body ">
-				<div class="col-md-12">
-					<table class="table">
-						<tbody>
-							<tr>
-								<td>No. Rekam Medis</td>
-								<td> : </td>
-								<td><span id="no_rm"><b>11-11-11</b></span></td>
-								<td>Tanggal Lahir</td>
-								<td> : </td>
-								<td><span id="tanggal_lahir"><b>22 Januari 1998</b></span></td>
-							</tr>
-							<tr>
-								<td>Nama Pasien</td>
-								<td> : </td>
-								<td><span id="panggilan"><b>Tn.</b></span> <span id="nama"><b>John Doe</b></span></td>
-								<td>Jenis Kelamin</td>
-								<td> : </td>
-								<td><span id="jenkel"><b>Laki-laki</b></span></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
- -->
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Pengkajian</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <h6>Pengkajian Keperawatan</h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="">Airway:</label>
 
-<!-- <div class="row" style="margin-top: 20px;">
-	<div class="col-lg">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Pengkajian Risiko Jatuh/ Up and Go:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="form-group col-md-3">
-						<label>Tanggal Partus: </label>
-						<input type="date" name="tgl_partus" id="tgl_partus" class="form-control">
-					</div>
-					<div class="form-group col-md-3">
-						<label>Usia Kehamilan: </label>
-						<input type="text" name="usia_hamil" id="usia_hamil" class="form-control">
-					</div>
-					<div class="form-group col-md-3">
-						<label>Tempat Partus: </label>
-						<input type="text" name="tempat_partus" id="tempat_partus" class="form-control">
-					</div>
-					<div class="form-group col-md-3">
-						<label>Jenis Partus: </label>
-						<input type="text" name="jenis_partus" id="jenis_partus" class="form-control">
-					</div>
-					<div class="form-group col-md-3">
-						<label>Penolong: </label>
-						<input type="text" name="penolong_partus" id="penolong_partus" class="form-control">
-					</div>
-					<div class="form-group col-md-3">
-						<label>Nifas: </label>
-						<input type="text" name="nifas" id="nifas" class="form-control">
-					</div>
-					<div class="form-group col-md-3">
-						<label>Jenis Kelamin Anak: </label>
-						<input type="text" name="jenkel_anak" id="jenkel_anak" class="form-control">
-					</div>
-					<div class="form-group col-md-3">
-						<label>Berat Badan Anak: </label>
-						<input type="text" name="bb_anak" id="bb_anak" class="form-control">
-					</div>
-					<div class="form-group col-md-6">
-						<label>Keadaan Sekarang: </label>
-						<input type="text" name="keadaan_anak" id="keadaan_anak" class="form-control">
-					</div>
-					<div class="form-group col-md-6">
-						<label>Keterangan: </label>
-						<input type="text" name="keterangan_anak" id="keterangan_anak" class="form-control">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
- -->
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_airway_bebas"
+                                                value="1" id="kaji_airway_bebas">
+                                            <label class="form-check-label" for="kaji_airway_bebas">
+                                                Bebas
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_airway_hidung"
+                                                value="1" id="kaji_airway_hidung">
+                                            <label class="form-check-label" for="kaji_airway_hidung">
+                                                Hidung/Mulut Kotor
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_airway_sputum"
+                                                value="1" id="kaji_airway_sputum">
+                                            <label class="form-check-label" for="kaji_airway_sputum">
+                                                Sputum
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_airway_darah"
+                                                value="1" id="kaji_airway_darah">
+                                            <label class="form-check-label" for="kaji_airway_darah">
+                                                Darah
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_airway_benda_padat" value="1" id="kaji_airway_benda_padat">
+                                            <label class="form-check-label" for="kaji_airway_benda_padat">
+                                                Benda Padat
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_airway_spasme"
+                                                value="1" id="kaji_airway_spasme">
+                                            <label class="form-check-label" for="kaji_airway_spasme">
+                                                Spasme
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_airway_pangkal_lidah" value="1"
+                                                id="kaji_airway_pangkal_lidah">
+                                            <label class="form-check-label" for="kaji_airway_pagkal_lidah">
+                                                Pangkal Lidah Jatuh
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
- <div class="row" style="margin-top: 20px;">
-	<div class="col-md-6">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Psikososial	:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-6 form-group">
-						<label>Psikososial:</label>
-						<select class="form-control inputan select2" id="psikososial" name="psikososial">
-							<option value="">Pilih</option>
-							<option value="Tenang">Tenang</option>
-							<option value="Takut">Takut</option>
-							<option value="Marah">Marah</option>
-							<option value="Sedih">Sedih</option>
-							<option value="Cemas">Cemas</option>
-							<option value="Menangis">Menangis</option>
-							<option value="Gelisah">Gelisah</option>
-							<option value="Mudah Tersinggung">Mudah Tersinggung</option>
-							<option value="Membahayakan">Membahayakan diri sendiri / orang lain</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label>Hubungan pasien keluarga:</label>
-						<select class="form-control inputan select2" id="psikososial_hub_keluarga" name="psikososial_hub_keluarga">
-							<option value="">Pilih</option>
-							<option value="Baik">Baik</option>
-							<option value="Tidak Baik">Tidak Baik</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label>Aktifitas Sosial:</label>
-						<select class="form-control inputan select2" id="psikososial_aktifitas_sosial" name="psikososial_aktifitas_sosial">
-							<option value="">Pilih</option>
-							<option value="0">Tidak Ada</option>
-							<option value="1">Ada</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label><i>Care Giver </i> (Pelaku Rawat)</label>
-						<select class="form-control inputan select2" id="psikososial_pelaku_rawat" name="psikososial_pelaku_rawat">
-							<option value="">Pilih</option>
-							<option value="Sendiri">Sendiri</option>
-							<option value="Keluarga">Keluarga</option>
-							<option value="Perawat Khusus">Perawat Khusus</option>
-							<option value="Pekerja Sosial">Pekerja Sosial</option>
-							<option value="Panti Asuhan/Jompo">Panti Asuhan/Jompo</option>
-						</select>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="col-md-6">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Eliminasi:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-6 form-group">
-						<label for="">BAB:</label>						
-						<select id="eliminasi_bab" nama="eliminasi_bab" class="form-control inputan select2">
-							<option value="">Pilih</option>
-							<option value="Normal">Normal</option>
-							<option value="Gangguang Bicara">Diare</option>
-							<option value="Konstipasi">Konstipasi</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="">Frekuensi BAB / hari:</label>
-						<input type="text" class="form-control inputan" name="eliminasi_frekuensi_bab" id="eliminasi_frekuensi_bab">
-					</div>
-					<div class="col-md-12">
-						<div class="form-check">
-							<input type="checkbox" class="form-check-input" name="eliminasi_colostomy" value="1" id="eliminasi_colostomy">
-							<label for="eliminasi_colostomy">Colostomy</label>
-						</div>
-					</div>
-					<br />
-					<br />
-					<div class="col-md-6 form-group">
-						<label for="">BAK:</label>						
-						<select id="eliminasi_bak" name="eliminasi_bak" class="form-control inputan select2">
-							<option value="">Pilih</option>
-							<option value="Normal">Normal</option>
-							<option value="Inkontineisia">Inkontinensia</option>
-							<option value="Disuria">Disuria</option>
-							<option value="Retensia">Retensia</option>
-							<option value="Poliuria">Poloiuria</option>
-							<option value="0">Lainnya</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan" name="eliminasi_bak_lainnya" id="eliminasi_bak_lainnya">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+                        <h6></h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="">Suara Nafas:</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_suara_nafas_normal" value="1" id="kaji_suara_nafas_normal">
+                                            <label class="form-check-label" for="kaji_suara_nafas_normal">
+                                                Normal
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_suara_nafas_stridor" value="1" id="kaji_suara_nafas_stridor">
+                                            <label class="form-check-label" for="kaji_suara_nafas_stridor">
+                                                Stridor
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_suara_nafas_snoring" value="1" id="kaji_suara_nafas_snoring">
+                                            <label class="form-check-label" for="kaji_suara_nafas_snoring">
+                                                Snoring
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_suara_nafas_gurgling" value="1"
+                                                id="kaji_suara_nafas_gurgling">
+                                            <label class="form-check-label" for="kaji_suara_nafas_gurgling">
+                                                Gurgling
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_suara_nafas_gasping" value="1" id="kaji_suara_nafas_gasping">
+                                            <label class="form-check-label" for="kaji_suara_nafas_gasping">
+                                                Gasping
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_suara_nafas_tidak" value="1" id="kaji_suara_nafas_tidak">
+                                            <label class="form-check-label" for="kaji_suara_nafas_tidak">
+                                                Tidak Ada Suara Nafas
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Masalah Keperawatan</h6>
+                        <label for="gangguan_jalan_nafas">Gangguan Bersihan Jalan Nafas:</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_jalan_nafas"
+                                        value="Aktual" id="gangguan_jalan_nafas">
+                                    <label class="form-check-label" for="gangguan_jalan_nafas">
+                                        Aktual
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_jalan_nafas"
+                                        value="Risiko" id="gangguan_jalan_nafas">
+                                    <label class="form-check-label" for="gangguan_jalan_nafas">
+                                        Risiko
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_jalan_nafas"
+                                        value="Potensial" id="gangguan_jalan_nafas">
+                                    <label class="form-check-label" for="gangguan_jalan_nafas">
+                                        Potensial
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Tindakan Keperawatan</h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="tindakan"></label>
 
-<div class="row" style="margin-top: 20px;">
-	<div class="col-md-6">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Skrining Gizi:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label>1. Penurunan selera makan</label>
-						<select class="form-control inputan select2" id="skrining_selera_makan">
-							<option value="">Pilih</option>
-							<option value="0">Tidak Ada</option>
-							<option value="1">Ya / Ada penurunan</option>
-						</select>
-					</div>
-					<div class="col-md-12 form-group">
-						<label>2. Mengalami penurunan berat badan yang tidak diinginkan dalam 3 bulan terakhir</label>
-						<select class="form-control inputan select2" id="skrining_turun_berat">
-							<option value="">Pilih</option>
-							<option value="0">Tidak Ada</option>
-							<option value="1">Ya / Ada penurunan</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label>Penurunan berat badan</label>
-						<select class="form-control inputan select2" id="skrining_nilai_turun_berat">
-							<option value="">Pilih</option>
-							<option value="1">1 - 5 kg</option>
-							<option value="2">6 - 10 kg</option>
-							<option value="3">11 - 15 kg</option>
-							<option value="4"> > 6kg</option>
-						</select>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="col-md-6">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Kebutuhan Komunikasi/ Pendidikan dan Pengajaran:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-6 form-group">
-						<label for="">Bicara:</label>						
-						<select id="komunikasi_bicara" class="form-control inputan select2">
-							<option value="">Pilih</option>
-							<option value="Normal">Normal</option>
-							<option value="Gangguang Bicara">Gangguan Bicara</option>
-							<option value="0">Lainnya</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan" name="komunikasi_bicara_lainnya" id="komunikasi_bicara_lainnya">
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="">Hambatan Belajar:</label>
-						<select id="komunikasi_hambatan" name="komunikasi_hambatan" class="form-control inputan select2">
-							<option value="">Pilih</option>
-							<option value="Tidak Ada">Tidak Ada</option>
-							<option value="Pendengaran">Pendengaran</option>
-							<option value="Cemas">Cemas</option>
-							<option value="Motivasi Memburuk">Motivasi Memburuk</option>
-							<option value="Bahasa">Bahasa</option>
-							<option value="Tidak">Tidak</option>
-							<option value="0">Lainnya</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan" name="komunikasi_hambatan_lainnya" id="komunikasi_hambatan_lainnya">
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="">Potensi Kebutuhan Belajar:</label>
-						<select id="komunikasi_kebutuhan_belajar" name="komunikasi_kebutuhan_belajar" class="form-control inputan select2">
-							<option value="">Pilih</option>
-							<option value="Proses Penyakit">Proses Penyakit</option>
-							<option value="Pengobatan">Pengobatan</option>
-							<option value="Nutrisi">Nutrisi</option>
-							<option value="Tindakan">Tindakan</option>
-							<option value="0">Lainnya</option>
-						</select>
-					</div>
-					<div class="col-md-6 form-group">
-						<label for="">Lainnya:</label>
-						<input type="text" class="form-control inputan" name="komunikasi_kebutuhan_belajar_lainnya" id="komunikasi_kebutuhan_belajar_lainnya">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="row" style="margin-top: 20px;">
-	<div class="col-md-12">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Pengkajian Risiko Jatuh/Up and Go:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-12 form-group">
-						<label for="">1. Perhatikan cara berjalan pasien saat akan duduk di kursi. Apakah pasien tampak tidak seimbang (sempoyongan) ?</label>	
-						<div class="row col-md-12" id="cara_masuk">
-							<div class="col-md-3">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_sempoyongan" value="0" id="kaji_resiko_sempoyongan_0">
-									<label class='custom-control-label' for="kaji_resiko_sempoyongan_0">Tidak</label>
-								</div>
-							</div>
-							<div class="col-md-4">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_sempoyongan" value="1" id="kaji_resiko_sempoyongan_1">
-									<label class='custom-control-label' for="kaji_resiko_sempoyongan_1">Ya</label>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-12 form-group">
-						<label for="">2. Apakah pasien memegang pinggiran kursi/meja/benda lain sebagai penopang saat akan duduk ?</label>
-						<div class="row col-md-12" id="cara_masuk">
-							<div class="col-md-3	">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_penopang" value="0" id="kaji_resiko_penopang_0">
-									<label class='custom-control-label' for="kaji_resiko_penopang_0">Tidak</label>
-								</div>
-							</div>
-							<div class="col-md-4">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_penopang" value="1" id="kaji_resiko_penopang_1">
-									<label class='custom-control-label' for="kaji_resiko_penopang_1">Ya</label>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-12 form-group">
-						<label for="">Diberitahukan ke Dokter:</label>
-						<div class="row col-md-12" id="cara_masuk">
-							<div class="col-md-3">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_ke_dokter" value="0" id="kaji_resiko_ke_dokter_0">
-									<label class='custom-control-label' for="kaji_resiko_ke_dokter_0">Tidak</label>
-								</div>
-							</div>
-							<div class="col-md-2">
-								<div class="custom-control custom-radio">
-									<input type="radio" class="custom-control-input" name="kaji_resiko_ke_dokter" value="1" id="kaji_resiko_ke_dokter_1">
-									<label class='custom-control-label' for="kaji_resiko_ke_dokter_1">Ya, Jam : </label>
-								</div>
-							</div>
-							<div class="col-md-3">
-								<input type="time" name="kaji_resiko_jam_dokter" id="kaji_resiko_jam_dokter" class="form-control inputan">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_head_tilt"
+                                                value="1" id="tindakan_head_tilt">
+                                            <label class="form-check-label" for="tindakan_head_tilt">
+                                                Head Tilt
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_chin_lift"
+                                                value="1" id="tindakan_chin_lift">
+                                            <label class="form-check-label" for="tindakan_chin_lift">
+                                                Chin Lift
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_jaw_trust"
+                                                value="1" id="tindakan_jaw_trust">
+                                            <label class="form-check-label" for="tindakan_jaw_trust">
+                                                Jaw Trust
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_oro_faringeal" value="1" id="tindakan_oro_faringeal">
+                                            <label class="form-check-label" for="tindakan_oro_faringeal">
+                                                Oro Faringeal
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_naso_faringeal" value="1" id="tindakan_naso_faringeal">
+                                            <label class="form-check-label" for="tindakan_naso_faringeal">
+                                                Naso Faringeal
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_suction"
+                                                value="1" id="tindakan_suction">
+                                            <label class="form-check-label" for="tindakan_suction">
+                                                Melakukan Suction
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_hidrasi"
+                                                value="1" id="tindakan_hidrasi">
+                                            <label class="form-check-label" for="tindakan_hidrasi">
+                                                Hidrasi
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_collar_neck"
+                                                value="1" id="tindakan_collar_neck">
+                                            <label class="form-check-label" for="tindakan_collar_neck">
+                                                Pasang Collar Neck
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_batuk"
+                                                value="1" id="tindakan_batuk">
+                                            <label class="form-check-label" for="tindakan_batuk">
+                                                Batuk Efektif
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_fowler"
+                                                value="1" id="tindakan_fowler">
+                                            <label class="form-check-label" for="tindakan_fowler">
+                                                Fowler/Semi Fowler
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_posisi_miring" value="1" id="tindakan_posisi_miring">
+                                            <label class="form-check-label" for="tindakan_posisi_miring">
+                                                Posisi Miring
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_posisi_mantap" value="1" id="tindakan_posisi_mantap">
+                                            <label class="form-check-label" for="tindakan_posisi_mantap">
+                                                Posisi Mantap PS Tidak Sadar
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_auskultasi_paru" value="1" id="tindakan_auskultasi_paru">
+                                            <label class="form-check-label" for="tindakan_auskultasi_paru">
+                                                Auskultasi Paru Secara Periodik
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Evaluasi (SOAP)</h6>
+                        <br />
+                        <div class="row">
+                            <div class="col-lg-12" id="">
+                                <textarea name="evaluasi_soap_a" class="form-control inputan evaluasi_soap_a"
+                                    id="evaluasi_soap_a" rows="20" placeholder="-"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Pengkajian</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <h6>Pengkajian Keperawatan</h6>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <label for="kaji_breathing_rr">Breathing:</label>
+                                <div class="input-group input-group-merge">
+                                    <input type="text" id="kaji_breathing_rr" name="kaji_breathing_rr"
+                                        class="form-control form-control-appended inputan" placeholder="RR">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span>x/m</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-<div class="row" style="margin-top: 20px;">
-	<div class="col-lg">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Diagnosa Keperawatan:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_nyeri" value="1" id="diagnosa_nyeri">
-								<label for="diagnosa_nyeri">Nyeri</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_pola_tidur" value="1" id="diagnosa_pola_tidur">
-								<label for="diagnosa_pola_tidur">Pola Tidur</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_mobilitas" value="1" id="diagnosa_mobilitas">
-								<label for="diagnosa_mobilitas">Mobilitas / Aktivitas</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_cedera" value="1" id="diagnosa_cedera">
-								<label for="diagnosa_cedera">Risiko Cidera / Jatuh</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_rawat_diri" value="1" id="diagnosa_rawat_diri">
-								<label for="diagnosa_rawat_diri">Perawatan Diri</label>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_kulit" value="1" id="diagnosa_kulit">
-								<label for="diagnosa_kulit">Integritas Kulit</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_suhu" value="1" id="diagnosa_suhu">
-								<label for="diagnosa_suhu">Suhu Tubuh</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_eliminasi" value="1" id="diagnosa_eliminasi">
-								<label for="diagnosa_eliminasi">Eliminasi</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_pengetahuan" value="1" id="diagnosa_pengetahuan">
-								<label for="diagnosa_pengetahuan">Pengetahuan/Komunikasi</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_nutrisi" value="1" id="diagnosa_nutrisi">
-								<label for="diagnosa_nutrisi">Nutrisi</label>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_cairan" value="1" id="diagnosa_cairan">
-								<label for="diagnosa_cairan">Keseimbangan Cairan & Elektrolit</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_perifer" value="1" id="diagnosa_perifer">
-								<label for="diagnosa_perifer">Perfusi Jaringan Perifer/Cerebral</label>
-							</div>
-						</div>
-						<div class="col-md-12">	
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_nafas" value="1" id="diagnosa_nafas">
-								<label for="diagnosa_nafas">Jalan nafas/pertukaran gas/ Bersihan Jalan Nafas</label>
-							</div>
-						</div>
-						<div class="col-md-12">	
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="diagnosa_infeksi" value="1" id="diagnosa_infeksi">
-								<label for="diagnosa_infeksi">Infeksi</label>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                            <h6></h6>
+                            <div class="col-lg-12">
+                                <label for="kaji_irama_nafas">Irama Nafas:</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="kaji_irama_nafas"
+                                                value="Teratur" id="kaji_irama_nafas_0">
+                                            <label class="form-check-label" for="kaji_irama_nafas_0">
+                                                Teratur
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="kaji_irama_nafas"
+                                                value="Tidak Teratur" id="kaji_irama_nafas_1">
+                                            <label class="form-check-label" for="kaji_irama_nafas_1">
+                                                Tidak Teratur
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6></h6>
+                            <div class="col-lg-12">
+                                <label for="">Bunyi Nafas:</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_bunyi_nafas_vesikuler" value="1"
+                                                id="kaji_bunyi_nafas_vesikuler">
+                                            <label class="form-check-label" for="kaji_bunyi_nafas_vesikuler">
+                                                Vesikuler
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_bunyi_nafas_wheezing" value="1"
+                                                id="kaji_bunyi_nafas_wheezing">
+                                            <label class="form-check-label" for="kaji_bunyi_nafas_wheezing">
+                                                Wheezing
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_bunyi_nafas_ronchi" value="1" id="kaji_bunyi_nafas_ronchi">
+                                            <label class="form-check-label" for="kaji_bunyi_nafas_ronchi">
+                                                Ronchi
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_bunyi_nafas_crakhels" value="1"
+                                                id="kaji_bunyi_nafas_crakhels">
+                                            <label class="form-check-label" for="kaji_bunyi_nafas_crakhels">
+                                                Crakhels
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6></h6>
+                            <div class="col-lg-12">
+                                <label for="">Penggunaan Otot Bantu Pernafasan:</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_guna_otot_dada"
+                                                value="1" id="kaji_guna_otot_dada">
+                                            <label class="form-check-label" for="kaji_guna_otot_dada">
+                                                Retraksi Dada
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_guna_otot_hidung"
+                                                value="1" id="kaji_guna_otot_hidung">
+                                            <label class="form-check-label" for="kaji_guna_otot_hidung">
+                                                Cuping Hidung
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6></h6>
+                            <div class="col-lg-12">
+                                <label for="">Pola Nafas:</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="kaji_pola_nafas_apneu"
+                                                value="1" id="kaji_pola_nafas_apneu">
+                                            <label class="form-check-label" for="kaji_pola_nafas_apneu">
+                                                Apneu
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_pola_nafas_dipsneu" value="1" id="kaji_pola_nafas_dipsneu">
+                                            <label class="form-check-label" for="kaji_pola_nafas_dipsneu">
+                                                Dipsneu
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_pola_nafas_bradipneu" value="1"
+                                                id="kaji_pola_nafas_bradipneu">
+                                            <label class="form-check-label" for="kaji_pola_nafas_bradipneu">
+                                                Bradipneu
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_pola_nafas_tachipneu" value="1"
+                                                id="kaji_pola_nafas_tachipneu">
+                                            <label class="form-check-label" for="kaji_pola_nafas_tachipneu">
+                                                Tachipneu
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="kaji_pola_nafas_orthopneu" value="1"
+                                                id="kaji_pola_nafas_orthopneu">
+                                            <label class="form-check-label" for="kaji_pola_nafas_orthopneu">
+                                                Orthopneu
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6></h6>
+                            <div class="col-lg-12">
+                                <label for="kaji_irama_nafas">Jalan Pernafasan:</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="kaji_jalan_nafas"
+                                                value="Pernafasan Dada" id="kaji_jalan_nafas_0">
+                                            <label class="form-check-label" for="kaji_jalan_nafas_0">
+                                                Pernafasan Dada
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="radio" class="form-check-input" name="kaji_jalan_nafas"
+                                                value="Pernafasan Perut" id="kaji_jalan_nafas_1">
+                                            <label class="form-check-label" for="kaji_irama_nafas_1">
+                                                Pernafasan Perut
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Masalah Keperawatan</h6>
+                        <label for="">Pola Nafas Tidak Efektif:</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_pola_nafas"
+                                        value="Aktual" id="gangguan_pola_nafas_0">
+                                    <label class="form-check-label" for="gangguan_pola_nafas_0">
+                                        Aktual
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_pola_nafas"
+                                        value="Risiko" id="gangguan_pola_nafas_1">
+                                    <label class="form-check-label" for="gangguan_pola_nafas_1">
+                                        Risiko
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_pola_nafas"
+                                        value="Potensial" id="gangguan_pola_nafas_2">
+                                    <label class="form-check-label" for="gangguan_pola_nafas_2">
+                                        Potensial
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Tindakan Keperawatan</h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for=""></label>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_monitor_nafas" value="1" id="tindakan_monitor_nafas">
+                                            <label class="form-check-label" for="tindakan_monitor_nafas">
+                                                Memonitor RR, Irama, Kedalaman Nafas
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_monitor_otot"
+                                                value="1" id="tindakan_monitor_otot">
+                                            <label class="form-check-label" for="tindakan_monitor_otot">
+                                                Memonitor Penggunaan Otot Bantu Nafas
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_ajar_nafas"
+                                                value="1" id="tindakan_ajar_nafas">
+                                            <label class="form-check-label" for="tindakan_ajar_nafas">
+                                                Ajarkan Teknik Nafas Dalam
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_atur_posisi"
+                                                value="1" id="tindakan_atur_posisi">
+                                            <label class="form-check-label" for="tindakan_atur_posisi">
+                                                Mengatur Posisi Semi Fowler Jika Tidak Ada Kontra Indikasi
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6></h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="">Kolaborasi</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_beri_oksigen"
+                                                value="1" id="tindakan_beri_oksigen">
+                                            <label class="form-check-label w-100" for="tindakan_beri_oksigen">
+                                                Pemberian Oksigen
+                                                <div class="input-group input-group-merge">
+                                                    <input type="text" id="tindakan_beri_oksigen_val"
+                                                        name="tindakan_beri_oksigen_val"
+                                                        class="form-control form-control-appended inputan numberonly"
+                                                        placeholder="0">
+                                                    <div class="input-group-append">
+                                                        <div class="input-group-text">
+                                                            <span>ml/mnt</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <br />
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_inhalasi"
+                                                value="1" id="tindakan_inhalasi">
+                                            <label class="form-check-label" for="tindakan_inhalasi">
+                                                Inhalasi
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_rontgen"
+                                                value="1" id="tindakan_rontgen">
+                                            <label class="form-check-label" for="tindakan_rontgen">
+                                                Rontgen
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_periksa_darah" value="1" id="tindakan_periksa_darah">
+                                            <label class="form-check-label" for="tindakan_periksa_darah">
+                                                Pemeriksaan Darah
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_agd"
+                                                value="1" id="tindakan_agd">
+                                            <label class="form-check-label" for="tindakan_agd">
+                                                (AGD)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_therapy_obat"
+                                                value="1" id="tindakan_therapy_obat">
+                                            <label class="form-check-label w-100" for="tindakan_therapy_obat">
+                                                Teraphy Obat
+                                                <textarea name="tindakan_therapy_obat_txt"
+                                                    class="form-control inputan tindakan_therapy_obat_txt"
+                                                    id="tindakan_therapy_obat_txt" rows="5" placeholder="-"></textarea>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12" id="">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Evaluasi (SOAP)</h6>
+                        <br />
+                        <div class="row">
+                            <div class="col-lg-12" id="">
+                                <textarea name="evaluasi_soap_b" class="form-control inputan evaluasi_soap_b"
+                                    id="evaluasi_soap_b" rows="20" placeholder="-"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row" style="margin-top: 20px;">
-	<div class="col-lg">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Penatalaksanaan:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_hub_baik" value="1" id="tatalaksana_hub_baik">
-								<label for="tatalaksana_hub_baik">Membina hubungan baik dengan pasien dan keluarga</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_terapeutik" value="1" id="tatalaksana_terapeutik">
-								<label for="tatalaksana_terapeutik">Komunikasi terapeutik</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_lingkungan" value="1" id="tatalaksana_lingkungan">
-								<label for="tatalaksana_lingkungan">Meningkatkan lingkungan yang nyaman</label>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_timbang" value="1" id="tatalaksana_timbang">
-								<label for="tatalaksana_timbang">Menimbang Berat Badan</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_ukur_tinggi" value="1" id="tatalaksana_ukur_tinggi">
-								<label for="tatalaksana_ukur_tinggi">Mengukur Tinggi Badan</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_kaji_vital" value="1" id="tatalaksana_kaji_vital">
-								<label for="tatalaksana_kaji_vital">Mengkaji Tanda-tanda Vital</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_oral" value="1" id="tatalaksana_oral">
-								<label for="tatalaksana_oral">Melakukan Oral Higiene</label>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_bersih_luka" value="1" id="tatalaksana_bersih_luka">
-								<label for="tatalaksana_bersih_luka">Membersihkan Luka</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_buka_jahit" value="1" id="tatalaksana_buka_jahit">
-								<label for="tatalaksana_buka_jahit">Membuka jahitan</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_suction" value="1" id="tatalaksana_suction">
-								<label for="tatalaksana_suction">Melakukan Suction</label>
-							</div>
-						</div>
-						<div class="col-md-12">	
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_insisi" value="1" id="tatalaksana_insisi">
-								<label for="tatalaksana_insisi">Melakukan Insisi</label>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_siapkan_obat" value="1" id="tatalaksana_siapkan_obat">
-								<label for="tatalaksana_siapkan_obat">Menyiapkan Obat</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<input type="text" name="tatalaksana_siapkan_obat_ket" id="tatalaksana_siapkan_obat_ket" class="form-control inputan">
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_beri_obat" value="1" id="tatalaksana_beri_obat">
-								<label for="tatalaksana_beri_obat">Memberikan Obat</label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<input type="text" name="tatalaksana_beri_obat_ket" id="tatalaksana_beri_obat_ket" class="form-control inputan">
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="col-md-12">
-							<div class="form-check">
-								<input type="checkbox" class="form-check-input" name="tatalaksana_konsul" value="1" id="tatalaksana_konsul">
-								<label for="tatalaksana_konsul">Konsultasi: </label>
-							</div>
-						</div>
-						<div class="col-md-12">
-							<input type="text" name="tatalaksana_konsul_ket" id="tatalaksana_konsul_ket" class="form-control inputan">
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Pengkajian</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <h6>Pengkajian Keperawatan</h6>
+                        <label for="kaji_circulation">Circulation Pucat</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_circulation" value="Ya"
+                                        id="kaji_circulation_0">
+                                    <label class="form-check-label" for="kaji_circulation_0">
+                                        Ya
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_circulation" value="Tidak"
+                                        id="gangguan_imbang_cairan_1">
+                                    <label class="form-check-label" for="kaji_circulation_1">
+                                        Tidak
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <label for="kaji_kapiler">Pengisian Kapiler</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_kapiler" value="Kurang"
+                                        id="kaji_kapiler_0">
+                                    <label class="form-check-label" for="kaji_kapiler_0">
+                                        < 2 Detik </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_kapiler" value="Lebih"
+                                        id="kaji_kapiler_1">
+                                    <label class="form-check-label" for="kaji_kapiler_1">
+                                        > 2 Detik
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <label for="kaji_nadi">Nadi</label>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <div class="input-group input-group-merge">
+                                    <input type="text" id="kaji_nadi_val" name="kaji_nadi_val"
+                                        class="form-control form-control-appended inputan numberonly" placeholder="0">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span>ml/mnt</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_nadi" value="Teraba"
+                                        id="kaji_nadi_0">
+                                    <label class="form-check-label" for="kaji_nadi_0">
+                                        Teraba
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_nadi" value="Tidak Teraba"
+                                        id="kaji_nadi_1">
+                                    <label class="form-check-label" for="kaji_nadi_1">
+                                        Tidak Teraba
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <label for="kaji_akral">Akral</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_akral" value="Hangat"
+                                        id="kaji_kapiler_0">
+                                    <label class="form-check-label" for="kaji_akral_0">
+                                        Hangat
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_akral" value="Dingin"
+                                        id="kaji_akral_1">
+                                    <label class="form-check-label" for="kaji_akral_1">
+                                        Dingin
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_akral" value="Edema"
+                                        id="kaji_akral_2">
+                                    <label class="form-check-label" for="kaji_akral_2">
+                                        Edema
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <label for="kaji_sianosis">Sianosis</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_sianosis" value="Ya"
+                                        id="kaji_sianosis_0">
+                                    <label class="form-check-label" for="kaji_sianosis_0">
+                                        Ya
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_sianosi" value="Tidak"
+                                        id="kaji_sianosis_1">
+                                    <label class="form-check-label" for="kaji_sianosis_1">
+                                        Tidak
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-lg-12">
+                                <div class="input-group input-group-merge">
+                                    <input type="text" id="kaji_sianosis_td" name="kaji_sianosis_td"
+                                        class="form-control form-control-appended inputan numberonly" placeholder="TD">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span>mmHg</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <br />
+                        <label for="kaji_hilang_cairan">Riwayat Kehilangan Cairan</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_hilang_cairan"
+                                        value="Muntah" id="kaji_hilang_cairan_0">
+                                    <label class="form-check-label" for="kaji_hilang_cairan_0">
+                                        Muntah
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_hilang_cairan" value="Diare"
+                                        id="kaji_hilang_cairan_1">
+                                    <label class="form-check-label" for="kaji_hilang_cairan_1">
+                                        Diare
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="kaji_hilang_cairan"
+                                        value="Lainnya" id="kaji_hilang_cairan_2">
+                                    <label class="form-check-label w-100" for="kaji_hilang_cairan_2">
+                                        Lainnya
+                                        <textarea name="kaji_hilang_cairan_lainnya"
+                                            class="form-control inputan kaji_hilang_cairan_lainnya"
+                                            id="kaji_hilang_cairan_lainnya" rows="5" placeholder="-"></textarea>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <h6>Masalah Keperawatan</h6>
+                        <label for="gangguan_cairan">Gangguan Keseimbangan Cairan dan Elektrolit:</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_cairan" value="Aktual"
+                                        id="gangguan_cairan_0">
+                                    <label class="form-check-label" for="gangguan_cairan_0">
+                                        Aktual
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_cairan" value="Risiko"
+                                        id="gangguan_cairan_1">
+                                    <label class="form-check-label" for="gangguan_cairan_1">
+                                        Risiko
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_cairan"
+                                        value="Potensial" id="gangguan_cairan_2">
+                                    <label class="form-check-label" for="gangguan_cairan_2">
+                                        Potensial
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <h6></h6>
+                        <label for="gangguan_perifer">Gangguan Perfusi Jaringan Perifer:</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_perifer" value="Aktual"
+                                        id="gangguan_perifer_0">
+                                    <label class="form-check-label" for="gangguan_perifer_0">
+                                        Aktual
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_perifer" value="Risiko"
+                                        id="gangguan_perifer_1">
+                                    <label class="form-check-label" for="gangguan_perifer_1">
+                                        Risiko
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_perifer"
+                                        value="Potensial" id="gangguan_perifer_2">
+                                    <label class="form-check-label" for="gangguan_perifer_2">
+                                        Potensial
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <h6></h6>
+                        <label for="ganguan_diare">Diare:</label>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_diare" value="Aktual"
+                                        id="gangguan_diare_0">
+                                    <label class="form-check-label" for="gangguan_diare_0">
+                                        Aktual
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_diare" value="Risiko"
+                                        id="gangguan_diare_1">
+                                    <label class="form-check-label" for="gangguan_diare_1">
+                                        Risiko
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="gangguan_diare" value="Potensial"
+                                        id="gangguan_diare_2">
+                                    <label class="form-check-label" for="gangguan_diare_2">
+                                        Potensial
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Tindakan Keperawatan</h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="">Mengukur</label>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_ukur_dehidrasi" value="1" id="tindakan_ukur_dehidrasi">
+                                            <label class="form-check-label" for="tindakan_ukur_dehidrasi">
+                                                Status Dehidrasi
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_ukur_nadi"
+                                                value="1" id="tindakan_ukur_nadi">
+                                            <label class="form-check-label" for="tindakan_ukur_nadi">
+                                                Kekuatan Nadi Perifer
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_ukur_intake"
+                                                value="1" id="tindakan_ukur_intake">
+                                            <label class="form-check-label" for="tindakan_ukur_intake">
+                                                Intake Output
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_ukur_cairan"
+                                                value="1" id="tindakan_ukur_cairan">
+                                            <label class="form-check-label" for="tindakan_ukur_cairan">
+                                                Balance Cairan
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_ukur_cpv"
+                                                value="1" id="tindakan_ukur_cpv">
+                                            <label class="form-check-label" for="tindakan_ukur_cpv">
+                                                CPV
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_ukur_turgor"
+                                                value="1" id="tindakan_ukur_turgor">
+                                            <label class="form-check-label" for="tindakan_ukur_turgor">
+                                                Perubahan Turgor, Membran Mukosa
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_ukur_kepiler"
+                                                value="1" id="tindakan_ukur_kepiler">
+                                            <label class="form-check-label" for="tindakan_ukur_kepiler">
+                                                Kepiler Refill
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        <h6></h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <label for="">Kolaborasi</label>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_beri_oksigen_1" value="1" id="tindakan_beri_oksigen_1">
+                                            <label class="form-check-label w-100" for="tindakan_beri_oksigen_1">
+                                                Pemberian Oksigen
+                                                <div class="input-group input-group-merge">
+                                                    <input type="text" id="tindakan_beri_oksigen_val_1"
+                                                        name="tindakan_beri_oksigen_val_1"
+                                                        class="form-control form-control-appended inputan numberonly"
+                                                        placeholder="0">
+                                                    <div class="input-group-append">
+                                                        <div class="input-group-text">
+                                                            <span>ml/mnt</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <br />
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_pasang_infus"
+                                                value="1" id="tindakan_pasang_infus">
+                                            <label class="form-check-label" for="tindakan_pasang_infus">
+                                                Memasang Infus
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_pasang_ngt"
+                                                value="1" id="tindakan_pasang_ngt">
+                                            <label class="form-check-label" for="tindakan_pasang_ngt">
+                                                Memasang NGT
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_pasang_kateter" value="1" id="tindakan_pasang_kateter">
+                                            <label class="form-check-label" for="tindakan_pasang_kateter">
+                                                Memasang Kateter Urine
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_periksa_labor" value="1" id="tindakan_periksa_labor">
+                                            <label class="form-check-label" for="tindakan_periksa_labor">
+                                                Pemerikasaan Labor
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_rontgen_1"
+                                                value="1" id="tindakan_rontgen_1">
+                                            <label class="form-check-label" for="tindakan_rontgen_1">
+                                                Rontgen
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input" name="tindakan_trans_darah"
+                                                value="1" id="tindakan_trans_darah">
+                                            <label class="form-check-label" for="tindakan_trans_darah">
+                                                Transfusi Darah
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                name="tindakan_therapy_obat_1" value="1" id="tindakan_therapy_obat_1">
+                                            <label class="form-check-label w-100" for="tindakan_therapy_obat_1">
+                                                Teraphy Obat
+                                                <textarea name="tindakan_therapy_obat_txt_1"
+                                                    class="form-control inputan tindakan_therapy_obat_txt_1"
+                                                    id="tindakan_therapy_obat_txt_1" rows="5"
+                                                    placeholder="-"></textarea>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
 
-<div class="row" style="margin-top: 20px;">
-	<div class="col-md-12">
-		<div class="card">
-			<div class="card-header card-header-large bg-white d-flex align-items-center">
-				<h5 class="card-header__title flex m-0">Tindak Lanjut:</h5>
-			</div>
-			<div class="card-body">
-				<div class="row">
-					<div class="col-md-4 form-group">
-						<label for="">Rencana Tindak Lanjut</label>	
-						<select class="form-control inputan select2" id="tindak_lanjut" name="tindak_lanjut">
-							<option value="">Pilih</option>
-							<option value="Rawat Inap">Rawat Inap</option>
-							<option value="Rujuk">Rujuk</option>
-							<option value="Pulang">Pulang</option>
-						</select>
-					</div>
-					<div class="col-md-8 form-group">
-						<label>Keterangan Tindak Lanjut:</label>
-						<textarea rows="2" name="tindak_lanjut_ket" id="tindak_lanjut_ket" class="form-control inputan"></textarea>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h6>Evaluasi (SOAP)</h6>
+                        <br />
+                        <div class="row">
+                            <div class="col-lg-12" id="">
+                                <textarea name="evaluasi_soap_c" class="form-control inputan evaluasi_soap_c"
+                                    id="evaluasi_soap_c" rows="20" placeholder="-"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

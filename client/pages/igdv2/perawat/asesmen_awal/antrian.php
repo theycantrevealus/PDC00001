@@ -1,3 +1,4 @@
+
 <div class="container-fluid page__heading-container">
     <div class="page__heading d-flex align-items-center">
         <div class="flex">
@@ -19,60 +20,45 @@
             <div class="z-0">
                 <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-perawat">
                     <li class="nav-item tab-biasa">
-                        <a href="#tab-assesment-awal-igd-1" class="nav-link active" data-toggle="tab" role="tab"
-                            aria-selected="true" aria-controls="tab-asesment-awal-igd-1">
-                            <span class="nav-link__count">
-                                01
-                            </span>
+                        <a href="#tab-assesment-awal-igd-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-asesment-awal-igd-1">
+							<span class="nav-link__count">
+								01
+							</span>
                             Askep IGD
                         </a>
                     </li>
                     <li class="nav-item tab-biasa">
-                        <a href="#tab-assesment-awal-igd-2" class="nav-link" data-toggle="tab" role="tab"
-                            aria-selected="false">
-                            <span class="nav-link__count">
-                                02
-                            </span>
+                        <a href="#tab-assesment-awal-igd-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								02
+							</span>
                             Askep IGD
                         </a>
                     </li>
                     <li class="nav-item tab-biasa">
-                        <a href="#tab-assesment-awal-igd-3" class="nav-link" data-toggle="tab" role="tab"
-                            aria-selected="false">
-                            <span class="nav-link__count">
-                                03
-                            </span>
+                        <a href="#tab-assesment-awal-igd-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								03
+							</span>
                             Askep IGD
                         </a>
                     </li>
                     <li class="nav-item tab-biasa">
-                        <a href="#tab-assesment-awal-igd-4" class="nav-link" data-toggle="tab" role="tab"
-                            aria-selected="false">
-                            <span class="nav-link__count">
-                                04
-                            </span>
+                        <a href="#tab-assesment-awal-igd-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+							<span class="nav-link__count">
+								04
+							</span>
                             Askep IGD
                         </a>
                     </li>
                 </ul>
             </div>
             <div class="card card-body tab-content">
-                <div class="tab-pane show fade tab-biasa active" id="tab-assesment-awal-igd-1">
+                <div class="tab-pane show fade tab-biasa active" id="tab-assesment-awal-1">
                     <?php require 'halaman1.php'; ?>
                     <?php //require 'action_panel.php'; ?>
                 </div>
-                <div class="tab-pane show fade tab-biasa" id="tab-assesment-awal-igd-2">
-                    <?php require 'halaman2.php'; ?>
-                    <?php //require 'action_panel.php'; ?>
-                </div>
-                <div class="tab-pane show fade tab-biasa" id="tab-assesment-awal-igd-3">
-                    <?php require 'halaman3.php'; ?>
-                    <?php //require 'action_panel.php'; ?>
-                </div>
-                <div class="tab-pane show fade tab-biasa" id="tab-assesment-awal-igd-4">
-                    <?php require 'halaman4.php'; ?>
-                    <?php //require 'action_panel.php'; ?>
-                </div>
+            
             </div>
             <div class="card card-footer">
                 <div class="row">
