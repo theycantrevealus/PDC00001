@@ -299,6 +299,58 @@
       ]
     });
 
+    var tableAntrianRawat = $("#table-antrian-rawat-jalan-perawat").DataTable({
+      "ajax":{
+        url: __HOSTAPI__ + "/Asesmen",
+        type: "POST",
+        data: function(d) {
+          d.request = "get_antrian_asesmen_rawat_inap";
+          d.pasien = __PAGES__[3];
+        },
+        headers:{
+          Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+        },
+        dataSrc:function(response) {
+          console.log(response)
+            var filteredData = [];
+            var data = response.response_package.response_data;
+              return data;
+        }
+      },autoWidth: false,
+            "bInfo" : false,
+            aaSorting: [[0, "asc"]],
+            "columnDefs":[
+                {"targets":0, "className":"dt-body-left"}
+            ],
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.waktu_masuk;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+
+                      if(row.waktu_keluar === null || row.waktu_keluar === undefined){
+                        return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + row.uid + "/" + row.uid_pasien + "/" + row.uid_kunjungan + "\" class=\"btn btn-success btn-sm\">" +
+                            "<span><i class=\"fa fa-sign-out-alt\"></i>Proses Perobatan</span>" +
+                            "</a>" +
+                            "</div>"
+                      } else {
+                        return "";
+                      }
+                      
+                    }
+                }
+            ]
+    });
+
     $("body").on("click", ".cppt_paginate_prev", function() {
       if (currentCPPTStep > 1) {
         currentCPPTStep -= 1;

@@ -777,7 +777,7 @@
                                         class="form-control form-control-appended inputan numberonly" placeholder="0">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
-                                            <span>ml/mnt</span>
+                                            <span>x/mnt</span>
                                         </div>
                                     </div>
                                 </div>
@@ -859,7 +859,7 @@
                             <div class="form-group col-lg-12">
                                 <div class="input-group input-group-merge">
                                     <input type="text" id="kaji_sianosis_td" name="kaji_sianosis_td"
-                                        class="form-control form-control-appended inputan numberonly" placeholder="TD">
+                                        class="form-control form-control-appended inputan" placeholder="TD">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             <span>mmHg</span>

@@ -349,9 +349,10 @@
                     <div class="col-lg-3 mb-4">
                         <h6>Masalah Keperawatan</h6>
                         <br />
-                        <label for="gangguan_nyaman">Gangguan Rasa Nyaman:</label>
+                        <label>Gangguan Rasa Nyaman:</label>
                         <div class="row">
                             <div class="col-lg-12">
+                                <label for="gangguan_nyaman">Cemas</label>
                                 <textarea name="gangguan_nyaman" class="form-control inputan" id="gangguan_nyaman"
                                     rows="5" placeholder="-"></textarea>
                             </div>
@@ -504,7 +505,7 @@
                                 <label for="">TD</label>
                                 <div class="input-group input-group-merge">
                                     <input type="text" id="tanda_vital_td" name="tanda_vital_td"
-                                        class="form-control form-control-appended inputan numberonly" placeholder="TD">
+                                        class="form-control form-control-appended inputan" placeholder="TD">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             <span>mmHg</span>
@@ -680,8 +681,8 @@
                                                 <div class="form-inline">
                                                     <div class="form-inline">
                                                         <label class="mr-4" for="kondisi_doe_jam">Jam: </label>
-                                                        <input id='kondisi_doe_jam' type="time" name='kondisi_doe_jam'
-                                                            class="form-control inputan" />
+                                                        <input id='kondisi_doe_jam' type="text" name='kondisi_doe_jam'
+                                                            class="form-control inputan txt_waktu" />
                                                     </div>
                                                 </div>
                                             </label>

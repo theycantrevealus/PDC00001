@@ -380,9 +380,10 @@
             rebasePartus();
         });
 
-        console.log(dataPasien);
 
-        function simpanAsesmen(allData, dataPasien, btnSelesai) {
+        simpanAsesmen(allData, dataPasien, $("#btnSelesai"));
+
+        function simpanAsesmen(allData, dataPasien, btnSelesai,redirect = "N") {
             $(".inputan").each(function(){
                 var value = $(this).val();
 
@@ -419,35 +420,36 @@
 
             var partusList = [];
 
-            $("#riwayat_hamil tbody tr").each(function(e) {
-                var tanggal_partus = $(this).find("td:eq(1)").attr("tanggal");
-                var usia_kehamilan = $(this).find("td:eq(2)").html();
-                var tempat_partus = $(this).find("td:eq(3)").html();
-                var jenis_partus = $(this).find("td:eq(4)").html();
-                var penolong = $(this).find("td:eq(5)").html();
-                var nifas = $(this).find("td:eq(6)").html();
-                var jenkel_anak = $(this).find("td:eq(7)").html();
-                var bb_anak = $(this).find("td:eq(8)").html();
-                var keadaan_sekarang = $(this).find("td:eq(9)").html();
-                var keterangan = $(this).find("td:eq(10)").html();
+            // $("#riwayat_hamil tbody tr").each(function(e) {
+            //     var tanggal_partus = $(this).find("td:eq(1)").attr("tanggal");
+            //     var usia_kehamilan = $(this).find("td:eq(2)").html();
+            //     var tempat_partus = $(this).find("td:eq(3)").html();
+            //     var jenis_partus = $(this).find("td:eq(4)").html();
+            //     var penolong = $(this).find("td:eq(5)").html();
+            //     var nifas = $(this).find("td:eq(6)").html();
+            //     var jenkel_anak = $(this).find("td:eq(7)").html();
+            //     var bb_anak = $(this).find("td:eq(8)").html();
+            //     var keadaan_sekarang = $(this).find("td:eq(9)").html();
+            //     var keterangan = $(this).find("td:eq(10)").html();
 
-                partusList.push({
-                    tanggal: tanggal_partus,
-                    usia: usia_kehamilan,
-                    tempat: tempat_partus,
-                    jenis: jenis_partus,
-                    penolong: penolong,
-                    nifas: nifas,
-                    jenkel_anak: jenkel_anak,
-                    bb_anak: bb_anak,
-                    keadaan_sekarang: keadaan_sekarang,
-                    keterangan: keterangan
-                });
-            });
+            //     partusList.push({
+            //         tanggal: tanggal_partus,
+            //         usia: usia_kehamilan,
+            //         tempat: tempat_partus,
+            //         jenis: jenis_partus,
+            //         penolong: penolong,
+            //         nifas: nifas,
+            //         jenkel_anak: jenkel_anak,
+            //         bb_anak: bb_anak,
+            //         keadaan_sekarang: keadaan_sekarang,
+            //         keterangan: keterangan
+            //     });
+            // });
 
             allData["partus_list"] = partusList;
 
             delete allData['simetris'];
+            delete allData['asal_masuk_option'];
             delete allData['riwayat_merokok_option'];
             delete allData['riwayat_miras_option'];
             delete allData['riwayat_obt_terlarang_option'];
@@ -467,14 +469,16 @@
                 type: "POST",
                 success: function(response){
                     btnSelesai.removeAttr("disabled");
-                    console.clear();
+                    //console.clear();
                     console.log(response);
                     if(
                         response.response_package.response_result > 0 ||
                         response.response_package.asesmen.response_result > 0
                     ) {
                         notification ("success", "Berhasil Simpan Data", 3000, "hasil_tambah_dev");
-                        location.href = __HOSTNAME__ + "/rawat_inap/perawat/asesmen-detail/" + dataPasien.pasien.uid + "/" + dataPasien.antrian.kunjungan + "/" + dataPasien.antrian.penjamin;
+                        if(redirect === "Y") {
+                            location.href = __HOSTNAME__ + "/rawat_inap/perawat/asesmen-detail/" + dataPasien.pasien.uid + "/" + dataPasien.antrian.kunjungan + "/" + dataPasien.antrian.penjamin+"/"+__NURSE_STATION__+"/"+__PAGES__[6];
+                        }
                     } else {
                         notification ("danger", "Gagal Simpan Data", 3000, "hasil_tambah_dev");
                     }
@@ -503,7 +507,7 @@
                 denyButtonColor: `#ff2a2a`
             }).then((result) => {
                 if (result.isConfirmed) {
-                    simpanAsesmen(allData, dataPasien, btnSelesai);
+                    simpanAsesmen(allData, dataPasien, btnSelesai,"Y");
 
 
 
@@ -903,8 +907,128 @@
             });
         });
 
-        autoInfus("#autoInfusBidan", "bidan");
-        autoInfus("#autoInfusBiasa", "biasa");
+        autoPeriksaPenunjang("#autoPeriksaPenunjang");
+
+        $("body").on("click",".btn-approve-periksa-penunjang", function(){
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+            var me = $(this);
+
+            var jenis = $("#jenis_auto_periksa_penunjang_"+ id).val();
+            var asal = $("#asal_auto_periksa_penunjang_"+ id).val();
+            var jumlah = $("#jumlah_auto_periksa_penunjang_"+ id).val();
+            var penerima = $("#penerima_auto_periksa_penunjang_"+ id).val();
+
+            if(
+                jenis !== null &&
+                jenis !== undefined &&
+                jenis !== "" &&
+
+                asal !== null &&
+                asal !== undefined &&
+                asal !== "" &&
+
+                jumlah !== null &&
+                jumlah !== undefined &&
+                jumlah !== "" &&
+
+                penerima !== null &&
+                penerima !== undefined &&
+                penerima !== ""
+            ){
+                me.addClass("btn-warning").removeClass("btn-success").html("<span><i class=\"fa fa-hourglass-half\"></i> Processing...</span>");
+                $.ajax({
+                    async: false,
+                    url: __HOSTAPI__ + "/Asesmen",
+                    type: "POST",
+                    data: {
+                        request: "update_inap_periksa_penunjang",
+                        jenis: jenis,
+                        asal : asal,
+                        jumlah: jumlah,
+                        penerima: penerima,
+                        dataAntrian: dataPasien.antrian
+                    },
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                    },
+                    success: function (response) {    
+                        me.parent().html("<button class=\"btn btn-danger btn-sm btn-delete-periksa-penunjang\" id=\"btn_delete_periksa_penunjang_" + id + "\"><span><i class=\"fa fa-trash-alt\"></i> Hapus </span></button>");
+                        me.remove();
+
+                        loadPasien(uid_antrian);
+                        autoPeriksaPenunjang("#autoPeriksaPenunjang");
+                    },
+                    error: function (response) {
+                        console.log(response);
+                        me.addClass("btn-success").removeClass("btn-warning").html("<span><i class=\"fa fa-check\"></i> OK</span>");
+                    }
+                });
+            }else {
+                alert("Semua input wajib diisi!");
+            }
+
+        });
+
+
+        $("body").on("click",".btn-delete-periksa-penunjang", function(){
+            var id = $(this).attr("id").split("_");
+            id = id[id.length - 1];
+
+            var server_id = $(this).attr("server-id");
+            var asesmen = $(this).attr("asesmen");
+
+            var me = $(this);
+
+            Swal.fire({
+                title: "Hapus Pemeriksaan Penunjang Yang Dibawa?",
+                showDenyButton: true,
+                type: 'warning',
+                confirmButtonText: `Ya`,
+                confirmButtonColor: `#1297fb`,
+                denyButtonText: `Batal`,
+                denyButtonColor: `#ff2a2a`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    me.addClass("btn-warning").removeClass("btn-danger").html("<span><i class=\"fa fa-hourglass-half\"></i> Processing...</span>");
+                    $.ajax({
+                        async: false,
+                        url: __HOSTAPI__ + "/Asesmen",
+                        type: "POST",
+                        data: {
+                            request: "hapus_inap_periksa_penunjang",
+                            id: server_id,
+                            asesmen: asesmen,
+                            dataAntrian: dataPasien.antrian
+                        },
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        success: function (response) {
+                            console.log(response)
+                            var data = response.response_package.response_result;
+
+                            if(data > 0) {
+                                loadPasien(uid_antrian);
+                                autoPeriksaPenunjang('#autoPeriksaPenunjang')
+                                me.addClass("btn-danger").removeClass("btn-warning").html("<span><i class=\"fa fa-trash-alt\"></i> Hapus</span>");
+                            } else {
+                                console.log(response);
+                                me.addClass("btn-danger").removeClass("btn-warning").html("<span><i class=\"fa fa-trash-alt\"></i> Hapus</span>");
+                            }
+                        },
+                        error: function (response) {
+                            console.log(response);
+                            me.addClass("btn-danger").removeClass("btn-warning").html("<span><i class=\"fa fa-trash-alt\"></i> Hapus</span>");
+                        }
+                    });
+                }
+            });
+
+        });
+
+        //autoInfus("#autoInfusBidan", "bidan");
+        //autoInfus("#autoInfusBiasa", "biasa");
 
         $("body").on("click", ".btn-approve-infus", function () {
             var target = $(this).attr("target");
@@ -1080,12 +1204,13 @@
         if (params != ""){
             $.ajax({
                 async: false,
-                url:__HOSTAPI__ + "/Asesmen/asesmen-rawat-detail/" + params,
+                url:__HOSTAPI__ + "/Asesmen/asesmen-rawat-detail-2/" + params,
                 type: "GET",
                 beforeSend: function(request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response) {
+                    console.log(response)
                     if (response.response_package != ""){
                         MetaData = response.response_package;
 
@@ -1116,98 +1241,109 @@
 
                         if (MetaData.asesmen_rawat != "") {
 
-                            let cara_masuk = $("input[name='cara_masuk']").val();
+                            //let cara_masuk = $("input[name='cara_masuk']").val();
                             $.each(MetaData.asesmen_rawat, function(key, item) {
                                 $("#" + key).val(item);
                                 if(item !== null || item !== "" || item != "") {
                                     $("#" + key).removeAttr("disabled").prop("disabled", false);
                                 } else {
-                                    disableLainnya('cara_masuk_lainnya', cara_masuk, "Lainnya");
+                                    //disableLainnya('cara_masuk_lainnya', cara_masuk, "Lainnya");
                                 }
                                 checkedRadio(key, item);
                                 checkedCheckbox(key, item);
-                                if(key == "riwayat_transfusi_golongan_darah") {
-                                    loadTermSelectBox("riwayat_transfusi_golongan_darah", 4, item);
-                                }
+                                // if(key == "riwayat_transfusi_golongan_darah") {
+                                //     loadTermSelectBox("riwayat_transfusi_golongan_darah", 4, item);
+                                // }
                             });
 
-                            let program_kb = $("#program_kb").val();
-                            if (program_kb == 0 || program_kb == "") {
-                                disableElementSelectBox('jenis-kb', program_kb);
+                            if ($("#asal_masuk").val() != ""){
+                                let $this = $("input:radio[name='asal_masuk_option']");
+                                $this.val("y").prop('checked', true);
+
+                                $("#asal_masuk").removeAttr("disabled");
+                            } else {
+                                $("#asal_masuk").attr({
+                                    "disabled": "disabled"
+                                });
                             }
+
+                            // let program_kb = $("#program_kb").val();
+                            // if (program_kb == 0 || program_kb == "") {
+                            //     disableElementSelectBox('jenis-kb', program_kb);
+                            // }
 
 
                             //disableLainnya('cara_masuk_lainnya', cara_masuk, "Lainnya");
 
-                            let rujukan = $("input[name='rujukan']").val();
-                            disableLainnya('ket_rujukan', rujukan, 1);
+                            // let rujukan = $("input[name='rujukan']").val();
+                            // disableLainnya('ket_rujukan', rujukan, 1);
 
-                            if ($("#riwayat_keluarga_lainnya").is(':checked')) {
-                                $(".riwayat_keluarga_lainnya_ket").removeAttr("disabled");
-                            }
+                            // if ($("#riwayat_keluarga_lainnya").is(':checked')) {
+                            //     $(".riwayat_keluarga_lainnya_ket").removeAttr("disabled");
+                            // }
 
-                            if ($("#nyeri_lainnya").is(':checked')) {
-                                $(".nyeri_lainnya_ket").removeAttr("disabled");
-                            }
+                            // if ($("#nyeri_lainnya").is(':checked')) {
+                            //     $(".nyeri_lainnya_ket").removeAttr("disabled");
+                            // }
 
-                            let bicara = $("#komunikasi_bicara").val();
-                            disableLainnya('komunikasi_bicara_lainnya', bicara, "Lainnya");
+                            // let bicara = $("#komunikasi_bicara").val();
+                            // disableLainnya('komunikasi_bicara_lainnya', bicara, "Lainnya");
 
-                            let hambatan = $("#komunikasi_hambatan").val();
-                            disableLainnya('komunikasi_hambatan_lainnya', hambatan, "Lainnya");
+                            // let hambatan = $("#komunikasi_hambatan").val();
+                            // disableLainnya('komunikasi_hambatan_lainnya', hambatan, "Lainnya");
 
-                            let kebutuhan = $("#komunikasi_kebutuhan_belajar").val();
-                            disableLainnya('komunikasi_kebutuhan_belajar_lainnya', kebutuhan, "Lainnya");
+                            // let kebutuhan = $("#komunikasi_kebutuhan_belajar").val();
+                            // disableLainnya('komunikasi_kebutuhan_belajar_lainnya', kebutuhan, "Lainnya");
 
-                            let kaji_jam_ke_dokter = $("#kaji_resiko_ke_dokter").val();
-                            if (kaji_jam_ke_dokter == 0 || kaji_jam_ke_dokter == ""){
-                                disableElementSelectBox('kaji_resiko_jam_dokter', program_kb);
-                            }
+                            // let kaji_jam_ke_dokter = $("#kaji_resiko_ke_dokter").val();
+                            // if (kaji_jam_ke_dokter == 0 || kaji_jam_ke_dokter == ""){
+                            //     disableElementSelectBox('kaji_resiko_jam_dokter', program_kb);
+                            // }
 
-                            if ($("#tatalaksana_siapkan_obat").is(':checked')) {
-                                $(".tatalaksana_siapkan_obat_ket").removeAttr("disabled");
-                            }
+                            // if ($("#tatalaksana_siapkan_obat").is(':checked')) {
+                            //     $(".tatalaksana_siapkan_obat_ket").removeAttr("disabled");
+                            // }
 
-                            if ($("#tatalaksana_beri_obat").is(':checked')) {
-                                $(".tatalaksana_beri_obat_ket").removeAttr("disabled");
-                            }
+                            // if ($("#tatalaksana_beri_obat").is(':checked')) {
+                            //     $(".tatalaksana_beri_obat_ket").removeAttr("disabled");
+                            // }
 
-                            if ($("#tatalaksana_konsul").is(':checked')) {
-                                $(".tatalaksana_konsul_ket").removeAttr("disabled");
-                            }
+                            // if ($("#tatalaksana_konsul").is(':checked')) {
+                            //     $(".tatalaksana_konsul_ket").removeAttr("disabled");
+                            // }
 
-                            if ($("#riwayat_merokok").val() != ""){
-                                let $this = $("input:radio[name='riwayat_merokok_option']");
-                                $this.val("y").prop('checked', true);
+                            // if ($("#riwayat_merokok").val() != ""){
+                            //     let $this = $("input:radio[name='riwayat_merokok_option']");
+                            //     $this.val("y").prop('checked', true);
 
-                                $("#riwayat_merokok").removeAttr("disabled");
-                            } else {
-                                $("#riwayat_merokok").attr({
-                                    "disabled": "disabled"
-                                });
-                            }
+                            //     $("#riwayat_merokok").removeAttr("disabled");
+                            // } else {
+                            //     $("#riwayat_merokok").attr({
+                            //         "disabled": "disabled"
+                            //     });
+                            // }
 
-                            if ($("#riwayat_miras").val() != ""){
-                                let $this = $("input:radio[name='riwayat_miras_option']");
-                                $this.val("y").prop('checked', true);
+                            // if ($("#riwayat_miras").val() != ""){
+                            //     let $this = $("input:radio[name='riwayat_miras_option']");
+                            //     $this.val("y").prop('checked', true);
 
-                                $("#riwayat_miras").removeAttr("disabled");
-                            } else {
-                                $("#riwayat_miras").attr({
-                                    "disabled": "disabled"
-                                });
-                            }
+                            //     $("#riwayat_miras").removeAttr("disabled");
+                            // } else {
+                            //     $("#riwayat_miras").attr({
+                            //         "disabled": "disabled"
+                            //     });
+                            // }
 
-                            if ($("#riwayat_obt_terlarang").val() != ""){
-                                let $this = $("input:radio[name='riwayat_obt_terlarang_option']");
-                                $this.val("y").prop('checked', true);
+                            // if ($("#riwayat_obt_terlarang").val() != ""){
+                            //     let $this = $("input:radio[name='riwayat_obt_terlarang_option']");
+                            //     $this.val("y").prop('checked', true);
 
-                                $("#riwayat_obt_terlarang").removeAttr("disabled");
-                            } else {
-                                $("#riwayat_obt_terlarang").attr({
-                                    "disabled": "disabled"
-                                });
-                            }
+                            //     $("#riwayat_obt_terlarang").removeAttr("disabled");
+                            // } else {
+                            //     $("#riwayat_obt_terlarang").attr({
+                            //         "disabled": "disabled"
+                            //     });
+                            // }
                         }
 
                         //IGD Modul Infus
@@ -1246,6 +1382,21 @@
                             /*autoInfus("#autoInfusBidan", "bidan");
                             autoInfus("#autoInfusBiasa", "biasa");*/
                         }
+
+                        //INAP Modul Penunjang
+                        if(MetaData.asesmen_penunjang !== undefined){
+                            $("#autoPeriksaPenunjang tbody tr").remove();
+                            for(var penunjangKey in MetaData.asesmen_penunjang) {
+                                autoPeriksaPenunjang("#autoPeriksaPenunjang",{
+                                    asesmen: MetaData.asesmen_penunjang[penunjangKey].asesmen,
+                                    serverID: MetaData.asesmen_penunjang[penunjangKey].id,
+                                    jenis: MetaData.asesmen_penunjang[penunjangKey].jenis,
+                                    asal: MetaData.asesmen_penunjang[penunjangKey].asal,
+                                    jumlah: MetaData.asesmen_penunjang[penunjangKey].jumlah,
+                                    penerima: MetaData.asesmen_penunjang[penunjangKey].penerima,
+                                });
+                            }
+                        }
                     }
                 },
                 error: function(response) {
@@ -1274,6 +1425,95 @@
         if (value == 1){
             $('input:checkbox[name='+ name +']').prop('checked', true);
         }
+    }
+
+    function autoPeriksaPenunjang(targetTable, setter = {}) {
+        
+        $(targetTable + " tbody tr").removeClass("last-periksa-penunjang");
+
+        var row = document.createElement("TR");
+        var containerJenis = document.createElement("TD");
+        var containerAsal = document.createElement("TD");
+        var containerJumlah = document.createElement("TD");
+        var containerPenerima = document.createElement("TD");
+        var containerAksi = document.createElement("TD");
+
+
+        var Jenis = document.createElement("INPUT");
+        var Asal = document.createElement("INPUT");
+        var Jumlah = document.createElement("INPUT");
+        var Penerima = document.createElement("INPUT");
+
+        $(Jenis).addClass("form-control");
+        $(Asal).addClass("form-control");
+        $(Jumlah).addClass("form-control");
+        $(Penerima).addClass("form-control");
+
+        if(
+            setter.asesmen !== undefined && setter.asesmen !== null
+        ){
+            $(containerJenis).html(setter.jenis);
+            $(containerAsal).html(setter.asal);
+            $(containerJumlah).html(setter.jumlah);
+            $(containerPenerima).html(setter.penerima);
+            $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Periksa Penunjang\">" +
+                    "<button asesmen=\"" + setter.asesmen + "\" server-id=\"" + setter.serverID + "\" class=\"btn btn-sm btn-danger btn-delete-periksa-penunjang\"><span><i class=\"fa fa-trash-alt\"></i> Hapus</span></button>" +
+                    "</div>");
+        }else{
+
+            $(containerJenis).append(Jenis);
+            $(containerAsal).append(Asal);
+            $(containerJumlah).append(Jumlah);
+            $(containerPenerima).append(Penerima);
+            $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Periksa Penunjang\">" +
+                    "<button class=\"btn btn-sm btn-success btn-approve-periksa-penunjang\"><span><i class=\"fa fa-check\"></i> OK</span></button>" +
+                    "</div>"); 
+                
+        }
+            
+
+        $(row).append(containerJenis);
+        $(row).append(containerAsal);
+        $(row).append(containerJumlah);
+        $(row).append(containerPenerima);
+        $(row).append(containerAksi);
+
+        $(row).addClass("last-periksa-penunjang");
+        $(targetTable + " tbody").append(row);
+
+        rebasePeriksaPenunjang(targetTable);
+    }
+
+    function rebasePeriksaPenunjang(targetTable){
+        $(targetTable + " tbody tr").each(function (e) {
+            var id = (e + 1);
+            $(this).attr({
+                "id": "row_auto_periksa_penunjang_" + id
+            });
+
+            $(this).find("td:eq(0) input").attr({
+                "id": "jenis_auto_periksa_penunjang_" + id
+            });
+
+            $(this).find("td:eq(1) input").attr({
+                "id": "asal_auto_periksa_penunjang_" + id
+            });
+
+            $(this).find("td:eq(2) input").attr({
+                "id": "jumlah_auto_periksa_penunjang_" + id
+            });
+            $(this).find("td:eq(3) input").attr({
+                "id": "penerima_auto_periksa_penunjang_" + id
+            });
+
+            $(this).find("td:eq(4) button.btn-approve-periksa-penunjang").attr({
+                "id": "approve_auto_periksa_penunjang_" + id
+            });
+
+            $(this).find("td:eq(4) button.btn-delete-periksa-penunjang").attr({
+                "id": "hapus_auto_periksa_penunjang_" + id
+            });
+        });
     }
 
 

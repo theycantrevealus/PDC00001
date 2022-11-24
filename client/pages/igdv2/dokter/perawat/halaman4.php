@@ -349,9 +349,10 @@
                     <div class="col-lg-3 mb-4">
                         <h6>Masalah Keperawatan</h6>
                         <br />
-                        <label for="gangguan_nyaman">Gangguan Rasa Nyaman:</label>
+                        <label>Gangguan Rasa Nyaman:</label>
                         <div class="row">
                             <div class="col-lg-12">
+                                <label for="gangguan_nyaman">Cemas</label>
                                 <textarea name="gangguan_nyaman" class="form-control inputan" id="gangguan_nyaman"
                                     rows="5" placeholder="-"></textarea>
                             </div>
@@ -504,7 +505,7 @@
                                 <label for="">TD</label>
                                 <div class="input-group input-group-merge">
                                     <input type="text" id="tanda_vital_td" name="tanda_vital_td"
-                                        class="form-control form-control-appended inputan numberonly" placeholder="TD">
+                                        class="form-control form-control-appended inputan" placeholder="TD">
                                     <div class="input-group-append">
                                         <div class="input-group-text">
                                             <span>mmHg</span>

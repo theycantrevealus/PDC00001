@@ -87,6 +87,41 @@
             </div>
             <div class="card-body">
                 <ol type="1" class="form-list-item">
+                <li>
+                        <h6>Informasi didapat dari</h6>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="form-check">
+                                    <input id="info_dari_0" class="form-check-input" type="radio" name="info_dari"
+                                        value="Langsung" />
+                                    <label for="info_dari_0" class="form-check-label">
+                                        Auto Anamnesa/Langsung
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="form-check">
+                                    <input id="info_dari_1" class="form-check-input" type="radio" name="info_dari"
+                                        value="Tidak Langsung" />
+                                    <label for="info_dari_1" class="form-check-label">
+                                        Allow Anamnesa/Tidak Langsung
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <h6></h6>
+                        <div class="row">
+                            <div class="col-lg-6 form-group">
+                                <label for="info_dari_nama">Nama Pengantar</label>
+                                <input id="info_dari_nama" type="text" name="info_dari_nama" class="form-control inputan">
+                            </div>
+                            <div class="col-lg-6 form-group">
+                                <label for="info_dari_hub">Hubungan</label>
+                                <input id="info_dari_hub" type="text" name="info_dari_hub" class="form-control inputan">
+                            </div>
+                        </div>
+                    </li>
                     <li>
                         <h6>Cara Masuk</h6>
                         <div class="row">
@@ -468,7 +503,7 @@
 						<input disabled type="text" name="nyeri_lainnya_ket" id="nyeri_lainnya_ket" class="form-control inputan nyeri_lainnya_ket" placeholder="-">
 					</div>
 					<div class="form-group col-lg-4">
-						<label>Skala Nyeri NRS ( &gt; 5th - Dewasa)</label>
+						<label>Skala Nyeri NRS ( &gt; 6th - Dewasa)</label>
 						<input placeholder="-" type="text" id="nyeri_skala" name="nyeri_skala" class="form-control inputan" />
 					</div>
 					<div class="form-group col-lg-3">
@@ -547,7 +582,7 @@
                                 <td>Resiko Rendah</td>
                             </tr>
                             <tr>
-                                <td>0 - 5</td>
+                                <td>>= 14</td>
                                 <td>Resiko Tinggi</td>
                             </tr>
                         </tbody>

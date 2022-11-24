@@ -667,9 +667,9 @@
                                 autoInfus("#autoInfusBidan", target);
                             } else {
                                 autoInfus("#autoInfusBiasa", target);
-                            }
+                            }*/
 
-                            me.parent().html("<button class=\"btn btn-danger btn-sm btn-delete-infus\" id=\"btn_delete_infus_" + target + "_" + id + "\"><span><i class=\"fa fa-trash-alt\"></i> Hapus </span></button>");*/
+                            me.parent().html("<button class=\"btn btn-danger btn-sm btn-delete-infus\" id=\"btn_delete_infus_" + target + "_" + id + "\"><span><i class=\"fa fa-trash-alt\"></i> Hapus </span></button>");
                             //me.remove();
                         } else {
                             console.log(response);
@@ -975,7 +975,7 @@
 
                         //IGD Modul Infus
                         if(MetaData.asesmen_infus !== undefined) {
-                            $("#autoInfusBidan tbody tr").remove();
+                            // $("#autoInfusBidan tbody tr").remove();
                             $("#autoInfusBiasa tbody tr").remove();
                             for(var infusKey in MetaData.asesmen_infus) {
                                 if(MetaData.asesmen_infus[infusKey].igd_type === "bidan") {

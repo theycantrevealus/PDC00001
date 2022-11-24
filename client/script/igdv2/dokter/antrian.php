@@ -108,7 +108,7 @@
             type:"GET",
             success:function(response) {
                 antrianData = response.response_package.response_data[0];
-
+                loadPerawatObjective(UID);
                 if(antrianData.waktu_keluar !== null) {
                     $("#btnSelesai").remove();
                     allowEdit = false;
@@ -3640,6 +3640,155 @@
             return radiologiTindakan;
         }*/
 
+        function loadPerawatObjective(params) {
+            var MetaData = null;
+
+            if (params != "") {
+                $.ajax({
+                async: false,
+                url: __HOSTAPI__ + "/Asesmen/asesmen-rawat-detail/" + params,
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response) {
+                    if (response.response_package != "") {
+                        MetaData = response.response_package;
+
+                        $.each(MetaData.pasien, function(key, item) {
+                            $("#" + key).html(item);
+                        });
+
+                        $.each(MetaData.antrian, function(key, item) {
+                            $("#" + key).val(item);
+                        });
+
+                        if (MetaData.pasien.id_jenkel == 2) {
+                            $(".wanita").attr("hidden", true);
+                        } else {
+                            $(".pria").attr("hidden", true);
+                        }
+
+                        if (MetaData.asesmen_rawat != "") {
+                            $.each(MetaData.asesmen_rawat, function(key, item) {
+                                $("#" + key).val(item);
+                                if(item !== null || item !== "" || item != "") {
+                                    $("#" + key).removeAttr("disabled").prop("disabled", false);
+                                } /*else {
+                                    disableLainnya('cara_masuk_lainnya', cara_masuk, "Lainnya");
+                                }*/
+                                checkedRadio(key, item);
+                                checkedCheckbox(key, item);
+                                // if(key == "riwayat_transfusi_golongan_darah") {
+                                //     loadTermSelectBox("riwayat_transfusi_golongan_darah", 4, item);
+                                // }
+                            });
+
+                            if ($("#asal_masuk").val() != ""){
+                                let $this = $("input:radio[name='asal_masuk_option'][value='y']");
+                                $this.prop('checked', true);
+
+                                $("#asal_masuk").removeAttr("disabled");
+                            } else {
+                                $("#asal_masuk").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
+
+                            if ($("#riwayat_penyakit").val() != ""){
+                                let $this = $("input:radio[name='riwayat_penyakit_option'][value='y']");
+                                $this.prop('checked', true);
+
+                                $("#riwayat_penyakit").removeAttr("disabled");
+                            } else {
+                                $("#riwayat_penyakit").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
+
+                            if ($("#riwayat_operasi").val() != ""){
+                                let $this = $("input:radio[name='riwayat_operasi_option'][value='y']");
+                                $this.prop('checked', true);
+
+                                $("#riwayat_operasi").removeAttr("disabled");
+                            } else {
+                                $("#riwayat_operasi").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
+
+                            if ($("#riwayat_pengobatan").val() != ""){
+                                let $this = $("input:radio[name='riwayat_pengobatan_option'][value='y']");
+                                $this.prop('checked', true);
+
+                                $("#riwayat_pengobatan").removeAttr("disabled");
+                            } else {
+                                $("#riwayat_pengobatan").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
+
+                            if (
+                                $("#status_hamil_g").val() != "" || 
+                                $("#status_hamil_a").val() != "" ||
+                                $("#status_hamil_p").val() != "" || 
+                                $("#status_hamil_h").val() != ""
+                            ){
+                                let $this = $("input:radio[name='status_hamil_option'][value='y']");
+                                $this.prop('checked', true);
+
+                                $("#status_hamil_g").removeAttr("disabled");
+                                $("#status_hamil_a").removeAttr("disabled");
+                                $("#status_hamil_p").removeAttr("disabled");
+                                $("#status_hamil_h").removeAttr("disabled");
+                            } else {
+                                $("#status_hamil_g").attr({
+                                    "disabled": "disabled"
+                                });
+                                $("#status_hamil_a").attr({
+                                    "disabled": "disabled"
+                                });
+                                $("#status_hamil_p").attr({
+                                    "disabled": "disabled"
+                                });
+                                $("#status_hamil_h").attr({
+                                    "disabled": "disabled"
+                                });
+                            }
+                        }
+
+                        if(MetaData.asesmen_infus !== undefined) {
+                            // $("#autoInfusBidan tbody tr").remove();
+                            $("#autoInfusBiasa tbody tr").remove();
+                            for(var infusKey in MetaData.asesmen_infus) {
+                                
+                                    autoInfus("#autoInfusBiasa", "biasa", {
+                                        dihapus_oleh: MetaData.asesmen_infus[infusKey].dihapus_oleh,
+                                        deleted_at: MetaData.asesmen_infus[infusKey].deleted_at,
+                                        asesmen: MetaData.asesmen_infus[infusKey].asesmen,
+                                        serverID: MetaData.asesmen_infus[infusKey].id,
+                                        pukul: MetaData.asesmen_infus[infusKey].pukul,
+                                        obat: MetaData.asesmen_infus[infusKey].obat,
+                                        dosis: MetaData.asesmen_infus[infusKey].dosis,
+                                        rute: MetaData.asesmen_infus[infusKey].rute,
+                                        keputusan: MetaData.asesmen_infus[infusKey].keputusan,
+                                        oleh: MetaData.asesmen_infus[infusKey].oleh
+                                    });
+                                
+                            }
+                        }
+
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+                });
+            }
+
+            return MetaData;
+            }
+
         function loadPasien(params){
             var MetaData = null;
 
@@ -3718,6 +3867,129 @@
                 }
             }
         }
+
+        function autoInfus(targetTable, classify, setter = {}) {
+            $(targetTable + " tbody tr").removeClass("last-infus");
+
+            var row = document.createElement("TR");
+            var containerPukul = document.createElement("TD");
+            var containerObat = document.createElement("TD");
+            var containerDosis = document.createElement("TD");
+            var containerRute = document.createElement("TD");
+            var containerLibat = document.createElement("TD");
+            var containerOleh = document.createElement("TD");
+            var containerAksi = document.createElement("TD");
+
+
+            var Obat = document.createElement("SELECT");
+            var Dosis = document.createElement("INPUT");
+            var Rute = document.createElement("INPUT");
+            var Libat = document.createElement("INPUT");
+
+            $(Obat).addClass("form-control auto_infus_obat");
+            $(Dosis).addClass("form-control");
+            $(Rute).addClass("form-control");
+            $(Libat).addClass("form-control");
+
+            if(
+                setter.obat !== undefined && setter.obat !== null
+            ) {
+                $(containerPukul).html(setter.pukul);
+                $(containerObat).html("<span>" + setter.obat.nama + "</span>");
+                $(containerDosis).html(setter.dosis);
+                $(containerRute).html(setter.rute);
+                $(containerLibat).html(setter.keputusan);
+                $(containerOleh).html(setter.oleh.nama);
+                if(setter.deleted_at !== null) {
+                    $(containerPukul).css({
+                        "text-decoration": "line-through"
+                    });
+                    $(containerObat).append("<br /><b class=\"text-info\"><i class=\"fa fa-info-circle\"></i> Dihapus oleh : " + setter.dihapus_oleh + "</b>");
+                    $(containerObat).find("span").css({
+                        "text-decoration": "line-through"
+                    });
+                    $(containerDosis).css({
+                        "text-decoration": "line-through"
+                    });
+                    $(containerRute).css({
+                        "text-decoration": "line-through"
+                    });
+                    $(containerLibat).css({
+                        "text-decoration": "line-through"
+                    });
+                    $(containerOleh).css({
+                        "text-decoration": "line-through"
+                    });
+                    $(containerAksi).html("<div class=\"wrap-content\"><i class=\"fa fa-trash-alt\"></i> Terhapus</div>");
+                } else {
+                    // $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                    //     "<button asesmen=\"" + setter.asesmen + "\" server-id=\"" + setter.serverID + "\" class=\"btn btn-sm btn-danger btn-delete-infus\"><span><i class=\"fa fa-trash-alt\"></i> Hapus</span></button>" +
+                    //     "</div>");
+                }
+            } else {
+                $(containerPukul).html(setter.pukul);
+                $(containerObat).append(Obat);
+                $(containerDosis).append(Dosis);
+                $(containerRute).append(Rute);
+                $(containerLibat).append(Libat);
+                $(containerOleh).html(__MY_NAME__);
+                // $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                //     "<button class=\"btn btn-sm btn-success btn-approve-infus\" target=\"" + classify + "\"><span><i class=\"fa fa-check\"></i> OK</span></button>" +
+                //     "</div>");
+            }
+
+
+            $(row).append(containerPukul);
+            $(row).append(containerObat);
+            $(row).append(containerDosis);
+            $(row).append(containerRute);
+            $(row).append(containerLibat);
+            $(row).append(containerOleh);
+            $(row).append(containerAksi);
+
+            $(row).addClass("last-infus");
+            $(targetTable + " tbody").append(row);
+
+            rebaseInfus(targetTable, classify);
+        }
+
+        function rebaseInfus(targetTable, classify) {
+            $(targetTable + " tbody tr").each(function (e) {
+                var id = (e + 1);
+                $(this).attr({
+                    "id": "row_auto_infus_" + classify + "_" + id
+                });
+
+                $(this).find("td:eq(0)").attr({
+                    "id": "pukul_auto_infus_" + classify + "_" + id
+                });
+
+                $(this).find("td:eq(1) select").attr({
+                    "id": "obat_auto_infus_" + classify + "_" + id
+                });
+
+                $(this).find("td:eq(2) input").attr({
+                    "id": "dosis_auto_infus_" + classify + "_" + id
+                });
+
+                $(this).find("td:eq(3) input").attr({
+                    "id": "rute_auto_infus_" + classify + "_" + id
+                });
+
+                $(this).find("td:eq(4) input").attr({
+                    "id": "libat_auto_infus_" + classify + "_" + id
+                });
+
+                $(this).find("td:eq(6) button.btn-approve-infus").attr({
+                    "id": "approve_auto_infus_" + classify + "_" + id
+                });
+
+                $(this).find("td:eq(6) button.btn-delete-infus").attr({
+                    "id": "hapus_auto_infus_" + classify + "_" + id
+                });
+            });
+        }
+
 
         function loadDataPenjamin(){
             let dataPenjamin;
