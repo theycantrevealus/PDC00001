@@ -575,11 +575,11 @@
                         <tbody>
                             <tr>
                                 <td>0 - 5</td>
-                                <td>Resiko Sedang</td>
+                                <td>Resiko Rendah</td>
                             </tr>
                             <tr>
                                 <td>6 - 13</td>
-                                <td>Resiko Rendah</td>
+                                <td>Resiko Sedang</td>
                             </tr>
                             <tr>
                                 <td>>= 14</td>

@@ -455,7 +455,7 @@
                             <th style="width: 30%;">Nama Obat/Infus</th>
                             <th style="width: 15%;">Dosis</th>
                             <th style="width: 15%;">Rute</th>
-                            <th>Libatkan Klien & Keluarga Dalam Pengambilan Keputusan</th>
+                            <th>Diperiksa Oleh</th>
                             <th style="width: 12%;">Diberikan Oleh</th>
                             <th class="wrap_content">Aksi</th>
                         </tr>
