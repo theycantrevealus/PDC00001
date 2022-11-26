@@ -2600,12 +2600,12 @@
         }
 
         $("#txt_tanda_vital_td").inputmask({
-            alias: 'decimal',
+            // alias: 'decimal',
             rightAlign: true,
-            placeholder: "0.00",
-            prefix: "",
-            autoGroup: false,
-            digitsOptional: true
+            // placeholder: "0.00",
+            // prefix: "",
+            // autoGroup: false,
+            // digitsOptional: true
         });
 
         $("#txt_tanda_vital_n").inputmask({

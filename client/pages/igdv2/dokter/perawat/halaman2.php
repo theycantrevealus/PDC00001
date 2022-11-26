@@ -848,7 +848,7 @@
                             </div>
                             <div class="col-lg-12">
                                 <div class="form-check">
-                                    <input type="radio" class="form-check-input" name="kaji_sianosi" value="Tidak"
+                                    <input type="radio" class="form-check-input" name="kaji_sianosis" value="Tidak"
                                         id="kaji_sianosis_1">
                                     <label class="form-check-label" for="kaji_sianosis_1">
                                         Tidak
