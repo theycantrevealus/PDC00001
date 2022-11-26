@@ -38,6 +38,10 @@ class Laporan extends Utility
             case 'obat_penjamin':
                 return self::obat_penjamin($parameter);
                 break;
+            case 'laboratorium':
+                return self::report_laboratorium($parameter);
+                break;
+    
         }
     }
 
@@ -357,7 +361,438 @@ class Laporan extends Utility
 
 
 
+    /** ======================================================================================
+     *                                  - New Report Function - 
+     *  ======================================================================================
+     * by@devAg
+     */ 
 
+    private function report_laboratorium($parameter){
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if ($UserData['data']->jabatan === __UIDDOKTER__) {
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            if ($parameter['mode'] == 'history') {
+            $paramData = array(
+                // 'lab_order.dr_penanggung_jawab' => '= ?',
+                // 'AND',
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                'lab_order.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            //$paramValue = array($UserData['data']->uid, $parameter['from'], $parameter['to'], $parameter['status']);
+            $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+            } else {
+            $paramData = array(
+                // 'lab_order.dr_penanggung_jawab' => '= ?',
+                // 'AND',
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            //$paramValue = array($UserData['data']->uid, $parameter['status']);
+            $paramValue = array($parameter['status']);
+            }
+        } else {
+            if ($parameter['mode'] == 'history') {
+            $paramData = array(
+                // 'lab_order.dr_penanggung_jawab' => '= ?',
+                // 'AND',
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                'AND',
+                'lab_order.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            // $paramValue = array($UserData['data']->uid, $parameter['from'], $parameter['to'], $parameter['status']);
+            $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+            } else {
+            $paramData = array(
+                // 'lab_order.dr_penanggung_jawab' => '= ?',
+                // 'AND',
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            // $paramValue = array($UserData['data']->uid, $parameter['status']);
+            $paramValue = array($parameter['status']);
+            }
+        }
+        } else { //Jika Bukan Dokter
+        if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            if ($parameter['mode'] == 'history') {
+            $paramData = array(
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                'lab_order.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+            } else {
+            $paramData = array(
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            $paramValue = array($parameter['status']);
+            }
+        } else {
+            if ($parameter['mode'] == 'history') {
+            $paramData = array(
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                'AND',
+                'lab_order.created_at' => 'BETWEEN ? AND ?',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            $paramValue = array($parameter['from'], $parameter['to'], $parameter['status']);
+            } else {
+            $paramData = array(
+                'lab_order.deleted_at' => 'IS NULL',
+                'AND',
+                '(lab_order.no_order' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                'AND',
+                'lab_order.status' => '= ?'
+            );
+            $paramValue = array($parameter['status']);
+            }
+        }
+        }
+
+        if ($parameter['length'] < 0) {
+        $data = self::$query
+            ->select(
+            'lab_order',
+            array(
+                'uid',
+                'asesmen as uid_asesmen',
+                'waktu_order',
+                'no_order'
+            )
+            )
+            ->join(
+            'asesmen',
+            array(
+                'antrian as uid_antrian'
+            )
+            )
+            ->join(
+            'antrian',
+            array(
+                'pasien as uid_pasien',
+                'dokter as uid_dokter',
+                'departemen as uid_poli',
+                'penjamin as uid_penjamin',
+                'waktu_masuk'
+            )
+            )
+            ->join(
+            'pasien',
+            array(
+                'nama as pasien',
+                'no_rm'
+            )
+            )
+            ->join(
+            'master_poli',
+            array(
+                'nama as departemen'
+            )
+            )
+            ->join(
+            'pegawai',
+            array(
+                'nama as dokter'
+            )
+            )
+            ->join(
+            'master_penjamin',
+            array(
+                'nama as penjamin'
+            )
+            )
+            ->join(
+            'kunjungan',
+            array(
+                'pegawai as uid_resepsionis'
+            )
+            )
+            ->join(
+            'lab_order_detail',
+            array(
+                'tindakan as uid_tindakan'
+            )
+            )
+            ->join(
+            'master_tindakan',
+            array(
+                'nama as nama_tindakan'
+            )
+            )
+            ->on(
+            array(
+                array('lab_order.asesmen', '=', 'asesmen.uid'),
+                array('asesmen.antrian', '=', 'antrian.uid'),
+                array('pasien.uid', '=', 'antrian.pasien'),
+                array('master_poli.uid', '=', 'antrian.departemen'),
+                array('pegawai.uid', '=', 'antrian.dokter'),
+                array('master_penjamin.uid', '=', 'antrian.penjamin'),
+                array('kunjungan.uid', '=', 'antrian.kunjungan'),
+                array('lab_order_detail.lab_order', '=', 'lab_order.uid'),
+                array('master_tindakan.uid', '=', 'lab_order_detail.tindakan'),
+            )
+            )
+            ->where($paramData, $paramValue)
+            ->order(
+            array(
+                'lab_order.waktu_order' => 'ASC'
+            )
+            )
+            ->execute();
+        } else {
+        $data = self::$query
+            ->select(
+            'lab_order',
+            array(
+                'uid',
+                'asesmen as uid_asesmen',
+                'waktu_order',
+                'no_order'
+            )
+            )
+            ->join(
+            'asesmen',
+            array(
+                'antrian as uid_antrian'
+            )
+            )
+            ->join(
+            'antrian',
+            array(
+                'pasien as uid_pasien',
+                'dokter as uid_dokter',
+                'departemen as uid_poli',
+                'penjamin as uid_penjamin',
+                'waktu_masuk'
+            )
+            )
+            ->join(
+            'pasien',
+            array(
+                'nama as pasien',
+                'no_rm'
+            )
+            )
+            ->join(
+            'master_poli',
+            array(
+                'nama as departemen'
+            )
+            )
+            ->join(
+            'pegawai',
+            array(
+                'nama as dokter'
+            )
+            )
+            ->join(
+            'master_penjamin',
+            array(
+                'nama as nama_penjamin'
+            )
+            )
+            ->join(
+            'kunjungan',
+            array(
+                'pegawai as uid_resepsionis'
+            )
+            )
+            ->join(
+            'lab_order_detail',
+            array(
+                'tindakan as uid_tindakan',
+                'mitra',
+                'penjamin',
+            )
+            )
+            ->join(
+            'master_tindakan',
+            array(
+                'nama as nama_tindakan'
+            )
+            )
+            ->join(
+            'master_mitra',
+            array(
+                'nama as nama_mitra'
+            )
+            )
+            ->on(
+            array(
+                array('lab_order.asesmen', '=', 'asesmen.uid'),
+                array('asesmen.antrian', '=', 'antrian.uid'),
+                array('pasien.uid', '=', 'antrian.pasien'),
+                array('master_poli.uid', '=', 'antrian.departemen'),
+                array('pegawai.uid', '=', 'antrian.dokter'),
+                array('master_penjamin.uid', '=', 'antrian.penjamin'),
+                array('kunjungan.uid', '=', 'antrian.kunjungan'),
+                array('lab_order_detail.lab_order', '=', 'lab_order.uid'),
+                array('master_tindakan.uid', '=', 'lab_order_detail.tindakan'),
+                array('master_mitra.uid', '=', 'lab_order_detail.mitra'),
+
+            )
+            )
+            ->where($paramData, $paramValue)
+            ->offset(intval($parameter['start']))
+            ->limit(intval($parameter['length']))
+            ->order(
+            array(
+                'lab_order.waktu_order' => 'ASC'
+            )
+            )
+            ->execute();
+        }
+
+
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+        $hasNilai = false;
+        //Check Nilai
+        $checkNilai = self::$query->select('lab_order_nilai', array(
+            'id', 'nilai'
+        ))
+            ->where(array(
+            'lab_order_nilai.lab_order' => '= ?'
+            ), array(
+            $value['uid']
+            ))
+            ->execute();
+        foreach ($checkNilai['response_data'] as $NKey => $NValue) {
+            if (!is_null($NValue['nilai'])) {
+            $hasNilai = true;
+            } else {
+            if (!$hasNilai) {
+                $hasNilai = false;
+            }
+            }
+        }
+        $data['response_data'][$key]['autonum'] = $autonum;
+        $data['response_data'][$key]['has_nilai'] = $hasNilai;
+        //$data['response_data'][$key]['tgl_ambil_sample_parse'] = date('d F Y', strtotime($value['tgl_ambil_sample']));
+        $data['response_data'][$key]['waktu_order'] = date('d F Y', strtotime($value['waktu_order'])) . ' - [' . date('H:i', strtotime($value['waktu_order'])) . ']';
+
+        //Check Detail
+
+        $autonum++;
+        }
+
+        $itemTotal = self::$query
+        ->select(
+            'lab_order',
+            array(
+            'uid',
+            'asesmen as uid_asesmen',
+            'waktu_order',
+            'no_order'
+            )
+        )
+        ->join(
+            'asesmen',
+            array(
+            'antrian as uid_antrian'
+            )
+        )
+        ->join(
+            'antrian',
+            array(
+            'pasien as uid_pasien',
+            'dokter as uid_dokter',
+            'departemen as uid_poli',
+            'penjamin as uid_penjamin',
+            'waktu_masuk'
+            )
+        )
+        ->join(
+            'pasien',
+            array(
+            'nama as pasien',
+            'no_rm'
+            )
+        )
+        ->join(
+            'master_poli',
+            array(
+            'nama as departemen'
+            )
+        )
+        ->join(
+            'pegawai',
+            array(
+            'nama as dokter'
+            )
+        )
+        ->join(
+            'master_penjamin',
+            array(
+            'nama as penjamin'
+            )
+        )
+        ->join(
+            'kunjungan',
+            array(
+            'pegawai as uid_resepsionis'
+            )
+        )
+        ->on(
+            array(
+            array('lab_order.asesmen', '=', 'asesmen.uid'),
+            array('asesmen.antrian', '=', 'antrian.uid'),
+            array('pasien.uid', '=', 'antrian.pasien'),
+            array('master_poli.uid', '=', 'antrian.departemen'),
+            array('pegawai.uid', '=', 'antrian.dokter'),
+            array('master_penjamin.uid', '=', 'antrian.penjamin'),
+            array('kunjungan.uid', '=', 'antrian.kunjungan')
+            )
+        )
+        ->where($paramData, $paramValue)
+        ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($data['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+        return $data;
+    }
+
+    // ====================================== Code End =======================================
 
 
 
