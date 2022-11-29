@@ -55,43 +55,43 @@
         reader.readAsDataURL(request.response);
         reader.onload = function(e) {
 
-          // var fileReader = new FileReader();
-          // fileReader.onload = function() {
-          //     var pdfData = new Uint8Array(this.result);
-          //     // Using DocumentInitParameters object to load binary data.
-          //     var loadingTask = pdfjsLib.getDocument({
-          //         data: pdfData
-          //     });
-          //     loadingTask.promise.then(function(pdf) {
-          //         // Fetch the first page
-          //         var pageNumber = 1;
-          //         pdf.getPage(pageNumber).then(function(page) {
-          //             var scale = 1.5;
-          //             var viewport = page.getViewport({
-          //                 scale: scale
-          //             });
-          //             // Prepare canvas using PDF page dimensions
-          //             var canvas = $("#pdfViewer")[0];
-          //             var context = canvas.getContext('2d');
-          //             canvas.height = viewport.height;
-          //             canvas.width = viewport.width;
-          //             // Render PDF page into canvas context
-          //             var renderContext = {
-          //                 canvasContext: context,
-          //                 viewport: viewport
-          //             };
-          //             var renderTask = page.render(renderContext);
-          //             renderTask.promise.then(function() {
-          //                 //$("#btnSubmit").removeAttr("disabled").html("Terima SK").removeClass("btn-warning").addClass("btn-primary");
-          //             });
-          //         });
-          //     }, function(reason) {
-          //         // PDF loading error
-          //         console.error(reason);
-          //     });
-          // };
-          // //fileReader.readAsArrayBuffer(file);
-          // fileReader.readAsArrayBuffer(request.response);
+          var fileReader = new FileReader();
+          fileReader.onload = function() {
+              var pdfData = new Uint8Array(this.result);
+              // Using DocumentInitParameters object to load binary data.
+              var loadingTask = pdfjsLib.getDocument({
+                  data: pdfData
+              });
+              loadingTask.promise.then(function(pdf) {
+                  // Fetch the first page
+                  var pageNumber = 1;
+                  pdf.getPage(pageNumber).then(function(page) {
+                      var scale = 1.5;
+                      var viewport = page.getViewport({
+                          scale: scale
+                      });
+                      // Prepare canvas using PDF page dimensions
+                      var canvas = $("#pdfViewer")[0];
+                      var context = canvas.getContext('2d');
+                      canvas.height = viewport.height;
+                      canvas.width = viewport.width;
+                      // Render PDF page into canvas context
+                      var renderContext = {
+                          canvasContext: context,
+                          viewport: viewport
+                      };
+                      var renderTask = page.render(renderContext);
+                      renderTask.promise.then(function() {
+                          //$("#btnSubmit").removeAttr("disabled").html("Terima SK").removeClass("btn-warning").addClass("btn-primary");
+                      });
+                  });
+              }, function(reason) {
+                  // PDF loading error
+                  console.error(reason);
+              });
+          };
+          //fileReader.readAsArrayBuffer(file);
+          fileReader.readAsArrayBuffer(request.response);
         };
       };
       request.send();

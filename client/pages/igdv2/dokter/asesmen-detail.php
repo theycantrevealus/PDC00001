@@ -138,6 +138,24 @@
                         </div>
                     </div>
                     <div class="tab-pane show fade" id="perawat">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <br />
+                            <table class="table table-striped" id="table-antrian-rawat-jalan-perawat"
+                                style="font-size: 0.9rem;">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th class="wrap_content">No</th>
+                                        <th>Tgl</th>
+                                        <th class="wrap_content">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
                     </div>
                     <div class="tab-pane show fade" id="obat">
                         <div class="card">

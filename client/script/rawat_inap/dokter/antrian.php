@@ -2600,12 +2600,12 @@
         }
 
         $("#txt_tanda_vital_td").inputmask({
-            alias: 'decimal',
+            // alias: 'decimal',
             rightAlign: true,
-            placeholder: "0.00",
-            prefix: "",
-            autoGroup: false,
-            digitsOptional: true
+            // placeholder: "0.00",
+            // prefix: "",
+            // autoGroup: false,
+            // digitsOptional: true
         });
 
         $("#txt_tanda_vital_n").inputmask({
@@ -3646,7 +3646,7 @@
             if (params != ""){
                 $.ajax({
                     async: false,
-                    url:__HOSTAPI__ + "/Asesmen/asesmen-rawat-detail/" + params,
+                    url:__HOSTAPI__ + "/Asesmen/asesmen-rawat-detail-2/" + params,
                     type: "GET",
                     beforeSend: function(request) {
                         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -3683,7 +3683,35 @@
                                     checkedRadio(key, item);
                                     checkedCheckbox(key, item);
                                 });
+
+                                if ($("#asal_masuk").val() != ""){
+                                    let $this = $("input:radio[name='asal_masuk_option']");
+                                    $this.val("y").prop('checked', true);
+
+                                    $("#asal_masuk").removeAttr("disabled");
+                                } else {
+                                    $("#asal_masuk").attr({
+                                        "disabled": "disabled"
+                                    });
+                                }
+                            
                             }
+
+                            if(MetaData.asesmen_penunjang !== undefined){
+                                $("#autoPeriksaPenunjang tbody tr").remove();
+                                for(var penunjangKey in MetaData.asesmen_penunjang) {
+                                    autoPeriksaPenunjang("#autoPeriksaPenunjang",{
+                                        asesmen: MetaData.asesmen_penunjang[penunjangKey].asesmen,
+                                        serverID: MetaData.asesmen_penunjang[penunjangKey].id,
+                                        jenis: MetaData.asesmen_penunjang[penunjangKey].jenis,
+                                        asal: MetaData.asesmen_penunjang[penunjangKey].asal,
+                                        jumlah: MetaData.asesmen_penunjang[penunjangKey].jumlah,
+                                        penerima: MetaData.asesmen_penunjang[penunjangKey].penerima,
+                                    });
+                                }
+                            }
+
+                           
                         }
                     },
                     error: function(response) {
@@ -3717,6 +3745,95 @@
                     }
                 }
             }
+        }
+
+        function autoPeriksaPenunjang(targetTable, setter = {}) {
+        
+            $(targetTable + " tbody tr").removeClass("last-periksa-penunjang");
+
+            var row = document.createElement("TR");
+            var containerJenis = document.createElement("TD");
+            var containerAsal = document.createElement("TD");
+            var containerJumlah = document.createElement("TD");
+            var containerPenerima = document.createElement("TD");
+            //var containerAksi = document.createElement("TD");
+
+
+            var Jenis = document.createElement("INPUT");
+            var Asal = document.createElement("INPUT");
+            var Jumlah = document.createElement("INPUT");
+            var Penerima = document.createElement("INPUT");
+
+            $(Jenis).addClass("form-control");
+            $(Asal).addClass("form-control");
+            $(Jumlah).addClass("form-control");
+            $(Penerima).addClass("form-control");
+
+            if(
+                setter.asesmen !== undefined && setter.asesmen !== null
+            ){
+                $(containerJenis).html(setter.jenis);
+                $(containerAsal).html(setter.asal);
+                $(containerJumlah).html(setter.jumlah);
+                $(containerPenerima).html(setter.penerima);
+                // $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Periksa Penunjang\">" +
+                //         "<button asesmen=\"" + setter.asesmen + "\" server-id=\"" + setter.serverID + "\" class=\"btn btn-sm btn-danger btn-delete-periksa-penunjang\"><span><i class=\"fa fa-trash-alt\"></i> Hapus</span></button>" +
+                //         "</div>");
+            }else{
+
+                $(containerJenis).append(Jenis);
+                $(containerAsal).append(Asal);
+                $(containerJumlah).append(Jumlah);
+                $(containerPenerima).append(Penerima);
+                // $(containerAksi).html("<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Periksa Penunjang\">" +
+                //         "<button class=\"btn btn-sm btn-success btn-approve-periksa-penunjang\"><span><i class=\"fa fa-check\"></i> OK</span></button>" +
+                //         "</div>"); 
+                    
+            }
+                
+
+            $(row).append(containerJenis);
+            $(row).append(containerAsal);
+            $(row).append(containerJumlah);
+            $(row).append(containerPenerima);
+            // $(row).append(containerAksi);
+
+            $(row).addClass("last-periksa-penunjang");
+            $(targetTable + " tbody").append(row);
+
+            rebasePeriksaPenunjang(targetTable);
+        }
+
+        function rebasePeriksaPenunjang(targetTable){
+            $(targetTable + " tbody tr").each(function (e) {
+                var id = (e + 1);
+                $(this).attr({
+                    "id": "row_auto_periksa_penunjang_" + id
+                });
+
+                $(this).find("td:eq(0) input").attr({
+                    "id": "jenis_auto_periksa_penunjang_" + id
+                });
+
+                $(this).find("td:eq(1) input").attr({
+                    "id": "asal_auto_periksa_penunjang_" + id
+                });
+
+                $(this).find("td:eq(2) input").attr({
+                    "id": "jumlah_auto_periksa_penunjang_" + id
+                });
+                $(this).find("td:eq(3) input").attr({
+                    "id": "penerima_auto_periksa_penunjang_" + id
+                });
+
+                $(this).find("td:eq(4) button.btn-approve-periksa-penunjang").attr({
+                    "id": "approve_auto_periksa_penunjang_" + id
+                });
+
+                $(this).find("td:eq(4) button.btn-delete-periksa-penunjang").attr({
+                    "id": "hapus_auto_periksa_penunjang_" + id
+                });
+            });
         }
 
         function loadDataPenjamin(){

@@ -17,13 +17,19 @@
 
     var dataLibrary = loadOrder(uid_order);
 
+    // for (var datKey in dataLibrary) {
+    //   if (dataLibrary[datKey].invoice !== null && dataLibrary[datKey].invoice !== undefined) {
+    //     forSave["tindakan_" + dataLibrary[datKey].id] = {
+    //       keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
+    //       kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
+    //     };
+    //   }
+    // }
     for (var datKey in dataLibrary) {
-      if (dataLibrary[datKey].invoice !== null && dataLibrary[datKey].invoice !== undefined) {
-        forSave["tindakan_" + dataLibrary[datKey].id] = {
-          keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
-          kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
-        };
-      }
+      forSave["tindakan_" + dataLibrary[datKey].id] = {
+        keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
+        kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
+      };
     }
 
     loadLampiran(uid_order);
@@ -33,25 +39,27 @@
 
       let id_tindakan = $(this).parent().parent().attr("id").split("_");
       tindakanID = id_tindakan[id_tindakan.length - 1];
-
-
+      
+      
       if (forSave["tindakan_" + tindakanID] === undefined) {
-        forSave["tindakan_" + tindakanID] = {
-          keterangan: (dataLibrary[datKey].keterangan === null) ? "" : dataLibrary[datKey].keterangan,
-          kesimpulan: (dataLibrary[datKey].kesimpulan === null) ? "" : dataLibrary[datKey].kesimpulan
-        };
-      } else {
-        console.log(forSave);
-      }
+          // for (var datKey in dataLibrary) {
+          forSave["tindakan_" + tindakanID] = {
+            keterangan: "",
+            kesimpulan: ""
+          };
+          // }
+        } else {
+          console.log(forSave);
+        }
 
-      if (selectedState != tindakanID) {
-        $("#panel-hasil").fadeIn(function() {
-          editorKeteranganPeriksa.setData(forSave["tindakan_" + tindakanID].keterangan);
-          editorKesimpulanPeriksa.setData(forSave["tindakan_" + tindakanID].kesimpulan);
-        });
-        selectedState = tindakanID;
-      }
-
+        if (selectedState != tindakanID) {
+          $("#panel-hasil").fadeIn(function() {
+            editorKeteranganPeriksa.setData(forSave["tindakan_" + tindakanID].keterangan);
+            editorKesimpulanPeriksa.setData(forSave["tindakan_" + tindakanID].kesimpulan);
+          });
+          selectedState = tindakanID;
+        }
+      
 
 
       let nama = $(this).closest('tr').find('td:eq(1)').text(); //$(this).html();

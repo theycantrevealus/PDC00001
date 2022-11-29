@@ -8,16 +8,34 @@
 							01
 							<b class="inv-tab-status text-success" id="status-1"><i class="fa fa-check-circle"></i></b>
 						</span>
-						Halaman 1
+						Asesmen Rawat Hal. 1
 					</a>
 				</li>
 				<li class="nav-item">
 					<a href="#tab-assesment-awal-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 						<span class="nav-link__count">
 							02
+							<b class="inv-tab-status text-success" id="status-2"><i class="fa fa-check-circle"></i></b>
+						</span>
+						Asesmen Rawat Hal. 2
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="#tab-assesment-awal-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+						<span class="nav-link__count">
+							03
 							<b class="inv-tab-status text-success" id="status-3"><i class="fa fa-check-circle"></i></b>
 						</span>
-						Halaman 2
+						Asesmen Rawat Hal. 3
+					</a>
+				</li>
+				<li class="nav-item">
+					<a href="#tab-assesment-awal-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
+						<span class="nav-link__count">
+							04
+							<b class="inv-tab-status text-success" id="status-4"><i class="fa fa-check-circle"></i></b>
+						</span>
+						Asesmen Rawat Hal. 4
 					</a>
 				</li>
 			</ul>
@@ -29,6 +47,14 @@
 			</div>
 			<div class="tab-pane show fade " id="tab-assesment-awal-2">
 				<?php require 'halaman2.php'; ?>
+				<?php //require 'action_panel.php'; ?>
+			</div>
+			<div class="tab-pane show fade" id="tab-assesment-awal-3">
+				<?php require 'halaman3.php'; ?>
+				<?php //require 'action_panel.php'; ?>
+			</div>
+			<div class="tab-pane show fade " id="tab-assesment-awal-4">
+				<?php require 'halaman4.php'; ?>
 				<?php //require 'action_panel.php'; ?>
 			</div>
 		</div>

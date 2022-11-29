@@ -45,6 +45,10 @@ class Asesmen extends Utility
         case 'asesmen-rawat-detail':
           return self::get_asesmen_rawat($parameter[2]);
           break;
+        
+        case 'asesmen-rawat-detail-2':
+          return self::get_asesmen_rawat_2($parameter[2]);
+          break;
 
         case 'get_asesmen_rawat_objective':
           return self::get_asesmen_rawat_objective($parameter[2]);
@@ -74,6 +78,12 @@ class Asesmen extends Utility
         case 'get_antrian_asesmen_medis_2':
           return self::get_antrian_asesmen_medis_2($parameter);
           break;
+        case 'get_antrian_asesmen_rawat_igd':
+          return self::get_antrian_asesmen_rawat_igd($parameter);
+          break;
+        case 'get_antrian_asesmen_rawat_inap':
+          return self::get_antrian_asesmen_rawat_inap($parameter);
+          break;
         case 'asesmen_progressing':
           return self::order_asesmen($parameter);
           break;
@@ -94,8 +104,16 @@ class Asesmen extends Utility
           return self::update_igd_infus($parameter);
           break;
 
+        case 'update_inap_periksa_penunjang':
+          return self::update_inap_periksa_penunjang($parameter);
+          break;
+
         case 'hapus_igd_infus':
           return self::hapus_igd_infus($parameter);
+          break;
+        
+        case 'hapus_inap_periksa_penunjang':
+          return self::hapus_inap_periksa_penunjang($parameter);
           break;
 
         default:
@@ -151,6 +169,27 @@ class Asesmen extends Utility
     return $process;
   }
 
+  private function hapus_inap_periksa_penunjang($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
+    
+    $process = self::$query->update('asesmen_inap_periksa_penunjang', array(
+      'deleted_at' => parent::format_date()
+    ))
+      ->where(array(
+        'asesmen_inap_periksa_penunjang.asesmen' => '= ?',
+        'AND',
+        'asesmen_inap_periksa_penunjang.id' => '= ?'
+      ), array(
+        $parameter['asesmen'],
+        $parameter['id']
+      ))
+      ->execute();
+
+    return $process;
+  }
+
   private function update_igd_infus($parameter)
   {
     $Authorization = new Authorization();
@@ -173,6 +212,26 @@ class Asesmen extends Utility
       ->execute();
     return $process;
   }
+
+  private function update_inap_periksa_penunjang($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+    $parental_asesmen = self::update_asesmen_rawat($parameter);
+    $process = self::$query->insert('asesmen_inap_periksa_penunjang', array(
+      'asesmen' => $parental_asesmen['master_uid'],
+      'jenis' => $parameter['jenis'],
+      'asal' => $parameter['asal'],
+      'jumlah' => $parameter['jumlah'],
+      'penerima' => $parameter['penerima'],
+      'created_at' => parent::format_date(),
+      'updated_at' => parent::format_date(),
+    ))
+      ->execute();
+    return $process;
+  }
+  
 
   private function order_asesmen($parameter)
   {
@@ -3003,6 +3062,169 @@ class Asesmen extends Utility
     return $antrian;
   }
 
+  private function get_asesmen_rawat_2($parameter)
+  {        //uid antrian
+    $antrian = self::get_pasien_asesmen_rawat($parameter);
+    $antrian['asesmen_rawat'] = [];
+    $Invetori = new Inventori(self::$pdo);
+    $Pegawai = new Pegawai(self::$pdo);
+
+    if (count($antrian) > 0) {
+      //Poli Info
+      //$Poli = new Poli(self::$pdo);
+      //$PoliDetail = $Poli->get_poli_detail($antrian['antrian']['departemen'])['response_data'][0];
+
+      $PoliDetail = self::$query->select('master_poli', array(
+        'uid',
+        'nama',
+        'tindakan_konsultasi',
+        'poli_asesmen',
+        'kode_bpjs',
+        'nama_bpjs',
+        'created_at',
+        'updated_at'
+      ))
+        ->where(array(
+            'master_poli.deleted_at' => 'IS NULL',
+            'AND',
+            'master_poli.uid' => '= ?'
+        ), array($antrian['antrian']['departemen']))
+        ->execute();
+
+      $PoliDetail = $PoliDetail['response_data'][0];
+
+      $data = self::$query
+        ->select('asesmen_rawat_' . $PoliDetail['poli_asesmen'], array('*'))
+        ->where(
+          array(
+            'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.deleted_at' => 'IS NULL',
+            'AND',
+            'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.kunjungan' => '= ?',
+            'AND',
+            'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.antrian' => '= ?',
+            'AND',
+            'asesmen_rawat_' . $PoliDetail['poli_asesmen'] . '.pasien' => '= ?'
+          ),
+          array(
+            $antrian['antrian']['kunjungan'],
+            $antrian['antrian']['uid'],
+            $antrian['antrian']['uid_pasien']
+          )
+        )
+        ->execute();
+      if ($data['response_result'] > 0) {
+        //Asesmen Kebidanan
+        $bidan = self::$query->select('asesmen_kebidanan', array(
+          'tanggal_partus',
+          'tempat_partus',
+          'jenis_partus',
+          'penolong',
+          'nifas',
+          'jenkel_anak',
+          'keadaan_sekarang',
+          'keterangan',
+          'bb_anak',
+          'usia_kehamilan'
+        ))
+          ->where(array(
+            'asesmen_kebidanan.asesmen' => '= ?',
+            'AND',
+            'asesmen_kebidanan.deleted_at' => 'IS NULL'
+          ), array(
+            $data['response_data'][0]['asesmen']
+          ))
+          ->execute();
+
+        $antrian['asesmen_bidan'] = $bidan['response_data'];
+
+
+
+        //Hanya untuk IGD
+        if ($antrian['antrian']['departemen'] === __POLI_IGD__) {
+          $infus = self::$query->select('asesmen_igd_infus', array(
+            'id',
+            'asesmen',
+            'pukul',
+            'obat',
+            'dosis',
+            'rute',
+            'keputusan',
+            'oleh',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+            'igd_type'
+          ))
+            ->where(array(
+              'asesmen_igd_infus.asesmen' => '= ?'
+            ), array(
+              $data['response_data'][0]['asesmen']
+            ))
+            ->order(array(
+              'created_at' => 'ASC'
+            ))
+            ->execute();
+          foreach ($infus['response_data'] as $infusKey => $infusValue) {
+            $infus['response_data'][$infusKey]['obat'] = $Invetori->get_item_detail($infusValue['obat'])['response_data'][0];
+            $infus['response_data'][$infusKey]['oleh'] = $Pegawai->get_detail_pegawai($infusValue['oleh'])['response_data'][0];
+            if (isset($infusValue['deleted_at'])) {
+              $LogInfo = self::$query->select('log_activity', array(
+                'id',
+                'user_uid'
+              ))
+                ->where(array(
+                  'log_activity.table_name' => '= ?',
+                  'AND',
+                  'log_activity.unique_target' => '= ?',
+                  'AND',
+                  'log_activity.action' => '= ?'
+                ), array(
+                  'asesmen_igd_infus',
+                  $infusValue['id'],
+                  'D'
+                ))
+                ->execute();
+              $infus['response_data'][$infusKey]['dihapus_oleh'] = $Pegawai->get_detail_pegawai($LogInfo['response_data'][0]['user_uid'])['response_data'][0]['nama'];
+            }
+          }
+          $antrian['asesmen_infus'] = $infus['response_data'];
+        }
+
+        //Hanya Untuk INAP
+        if ($antrian['antrian']['departemen'] === __POLI_INAP__) {
+          $penunjang = self::$query->select('asesmen_inap_periksa_penunjang', array(
+            'id',
+            'asesmen',
+            'jenis',
+            'asal',
+            'jumlah',
+            'penerima',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+          ))
+            ->where(array(
+              'asesmen_inap_periksa_penunjang.asesmen' => '= ?',
+              'AND',
+              'asesmen_inap_periksa_penunjang.deleted_at' =>'IS NULL'
+            ), array(
+              $data['response_data'][0]['asesmen']
+            ))
+            ->order(array(
+              'created_at' => 'ASC'
+            ))
+            ->execute();
+          
+          $antrian['asesmen_penunjang'] = $penunjang['response_data'];
+        }
+
+        $antrian['asesmen_rawat'] = $data['response_data'][0];
+      }
+    }
+
+    return $antrian;
+  }
+
   private function update_asesmen_rawat($parameter)
   {
     $Authorization = new Authorization();
@@ -3329,14 +3551,402 @@ class Asesmen extends Utility
     return $antrian;
   }
 
+  private function get_antrian_asesmen_rawat_igd($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+    $Pasien = new Pasien(self::$pdo);
+    $Poli = new Poli(self::$pdo);
+
+    $pegawai = new Pegawai(self::$pdo);
+
+    if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+      $paramData = array(
+        'antrian.deleted_at' => 'IS NULL',
+        'AND',
+        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+        'OR',
+        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+        'AND',
+        'pasien.deleted_at' => 'IS NULL'
+      );
+
+      $paramValue = array();
+    } else {
+      $paramData = array(
+        'antrian.pasien' => '= ?',
+        'AND',
+        'antrian.departemen' => '= ?',
+        'AND',
+        'antrian.deleted_at' => 'IS NULL',
+        'AND',
+        'pasien.deleted_at' => 'IS NULL'
+      );
+
+      $paramValue = array($parameter['pasien'],__POLI_IGD__);
+    }
+
+    if (intval($parameter['length']) > -1) {
+      $data = self::$query->select('antrian', array(
+        'uid',
+        'kunjungan as uid_kunjungan',
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk',
+        'waktu_keluar',
+        'prioritas'
+      ))
+        ->join('pasien', array(
+          'nama as pasien',
+          'no_rm'
+        ))
+        ->join('pegawai', array(
+          'nama as dokter'
+        ))
+        ->join('master_penjamin', array(
+          'nama as penjamin'
+        ))
+        ->join('kunjungan', array(
+          'uid as uid_kunjungan',
+          'pegawai as uid_resepsionis'
+        ))
+        ->join('asesmen_rawat_igd',array(
+          'perawat'
+        ))
+        ->on(array(
+          array('antrian.pasien', '=', 'pasien.uid'),
+          array('antrian.dokter', '=', 'pegawai.uid'),
+          array('antrian.penjamin', '=', 'master_penjamin.uid'),
+          array('antrian.kunjungan', '=', 'kunjungan.uid'),
+          array('antrian.uid', '=', 'asesmen_rawat_igd.antrian')
+        ))
+        ->where($paramData, $paramValue)
+        ->order(array(
+          'antrian.prioritas' => 'DESC',
+          'antrian.waktu_masuk' => 'ASC'
+        ))
+        ->execute();
+    } else {
+      $data = self::$query->select('antrian', array(
+        'uid',
+        'kunjungan as uid_kunjungan',
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk',
+        'waktu_keluar',
+        'prioritas'
+      ))
+        ->join('pasien', array(
+          'nama as pasien',
+          'no_rm'
+        ))
+        ->join('pegawai', array(
+          'nama as dokter'
+        ))
+        ->join('master_penjamin', array(
+          'nama as penjamin'
+        ))
+        ->join('kunjungan', array(
+          'uid as uid_kunjungan',
+          'pegawai as uid_resepsionis'
+        ))
+        ->join('asesmen_rawat_igd',array(
+          'perawat'
+        ))
+        ->on(array(
+          array('antrian.pasien', '=', 'pasien.uid'),
+          array('antrian.dokter', '=', 'pegawai.uid'),
+          array('antrian.penjamin', '=', 'master_penjamin.uid'),
+          array('antrian.kunjungan', '=', 'kunjungan.uid'),
+          array('antrian.uid', '=', 'asesmen_rawat_igd.antrian')
+        ))
+        ->where($paramData, $paramValue)
+        ->offset(intval($parameter['start']))
+        ->limit(intval($parameter['length']))
+        ->order(array(
+          'antrian.prioritas' => 'DESC',
+          'antrian.waktu_masuk' => 'ASC'
+        ))
+        ->execute();
+    }
+
+
+    $data['response_draw'] = intval($parameter['draw']);
+
+    $autonum = intval($parameter['start']) + 1;
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+
+      $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+      $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
+
+      $get_dokter = $pegawai->get_detail($data['response_data'][$key]['uid_dokter']);
+      $data['response_data'][$key]['dokter_detail'] = $get_dokter['response_data'][0]['nama'];
+
+      if ($value['uid_poli'] === __POLI_INAP__) {
+        $PoliDetail = array(
+          'uid' => __POLI_INAP__,
+          'poli_asesmen' => 'inap'
+        );
+      } else {
+        $PoliDetail = $Poli->get_poli_info($value['uid_poli'])['response_data'][0];
+      }
+
+
+      $data['response_data'][$key]['poli_detail'] = $PoliDetail;
+
+      $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);
+      $data['response_data'][$key]['pasien_detail'] = $PasienDetail['response_data'][0];
+
+      $autonum++;
+    }
+
+    $Total = self::$query->select('antrian', array(
+      'uid'
+    ))
+      ->join('pasien', array(
+        'nama as pasien',
+        'no_rm'
+      ))
+      ->join('pegawai', array(
+        'nama as dokter'
+      ))
+      ->join('master_penjamin', array(
+        'nama as penjamin'
+      ))
+      ->join('kunjungan', array(
+        'uid as uid_kunjungan',
+        'pegawai as uid_resepsionis'
+      ))
+      ->join('asesmen_rawat_igd',array(
+        'perawat'
+      ))
+      ->on(array(
+        array('antrian.pasien', '=', 'pasien.uid'),
+        array('antrian.dokter', '=', 'pegawai.uid'),
+        array('antrian.penjamin', '=', 'master_penjamin.uid'),
+        array('antrian.kunjungan', '=', 'kunjungan.uid'),
+        array('antrian.uid', '=', 'asesmen_rawat_igd.antrian')
+      ))
+      ->where($paramData, $paramValue)
+      ->execute();
+
+
+    $data['recordsTotal'] = count($Total['response_data']);
+    $data['recordsFiltered'] = count($data);
+    $data['length'] = intval($parameter['length']);
+    $data['start'] = intval($parameter['start']);
+
+    return $data;
+  }
+
+  private function get_antrian_asesmen_rawat_inap($parameter)
+  {
+    $Authorization = new Authorization();
+    $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+    $Pasien = new Pasien(self::$pdo);
+    $Poli = new Poli(self::$pdo);
+
+    $pegawai = new Pegawai(self::$pdo);
+
+    if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+      $paramData = array(
+        'antrian.deleted_at' => 'IS NULL',
+        'AND',
+        '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+        'OR',
+        'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+        'AND',
+        'pasien.deleted_at' => 'IS NULL'
+      );
+
+      $paramValue = array();
+    } else {
+      $paramData = array(
+        'antrian.pasien' => '= ?',
+        'AND',
+        'antrian.departemen' => '= ?',
+        'AND',
+        'antrian.deleted_at' => 'IS NULL',
+        'AND',
+        'pasien.deleted_at' => 'IS NULL'
+      );
+
+      $paramValue = array($parameter['pasien'],__POLI_INAP__);
+    }
+
+    if (intval($parameter['length']) > -1) {
+      $data = self::$query->select('antrian', array(
+        'uid',
+        'kunjungan as uid_kunjungan',
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk',
+        'waktu_keluar',
+        'prioritas'
+      ))
+        ->join('pasien', array(
+          'nama as pasien',
+          'no_rm'
+        ))
+        ->join('pegawai', array(
+          'nama as dokter'
+        ))
+        ->join('master_penjamin', array(
+          'nama as penjamin'
+        ))
+        ->join('kunjungan', array(
+          'uid as uid_kunjungan',
+          'pegawai as uid_resepsionis'
+        ))
+        ->join('asesmen_rawat_inap',array(
+          'perawat'
+        ))
+        ->on(array(
+          array('antrian.pasien', '=', 'pasien.uid'),
+          array('antrian.dokter', '=', 'pegawai.uid'),
+          array('antrian.penjamin', '=', 'master_penjamin.uid'),
+          array('antrian.kunjungan', '=', 'kunjungan.uid'),
+          array('antrian.uid', '=', 'asesmen_rawat_inap.antrian')
+        ))
+        ->where($paramData, $paramValue)
+        ->order(array(
+          'antrian.prioritas' => 'DESC',
+          'antrian.waktu_masuk' => 'ASC'
+        ))
+        ->execute();
+    } else {
+      $data = self::$query->select('antrian', array(
+        'uid',
+        'kunjungan as uid_kunjungan',
+        'pasien as uid_pasien',
+        'dokter as uid_dokter',
+        'departemen as uid_poli',
+        'penjamin as uid_penjamin',
+        'waktu_masuk',
+        'waktu_keluar',
+        'prioritas'
+      ))
+        ->join('pasien', array(
+          'nama as pasien',
+          'no_rm'
+        ))
+        ->join('pegawai', array(
+          'nama as dokter'
+        ))
+        ->join('master_penjamin', array(
+          'nama as penjamin'
+        ))
+        ->join('kunjungan', array(
+          'uid as uid_kunjungan',
+          'pegawai as uid_resepsionis'
+        ))
+        ->join('asesmen_rawat_inap',array(
+          'perawat'
+        ))
+        ->on(array(
+          array('antrian.pasien', '=', 'pasien.uid'),
+          array('antrian.dokter', '=', 'pegawai.uid'),
+          array('antrian.penjamin', '=', 'master_penjamin.uid'),
+          array('antrian.kunjungan', '=', 'kunjungan.uid'),
+          array('antrian.uid', '=', 'asesmen_rawat_inap.antrian')
+        ))
+        ->where($paramData, $paramValue)
+        ->offset(intval($parameter['start']))
+        ->limit(intval($parameter['length']))
+        ->order(array(
+          'antrian.prioritas' => 'DESC',
+          'antrian.waktu_masuk' => 'ASC'
+        ))
+        ->execute();
+    }
+
+
+    $data['response_draw'] = intval($parameter['draw']);
+
+    $autonum = intval($parameter['start']) + 1;
+    foreach ($data['response_data'] as $key => $value) {
+      $data['response_data'][$key]['autonum'] = $autonum;
+      $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk'])) . ' - [' . date('H:i', strtotime($value['waktu_masuk'])) . ']';
+
+      $get_pegawai = $pegawai->get_detail($data['response_data'][$key]['uid_resepsionis']);
+      $data['response_data'][$key]['user_resepsionis'] = $get_pegawai['response_data'][0]['nama'];
+
+      $get_dokter = $pegawai->get_detail($data['response_data'][$key]['uid_dokter']);
+      $data['response_data'][$key]['dokter_detail'] = $get_dokter['response_data'][0]['nama'];
+
+      if ($value['uid_poli'] === __POLI_INAP__) {
+        $PoliDetail = array(
+          'uid' => __POLI_INAP__,
+          'poli_asesmen' => 'inap'
+        );
+      } else {
+        $PoliDetail = $Poli->get_poli_info($value['uid_poli'])['response_data'][0];
+      }
+
+
+      $data['response_data'][$key]['poli_detail'] = $PoliDetail;
+
+      $PasienDetail = $Pasien->get_pasien_detail('pasien', $value['uid_pasien']);
+      $data['response_data'][$key]['pasien_detail'] = $PasienDetail['response_data'][0];
+
+      $autonum++;
+    }
+
+    $Total = self::$query->select('antrian', array(
+      'uid'
+    ))
+      ->join('pasien', array(
+        'nama as pasien',
+        'no_rm'
+      ))
+      ->join('pegawai', array(
+        'nama as dokter'
+      ))
+      ->join('master_penjamin', array(
+        'nama as penjamin'
+      ))
+      ->join('kunjungan', array(
+        'uid as uid_kunjungan',
+        'pegawai as uid_resepsionis'
+      ))
+      ->join('asesmen_rawat_inap',array(
+        'perawat'
+      ))
+      ->on(array(
+        array('antrian.pasien', '=', 'pasien.uid'),
+        array('antrian.dokter', '=', 'pegawai.uid'),
+        array('antrian.penjamin', '=', 'master_penjamin.uid'),
+        array('antrian.kunjungan', '=', 'kunjungan.uid'),
+        array('antrian.uid', '=', 'asesmen_rawat_inap.antrian')
+      ))
+      ->where($paramData, $paramValue)
+      ->execute();
+
+
+    $data['recordsTotal'] = count($Total['response_data']);
+    $data['recordsFiltered'] = count($data);
+    $data['length'] = intval($parameter['length']);
+    $data['start'] = intval($parameter['start']);
+
+    return $data;
+  }
+
   private function get_list_antrian($parameter)
   {
     $antrian = new Antrian(self::$pdo);
-
     $listPasien = [];
     foreach ($parameter as $Pkey => $value) {
       $antrianData = $antrian->get_antrian_by_poli($value['poli'])['response_data'];
-
       foreach ($antrianData as $key => $Pvalue) {
         if ($Pvalue['uid_penjamin'] === __UIDPENJAMINBPJS__) {
           $SEP = self::$query->select('bpjs_sep', array(
