@@ -18,25 +18,7 @@
         $("#range_absen").change(function() {
             tableAbsen.ajax.reload();
         });
-
-        //Init Absen
-        $.ajax({
-            async: false,
-                url: __HOSTAPI__  + "/Absen",
-                beforeSend: function (request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                type: "POST",
-                data: {
-                    request: 'update_absen',
-                },
-                success: function (response) {
-                    tableAbsen.ajax.reload();
-                },
-                error: function (response) {
-                    //
-                }
-        });     
+    
         
         var tableAbsen = $("#table-absen-harian").DataTable({
             processing: true,
@@ -113,6 +95,25 @@
                 }
             ]
         });
+
+        //Init Absen
+        $.ajax({
+            async: false,
+                url: __HOSTAPI__  + "/Absen",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type: "POST",
+                data: {
+                    request: 'update_absen',
+                },
+                success: function (response) {
+                    tableAbsen.ajax.reload();
+                },
+                error: function (response) {
+                    //
+                }
+        }); 
 
         $("#btnAbsenMasuk").click(function () {
             $.ajax({
