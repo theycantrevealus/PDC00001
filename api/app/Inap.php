@@ -124,6 +124,9 @@ class Inap extends Utility
             case 'tambah_asesmen':
                 return self::tambah_asesmen($parameter);
                 break;
+            case 'tambah_asesmen_2':
+                return self::tambah_asesmen_2($parameter);
+                break;
             case 'get_visit_dokter':
                 return self::get_visit_dokter($parameter);
                 break;
@@ -2742,38 +2745,91 @@ class Inap extends Utility
         return $AntrianProses;
     }
 
+    private function tambah_asesmen_2($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        if(isset($parameter['dokter']) && !empty($parameter['dokter']) ){
+            $dokter = $parameter['dokter'];
+        }else {
+            $dokter = $UserData['data']->uid;
+        }
+
+        $Antrian = new Antrian(self::$pdo);
+        $parameter['dataObj'] = array(
+            'departemen' => $parameter['poli'],
+            'pasien' => $parameter['pasien'],
+            'penjamin' => $parameter['penjamin'],
+            'prioritas' => 36,
+            'dokter' => $dokter
+        );
+        $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+
+        return $AntrianProses;
+    }
+
     private function get_visit_dokter($parameter){
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
 
-        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
-            $paramData = array(
-                'inap_visite_dokter.dokter' => '= ?',
-                'AND',
-                '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
-                'OR',
-                'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
-            );
 
-            $paramValue = array(
-                $UserData['data']->uid
-            );
-        }else {
+        if($parameter['jenis_pelayanan'] === 'konsultasi'){
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'inap_visite_dokter.dokter_rujuk' => '= ?',
+                    'AND',
+                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                );
 
-            $paramData = array(
-                'inap_visite_dokter.dokter' => '= ?'
-            );
+                $paramValue = array(
+                    $UserData['data']->uid
+                );
+            }else {
 
-            $paramValue = array(
-                $UserData['data']->uid
-            );
+                $paramData = array(
+                    'inap_visite_dokter.dokter_rujuk' => '= ?'
+                );
 
+                $paramValue = array(
+                    $UserData['data']->uid
+                );
+
+            }
+
+        } else {
+
+            if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+                $paramData = array(
+                    'inap_visite_dokter.dokter' => '= ?',
+                    'AND',
+                    '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                    'OR',
+                    'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')'
+                );
+
+                $paramValue = array(
+                    $UserData['data']->uid
+                );
+            }else {
+
+                $paramData = array(
+                    'inap_visite_dokter.dokter' => '= ?'
+                );
+
+                $paramValue = array(
+                    $UserData['data']->uid
+                );
+
+            }
         }
-
+    
         if ($parameter['length'] < 0) {
             $data = self::$query->select('inap_visite_dokter', array(
                 'pasien',
                 'dokter',
+                'dokter_rujuk',
                 'penjamin',
                 'kunjungan',
                 'antrian',
@@ -2795,6 +2851,7 @@ class Inap extends Utility
             $data = self::$query->select('inap_visite_dokter', array(
                 'pasien',
                 'dokter',
+                'dokter_rujuk',
                 'penjamin',
                 'kunjungan',
                 'antrian',
@@ -2826,14 +2883,73 @@ class Inap extends Utility
         $Poli = new Poli(self::$pdo);
         $Pegawai = new Pegawai(self::$pdo);
         $Penjamin = new Penjamin(self::$pdo);
+        $Antrian = new Antrian(self::$pdo);
         $returnedData = array();
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $data['response_data'][$key]['created_at_parse'] = date('d F Y', strtotime($value['created_at']));
             
+            //Antrian
+            $Antrian = self::$query->select('antrian',
+              array(
+                'uid',
+                'pasien',
+                'kunjungan',
+                'departemen',
+                'penjamin',
+                'dokter',
+                'waktu_masuk',
+                'waktu_keluar',
+                'prioritas'
+              )
+            )
+            ->where(
+              array(
+                'antrian.deleted_at' => 'IS NULL',
+                'AND',
+                'antrian.uid' => '= ?'
+              ),
+              array($value['antrian'])
+            )
+            ->execute();
+            $data['response_data'][$key]['antrian'] = $Antrian['response_data'][0]; 
+
+            $Inap = self::$query->select('rawat_inap',
+                    array(
+                    'uid',
+                    'pasien',
+                    )
+                )
+                ->where(
+                    array(
+                        'rawat_inap.waktu_keluar' => 'IS NULL',
+                        'AND',
+                    'rawat_inap.deleted_at' => 'IS NULL',
+                    'AND',
+                    'rawat_inap.pasien' => '= ?'
+                    ),
+                    array($value['pasien'])
+                )
+                ->execute();
+
+          $data['response_data'][$key]['inap'] = $Inap['response_data'][0];
+
            //Pasien
            $PasienDetail = $Pasien->get_pasien_info('pasien', $value['pasien']);
            $data['response_data'][$key]['pasien'] = $PasienDetail['response_data'][0]; 
+
+           //Dokter
+           $PegawaiDetail = $Pegawai->get_detail($value['dokter']);
+           $data['response_data'][$key]['dokter'] = $PegawaiDetail['response_data'][0];
+
+           //Dokter Rujuk
+           if(
+                !empty($data['response_data'][$key]['dokter_rujuk']) &&
+                isset($data['response_data'][$key]['dokter_rujuk'])
+           ){
+           $PegawaiRujukDetail = $Pegawai->get_detail($value['dokter_rujuk']);
+           $data['response_data'][$key]['dokter_rujuk'] = $PegawaiRujukDetail['response_data'][0];
+            }
 
            //Penjamin
            $PenjaminDetail = $Penjamin->get_penjamin_detail($value['penjamin']);
@@ -2881,6 +2997,7 @@ class Inap extends Utility
                 'penjamin' => $parameter['penjamin'],
                 'kunjungan' => $parameter['kunjungan'],
                 'antrian' => $parameter['antrian'],
+                'dokter_rujuk', $parameter['dokter'],
                 'jenis_layanan' => $parameter['jenis_layanan'],
                 'keterangan' => $parameter['keterangan'],
                 'updated_at' => parent::format_date()
@@ -2898,6 +3015,7 @@ class Inap extends Utility
                 'dokter' => $UserData['data']->uid,
                 'penjamin' => $parameter['penjamin'],
                 'kunjungan' => $parameter['kunjungan'],
+                'dokter_rujuk' => $parameter['dokter'],
                 'antrian' => $parameter['antrian'],
                 'jenis_layanan' => $parameter['jenis_layanan'],
                 'keterangan' => $parameter['keterangan'],

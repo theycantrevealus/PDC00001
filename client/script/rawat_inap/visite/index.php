@@ -13,6 +13,7 @@
                 type: "POST",
                 data: function(d) {
                     d.request = "get_visit_dokter";
+                    d.jenis_pelayanan = "visite";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -72,6 +73,15 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        if(row.dokter_rujuk !== null && row.dokter_rujuk !== undefined){
+                            return "<span class=\"wrap_content\">" + row.dokter_rujuk.nama + "</span>";
+                        } else {
+                            return "-";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         return "<span class=\"wrap_content\">" + row.jenis_layanan + "</span>";
                     }
                 },
@@ -92,6 +102,132 @@
                 }
             ]
         });
+
+        var listRIKonsultasi = $("#table-konsultasi-dokter").DataTable({
+            processing: true,
+            serverSide: true,
+            sPaginationType: "full_numbers",
+            bPaginate: true,
+            lengthMenu: [[20, 50, -1], [20, 50, "All"]],
+            serverMethod: "POST",
+            "ajax":{
+                url: __HOSTAPI__ + "/Inap",
+                type: "POST",
+                data: function(d) {
+                    d.request = "get_visit_dokter";
+                    d.jenis_pelayanan = "konsultasi";
+                },
+                headers:{
+                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                },
+                dataSrc:function(response) {
+                    console.log(response);
+                    var returnedData = [];
+                    if(response == undefined || response.response_package == undefined) {
+                        returnedData = [];
+                    } else {
+                        var data = response.response_package.response_data;
+                        var autonum = 1;
+                        for(var key in data) {
+                            data[key].autonum = autonum;
+                            returnedData.push(data[key]);
+                            autonum++;
+                            // if(
+                            //     data[key].pasien !== null && data[key].pasien !== undefined &&
+                            //     //data[key].dokter.uid === __ME__ &&
+                            //     data[key].nurse_station !== null
+                            // ) {
+                            //     data[key].autonum = autonum;
+                            //     returnedData.push(data[key]);
+                            //     autonum++;
+                            // }
+                        }
+                    }
+
+                    response.draw = parseInt(response.response_package.response_draw);
+                    response.recordsTotal = response.response_package.recordsTotal;
+                    response.recordsFiltered = response.response_package.recordsTotal;
+
+                    return returnedData;
+                }
+            },
+            autoWidth: false,
+            language: {
+                search: "",
+                searchPlaceholder: "Cari Nama Pasien"
+            },
+            "columns" : [
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.autonum;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.created_at_parse + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<b kunjungan=\"" + row.kunjungan + "\" data=\"" + row.pasien.uid + "\" id=\"pasien_" + row.id + "\" class=\"text-info\">" + row.pasien.no_rm + "</b><br />" + row.pasien.nama;
+                        // return "<span class=\"wrap_content\">" + row.nama + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.dokter.nama !== null && row.dokter.nama !== undefined){
+                            return "<span class=\"wrap_content\">" + row.dokter.nama + "</span>";
+                        } else {
+                            return "-";
+                        }
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.jenis_layanan + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return "<span class=\"wrap_content\">" + row.penjamin.nama + "</span>";
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        if(row.keterangan !== ""){
+                            return "<span class=\"wrap_content\">" + row.keterangan + "</span>";
+                        }else {
+                            return "-";
+                        }
+                        
+                    }
+                },
+                // __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + antrian + "/" + pasien + "/" + kunjungan + "/" + penjamin + "/" + inap
+                {
+                    "data": null,
+                    render: function(data, type, row, meta) {
+                        if(row.antrian.waktu_keluar === null || row.antrian.waktu_keluar === undefined ){
+                            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                            "<a href=\"" + __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + row.antrian.uid + "/"+ row.pasien.uid +"/"+ row.kunjungan+"/"+row.penjamin.uid+"/"+row.inap.uid+"\" class=\"btn btn-success btnDetailAntrian\">" +
+                            "<i class=\"fa fa-sign-out-alt\"></i> Proses" +
+                            "</a>" +
+                            "</div>";
+                        }else {
+                            return "";
+                        }
+                    }
+                }
+            ]
+        });
+
+        $("#txt_jenis_pelayanan").on('change',function(){
+            console.log('aaaaa')
+            if($(this).val() === 'Konsultasi'){
+                $('#konsultasi_dokter').show();
+            }else  {
+                $('#konsultasi_dokter').hide();
+            }
+        })
 
         $("#btnTambahVisit").click(function() {
             $("#pasien_saya").select2({
@@ -144,6 +280,52 @@
                     penjamin: data.penjamin
                 })
             });
+
+            $("#dokter").select2({
+                minimumInputLength: 2,
+                "language": {
+                    "noResults": function() {
+                        return "Dokter tidak ditemukan";
+                    }
+                },
+                placeholder: "Cari Dokter",
+                ajax: {
+                    dataType: "json",
+                    headers: {
+                        "Authorization": "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+                        "Content-Type": "application/json",
+                    },
+                    url: __HOSTAPI__ + "/Pegawai/get_all_dokter_select2",
+                    type: "GET",
+                    data: function(term) {
+                        return {
+                            search: term.term
+                        };
+                    },
+                    cache: true,
+                    processResults: function(response) {
+                        var data = response.response_package.response_data;
+                        // console.clear();
+                        console.log(response);
+                        return {
+                            results: $.map(data, function(item) {
+
+                                return {
+                                    text: item.nama_dokter,
+                                    id: item.uid
+                                }
+                            })
+                        };
+                    }
+                }
+            }).on("select2:select", function(e) {
+                var data = e.params.data;
+                $("#dokter option:selected").attr({
+                    dokter: data.id
+                })
+            });
+
+
             $("#form-tambah-visit").modal("show");
         });
 
@@ -151,15 +333,21 @@
             var jenis_pelayanan = $("#txt_jenis_pelayanan").val();
             var keterangan = $("#txt_ket").val();
             var pasien = $("#pasien_saya").val();
+            if(jenis_pelayanan === 'Konsultasi'){
+                var dokter = $("#dokter").val();
+            }else{
+                var dokter = null;
+            }
             var inap = $("#pasien_saya option:selected").attr("inap");
             var kunjungan = $("#pasien_saya option:selected").attr("kunjungan");
             var penjamin = $("#pasien_saya option:selected").attr("penjamin");
 
             var formData = {
-                request: "tambah_asesmen",
+                request: "tambah_asesmen_2",
                 penjamin: penjamin,
                 kunjungan: kunjungan,
                 pasien: pasien,
+                dokter: dokter,
                 jenis_layanan: jenis_pelayanan,
                 keterangan:keterangan,
                 poli: __POLI_INAP__
@@ -175,19 +363,20 @@
                 type: "POST",
                 data: formData,
                 success: function(response) {
-                    console.log(response.response_package.response_values[0]);
+                   console.log(response.response_package.response_values[0]);
                     
                     if(response.response_package.response_values[0] !== null &&
                         response.response_package.response_values[0] !== undefined
                     
                     ){
                         var antrian = response.response_package.response_values[0];
-                        var formData = {
+                        var formDataVisit = {
                             request: "tambah_asesmen_visit",
                             antrian: antrian,
                             penjamin: penjamin,
                             kunjungan: kunjungan,
                             pasien: pasien,
+                            dokter: dokter,
                             jenis_layanan: jenis_pelayanan,
                             keterangan:keterangan,
                             poli: __POLI_INAP__
@@ -200,10 +389,15 @@
                                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                             },
                             type: "POST",
-                            data: formData,
+                            data: formDataVisit,
                             success: function(response) {
                                 console.log(response);
-                                location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + antrian + "/" + pasien + "/" + kunjungan + "/" + penjamin + "/" + inap;
+                                if(jenis_pelayanan === 'Visite'){
+                                    location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + antrian + "/" + pasien + "/" + kunjungan + "/" + penjamin + "/" + inap;
+                                }else {
+                                    $("#form-tambah-visit").modal("hide");
+                                    listRI.ajax.reload();
+                                }
                             },
                             error: function(response) {
                                 console.log(response);
@@ -211,7 +405,6 @@
                         });
 
                     }
-                    //location.href = __HOSTNAME__ + "/rawat_inap/dokter/antrian/" + response.response_package.response_values[0] + "/" + pasien + "/" + kunjungan + "/" + penjamin + "/" + inap;
                 },
                 error: function(response) {
                     console.log(response);
@@ -240,6 +433,7 @@
                         <select id="pasien_saya" class="form-control"></select>
                         <br /><br />
                     </div>
+                    
                     <div class="col-lg-12">
                         <strong>Jenis Pelayanan</strong>
                         <select id="txt_jenis_pelayanan" class="form-control">
@@ -247,6 +441,12 @@
                             <option value="Konsultasi">Konsultasi</option>
                         </select>
                         <br />
+                    </div>
+
+                    <div style="display:none" id="konsultasi_dokter" class="col-lg-12">
+                        <strong>Konsultasi Dengan Dokter</strong>
+                        <select id="dokter" class="form-control"></select>
+                        <br /><br/>
                     </div>
                     <div class="col-lg-12">
                         <strong>Keterangan</strong>

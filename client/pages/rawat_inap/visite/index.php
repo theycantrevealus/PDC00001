@@ -26,17 +26,48 @@
                         </span>
                     </button>
                 </div>
+                <div class="card-header card-header-tabs-basic nav" role="tablist">
+                    <a href="#visite" class="active" data-toggle="tab" role="tab" aria-controls="keluhan-utama"
+                        aria-selected="true">Visite Dokter</a>
+                    <a href="#konsultasi" data-toggle="tab" role="tab" aria-selected="false">Konsultasi</a>
+                </div>
                 <div class="card-body tab-content">
-                    <div class="tab-pane active show fade" id="list-visit-dokter">
+                    <div class="tab-pane active show fade" id="visite">
                         <table class="table table-bordered table-striped largeDataType" id="table-visit-dokter">
                             <thead class="thead-dark">
                             <tr>
                                 <th style="width:10px" class="wrap_content">No</th>
                                 <th>Tanggal</th>
                                 <th>Pasien</th>
+                                <th>Dokter Konsultasi</th>
                                 <th>Jenis Pelayanan</th>
                                 <th>Penjamin</th>
                                 <th>Keterangan</th>
+                                
+
+                                <!-- <th>Poliklinik</th>
+                                
+                                <th>Dokter</th>
+                                <th>Penjamin</th> -->
+                                <!-- <th class="wrap_content">Aksi</th> -->
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="tab-pane show fade" id="konsultasi">
+                    <table class="table table-bordered table-striped largeDataType" id="table-konsultasi-dokter">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th style="width:10px" class="wrap_content">No</th>
+                                <th>Tanggal</th>
+                                <th>Pasien</th>
+                                <th>Dokter</th>
+                                <th>Jenis Pelayanan</th>
+                                <th>Penjamin</th>
+                                <th>Keterangan</th>
+                                <th>#</th>
                                 
 
                                 <!-- <th>Poliklinik</th>
