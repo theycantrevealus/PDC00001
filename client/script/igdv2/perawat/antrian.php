@@ -659,7 +659,7 @@
                                 }
                             });*/
 
-                            loadPasien(uid_antrian);
+                            // loadPasien(uid_antrian);
                             // autoInfus("#autoInfusBidan", "bidan");
                             autoInfus("#autoInfusBiasa", "biasa");
 
