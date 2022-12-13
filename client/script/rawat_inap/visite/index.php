@@ -73,7 +73,8 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        if(row.dokter_rujuk !== null && row.dokter_rujuk !== undefined){
+                        if(row.dokter_rujuk !== null && row.dokter_rujuk !== undefined 
+                        && row.dokter.uid !== row.dokter_rujuk.uid){
                             return "<span class=\"wrap_content\">" + row.dokter_rujuk.nama + "</span>";
                         } else {
                             return "-";
@@ -221,7 +222,7 @@
         });
 
         $("#txt_jenis_pelayanan").on('change',function(){
-            console.log('aaaaa')
+
             if($(this).val() === 'Konsultasi'){
                 $('#konsultasi_dokter').show();
             }else  {

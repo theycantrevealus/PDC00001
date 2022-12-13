@@ -2789,10 +2789,13 @@ class Inap extends Utility
             }else {
 
                 $paramData = array(
-                    'inap_visite_dokter.dokter_rujuk' => '= ?'
+                    'inap_visite_dokter.dokter_rujuk' => '= ?',
+                    'AND',
+                    'inap_visite_dokter.dokter' => '!= ?',
                 );
 
                 $paramValue = array(
+                    $UserData['data']->uid,
                     $UserData['data']->uid
                 );
 
@@ -2997,7 +3000,7 @@ class Inap extends Utility
                 'penjamin' => $parameter['penjamin'],
                 'kunjungan' => $parameter['kunjungan'],
                 'antrian' => $parameter['antrian'],
-                'dokter_rujuk', $parameter['dokter'],
+                'dokter_rujuk' => ($parameter['jenis_layanan']) == "Konsultasi" ? $parameter['dokter'] : $UserData['data']->uid,
                 'jenis_layanan' => $parameter['jenis_layanan'],
                 'keterangan' => $parameter['keterangan'],
                 'updated_at' => parent::format_date()
@@ -3015,7 +3018,7 @@ class Inap extends Utility
                 'dokter' => $UserData['data']->uid,
                 'penjamin' => $parameter['penjamin'],
                 'kunjungan' => $parameter['kunjungan'],
-                'dokter_rujuk' => $parameter['dokter'],
+                'dokter_rujuk' => ($parameter['jenis_layanan']) == "Konsultasi" ? $parameter['dokter'] : $UserData['data']->uid,
                 'antrian' => $parameter['antrian'],
                 'jenis_layanan' => $parameter['jenis_layanan'],
                 'keterangan' => $parameter['keterangan'],
