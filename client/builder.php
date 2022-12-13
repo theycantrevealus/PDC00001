@@ -616,6 +616,7 @@ $lastExist = '';
                     var currentData = listData[b].data[0];
                     currentData.asesmen.resep = (currentData.asesmen.resep !== undefined && currentData.asesmen.resep !== null) ? [currentData.asesmen.resep[currentData.asesmen.resep.length - 1]] : [];
                     currentData.asesmen.racikan = (currentData.asesmen.racikan !== undefined && currentData.asesmen.racikan !== null) ? [currentData.asesmen.racikan[currentData.asesmen.racikan.length - 1]] : [];
+                    console.log(currentData);
                     $.ajax({
                       url: __HOSTNAME__ + "/pages/pasien/cppt-single.php",
                       async: false,
@@ -624,6 +625,7 @@ $lastExist = '';
                       },
                       type: "POST",
                       data: {
+                        uid: currentData.uid,
                         currentData: UID,
                         __HOSTNAME__: __HOSTNAME__,
                         __HOST__: __HOST__,
@@ -657,6 +659,50 @@ $lastExist = '';
                       },
                       success: function(responseSingle) {
                         $("#group_cppt_" + a).append(responseSingle);
+                        if(currentData.departemen.uid === __POLI_IGD__) {
+                          var savedPoint = {};
+                          var currentCount = 1;
+                          var canvas = $("#myCanvas_" + currentData.uid);
+                          // $("#dataset__" + currentData.uid).remove();
+                          
+                          var context = canvas.get(0).getContext('2d');
+                          var savedPoint = {};
+
+                          
+                          if(currentData.asesmen.saved_lokalis_item !== "") {
+                            var saved_pascalis = JSON.parse(currentData.asesmen.saved_lokalis_item);
+                            var currentCount = 1;
+                            var message = String.fromCharCode(215) + " " + currentCount;
+                            for(var azpas in saved_pascalis) {
+                              if(savedPoint["point_" + currentCount] === undefined) {
+                                  savedPoint["point_" + currentCount] = {
+                                      message: message,
+                                      keterangan: "",
+                                      x: 0,
+                                      y: 0
+                                  };
+                              }
+
+                              savedPoint["point_" + currentCount] = {
+                                message: message,
+                                keterangan: "",
+                                x: saved_pascalis[azpas].x,
+                                y: saved_pascalis[azpas].y
+                              };
+                              currentCount++;
+                            }
+                            
+                            refreshLokalis(saved_pascalis, canvas, context, currentData);
+
+                            var ats_list = (currentData.asesmen.ats_list !== undefined && currentData.asesmen.ats_list !== "") ? JSON.parse(currentData.asesmen.ats_list) : [];
+                            for(var atsKey in ats_list) {
+                                $("#dataset__" + currentData.uid + " input[value=\"" + ats_list[atsKey] + "\"]").prop("checked", true);
+                            }
+
+                            // LANJUTAKN DISINI BRO
+                            // Data asesmen IGD ada di currentData.asesmen dari table asesmen_medis_igd
+                          }
+                        }
                       },
                       error: function(responseSingleError) {
                         console.log(responseSingleError);
@@ -679,6 +725,62 @@ $lastExist = '';
         }
       });
     }
+
+    function writeMessage(canvas, message, xloc, yloc, context) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.font = '18pt Calibri';
+        context.fillStyle = 'red';
+        context.fillText(message, xloc, yloc); // x,y are bottom left of text
+    }
+
+    function refreshLokalis(dataSet, canvas, context, currentData) {
+      var savedPoint = {};
+
+      $("#dataset__" + currentData.uid + " #lokalis_value tbody tr").remove();
+
+      var autoNum = 1;
+      context.clearRect(0, 0, canvas.width(), canvas.height());
+
+      for(var key in dataSet) {
+          var c= 215;
+          var message = String.fromCharCode(c) + " " + autoNum;
+
+          var newRow = document.createElement("TR");
+          $(newRow).attr({
+              "id": "row-" + key
+          });
+          var newNum = document.createElement("TD");
+          $(newNum).html(autoNum);
+          var newRemark = document.createElement("TD");
+          var newAct = document.createElement("TD");
+
+          var remark = document.createElement("TEXTAREA");
+          var deleteBtn = document.createElement("BUTTON");
+
+          $(remark).addClass("form-control").attr({
+              "placeholder": "Keterangan"
+          }).attr({
+              "id": "keterangan_lokalis_" + key
+          }).val(dataSet[key].keterangan);
+
+          $(deleteBtn).addClass("btn btn-danger btnHapusLokalis").html("<i class=\"fa fa-times\"></i>").attr({
+              id: "hapus-" + key
+          });
+
+          $(newRemark).append(remark);
+          $(newAct).append(deleteBtn);
+
+          $(newRow).append(newNum);
+          $(newRow).append(newRemark);
+          $(newRow).append(newAct);
+
+          $("#dataset__" + currentData.uid + " #lokalis_value tbody").append(newRow);
+
+          writeMessage(canvas, message, dataSet[key].x, dataSet[key].y, context);
+
+          autoNum++;
+      }
+  }
 
     function getDateRange(target) {
       var rangeItem = $(target).val().split(" to ");
