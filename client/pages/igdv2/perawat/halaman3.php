@@ -286,12 +286,12 @@
                                 <label for="">Pupil: Diameter Pupil</label>
                                 <div class="form-inline">
                                     <div class="form-group">
-                                        <input type="text" name="kaji_pupil_0" class="form-control inputan numberonly"
+                                        <input type="text" name="kaji_pupil_0" class="form-control inputan"
                                             id="kaji_pupil_0" style="width: 60px" placeholder="">
                                         <label for="">/</label>
                                     </div>
                                     <div class="form-group">
-                                        <input type="text" name="kaji_pupil_1" class="form-control inputan numberonly"
+                                        <input type="text" name="kaji_pupil_1" class="form-control inputan"
                                             id="kaji_pupil_1" style="width: 60px" placeholder="">
                                     </div>
                                 </div>

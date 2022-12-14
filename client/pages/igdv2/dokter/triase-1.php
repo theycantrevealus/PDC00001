@@ -346,10 +346,10 @@
                                                     <input type="checkbox" name="ats_check" value="1_8" /> Kejang berkepanjangan(lebih dari 10 menit/tidak berhenti)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name="ats_check" value="1_9" /> Henti Jantung
+                                                    <input type="checkbox" name="ats_check" value="1_9" /> Indra Vena over dosis tidak respon atau hipoventilasi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name="ats_check" value="1_10" /> Henti Jantung
+                                                    <input type="checkbox" name="ats_check" value="1_10" /> Gangguan perilaku berat dengan ancaman tindak kekerasan / destruktif
                                                 </li>
                                             </ul>
                                         </td>
