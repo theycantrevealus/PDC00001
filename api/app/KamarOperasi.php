@@ -51,6 +51,14 @@ class KamarOperasi extends Utility {
                     return self::get_paket_list_name($parameter);
                     break;
 
+                case 'asesmen_operasi':
+                    return self::get_asesmen($parameter);
+                    break;
+
+                case 'get_asesmen_detail':
+                    return self::get_asesmen_detail($parameter[2]);
+                    break;
+
 				default:
 					# code...
 					break;
@@ -64,7 +72,11 @@ class KamarOperasi extends Utility {
 		switch ($parameter['request']) {
             case 'add_jenis_operasi':
                 return self::add_jenis_operasi($parameter);
-            break;
+                break;
+
+            case 'add_laporan_bedah':
+                return self::add_laporan_bedah($parameter);
+                break;
 
             case 'edit_jenis_operasi':
                 return self::edit_jenis_operasi($parameter);
@@ -77,6 +89,10 @@ class KamarOperasi extends Utility {
             case 'edit_jadwal_operasi':
 				return self::edit_jadwal_operasi($parameter);
             break;
+
+            case 'tambah_asesmen':
+                return self::tambah_asesmen($parameter);
+                break;
 
 			// case 'edit_penjamin':
 			// 	return self::edit_penjamin($parameter);
@@ -630,6 +646,8 @@ class KamarOperasi extends Utility {
             ->select('kamar_operasi_jadwal',
                 array(
                     'uid',
+                    'kunjungan',
+                    'penjamin',
                     'pasien as uid_pasien',
                     'ruang_operasi as uid_ruang_operasi',
                     'tgl_operasi',
@@ -650,6 +668,24 @@ class KamarOperasi extends Utility {
         $pasien = new Pasien(self::$pdo);
         $ruangan = new Ruangan(self::$pdo);
         foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['kunjungan'] = $value['kunjungan'];
+            $data['response_data'][$key]['penjamin'] = $value['penjamin'];
+
+            //CHECK Asesmen 
+            $asesmen = self::$query
+            ->select('asesmen_medis_operasi',
+                array(
+                    'uid',
+                )
+            )
+            ->where(
+                array('asesmen_medis_operasi.jadwal' => '= ?'),
+                array($value['uid'])
+            )
+            ->execute();
+
+            $data['response_data'][$key]['asesmen'] = $asesmen['response_data'][0];
+
             $data['response_data'][$key]['tgl_operasi'] = parent::dateToIndoSlash($value['tgl_operasi']);
 
             $jenis_operasi = self::get_jenis_operasi_detail($value['uid_jenis_operasi']);
@@ -731,6 +767,7 @@ class KamarOperasi extends Utility {
         $pasien = new Pasien(self::$pdo);
         $pegawai = new Pegawai(self::$pdo);
         $ruangan = new Ruangan(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
 
         foreach ($jadwal['response_data'] as $key => $value) {
             $data_pasien = $pasien->get_pasien_info('pasien', $value['pasien']);
@@ -739,6 +776,8 @@ class KamarOperasi extends Utility {
             $jadwal['response_data'][$key]['ruang_operasi_detail'] = $ruangan->get_ruangan_detail('master_unit_ruangan', $value['ruang_operasi'])['response_data'][0];
             $jadwal['response_data'][$key]['tgl_operasi_parsed'] = date('d F Y', strtotime($value['tgl_operasi']));
             $jadwal['response_data'][$key]['pasien'] = ($data_pasien['response_result'] > 0) ? $data_pasien['response_data'][0] : "-";
+            $jadwal['response_data'][$key]['penjamin'] =  $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0]['nama'];
+
         }
 
 
@@ -1422,6 +1461,300 @@ class KamarOperasi extends Utility {
 
 		return $delete;
 	}
+
+    private static function get_asesmen($parameter)
+    {
+        $data = self::$query
+        ->select('asesmen_medis_operasi',
+            array(
+                'uid',
+                'kunjungan',
+                'pasien' ,
+                'dokter',
+                'jadwal',
+                'operator',
+                'asisten',
+                'instrumen',
+                'macam_pembedahan' ,
+                'urgensi' ,
+                'luka_operasi',
+                'diagnosa_pra_bedah',
+                'tindakan_bedah',
+                'diagnosa_pasca_bedah',
+                'ahli_bius',
+                'cara_bius' ,
+                'posisi_pasien',
+                'no_implant' ,
+                'mulai',
+                'selesai',
+                'lama_jam',
+                'lama_menit' ,
+                'ok' ,
+                'komplikasi' ,
+                'perdarahan' ,
+                'jaringan_patologi' ,
+                'asal_jaringan',
+                'operator_1' ,
+                'ket_operator_1' ,
+                'operator_2' ,
+                'ket_operator_2',
+                'dokter_anestesi',
+                'ket_dokter_anestesi',
+                'dokter_anak',
+                'ket_dokter_anak',
+                'penata_anestesi' ,
+                'ket_penata_anestesi' ,
+                'perawat_ok_1' ,
+                'ket_perawat_ok_1' ,
+                'perawat_ok_2' ,
+                'ket_perawat_ok_2' ,
+                'perawat_ok_3',
+                'ket_perawat_ok_3' ,
+                'perawat_ok_4' ,
+                'ket_perawat_ok_4' ,
+                'created_at',
+                'updated_at',
+            )
+        )
+        ->where(
+            array('asesmen_medis_operasi.deleted_at' => 'IS NULL')
+        )
+        ->execute();
+    
+        $pegawai = new Pegawai(self::$pdo);
+        $pasien = new Pasien(self::$pdo);
+        $ruangan = new Ruangan(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['kunjungan'] = $value['kunjungan'];
+            
+
+            $data['response_data'][$key]['jadwal'] = self::get_jadwal_pasien_detail($value['jadwal'])['response_data'][0];
+
+            $detail_dokter = $pegawai->get_detail($value['dokter']);
+            $data['response_data'][$key]['dokter'] = 
+                ($detail_dokter['response_result'] > 0) ? $detail_dokter['response_data'][0]['nama'] : "-";
+
+            $detail_pasien = $pasien->get_pasien_detail('pasien', $value['pasien']);
+            $data['response_data'][$key]['pasien'] = 
+                ($detail_pasien['response_result'] > 0) ? $detail_pasien['response_data'][0]['nama'] : "-";
+
+        }
+
+        return $data;
+    }
+
+    private static function get_asesmen_detail($parameter)
+    {
+        $data = self::$query
+        ->select('asesmen_medis_operasi',
+            array(
+                'uid',
+                'kunjungan',
+                'pasien' ,
+                'dokter',
+                'jadwal',
+                'operator',
+                'asisten',
+                'instrumen',
+                'macam_pembedahan' ,
+                'urgensi' ,
+                'luka_operasi',
+                'diagnosa_pra_bedah',
+                'tindakan_bedah',
+                'diagnosa_pasca_bedah',
+                'ahli_bius',
+                'cara_bius' ,
+                'posisi_pasien',
+                'no_implant' ,
+                'mulai',
+                'selesai',
+                'lama_jam',
+                'lama_menit' ,
+                'ok' ,
+                'komplikasi' ,
+                'perdarahan' ,
+                'jaringan_patologi' ,
+                'asal_jaringan',
+                'operator_1' ,
+                'ket_operator_1' ,
+                'operator_2' ,
+                'ket_operator_2',
+                'dokter_anestesi',
+                'ket_dokter_anestesi',
+                'dokter_anak',
+                'ket_dokter_anak',
+                'penata_anestesi' ,
+                'ket_penata_anestesi' ,
+                'perawat_ok_1' ,
+                'ket_perawat_ok_1' ,
+                'perawat_ok_2' ,
+                'ket_perawat_ok_2' ,
+                'perawat_ok_3',
+                'ket_perawat_ok_3' ,
+                'perawat_ok_4' ,
+                'ket_perawat_ok_4' ,
+                'created_at',
+                'updated_at',
+            )
+        )
+        ->where(
+            array(
+                'asesmen_medis_operasi.deleted_at' => 'IS NULL',
+                'AND',
+                'asesmen_medis_operasi.uid' => '= ?'
+            ),
+            array($parameter)
+        )
+        ->execute();
+    
+        $pegawai = new Pegawai(self::$pdo);
+        $pasien = new Pasien(self::$pdo);
+        $ruangan = new Ruangan(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['kunjungan'] = $value['kunjungan'];
+            
+
+            $data['response_data'][$key]['jadwal'] = self::get_jadwal_pasien_detail($value['jadwal'])['response_data'][0];
+
+            $detail_dokter = $pegawai->get_detail($value['dokter']);
+            $data['response_data'][$key]['dokter'] = 
+                ($detail_dokter['response_result'] > 0) ? $detail_dokter['response_data'][0]['nama'] : "-";
+            
+            $detail_dokter_anestesi = $pegawai->get_detail($value['dokter_anestesi']);
+            $data['response_data'][$key]['dokter_anestesi'] = 
+                ($detail_dokter_anestesi['response_result'] > 0) ? $detail_dokter_anestesi['response_data'][0]['nama'] : "-";
+            
+            $detail_dokter_anak = $pegawai->get_detail($value['dokter_anak']);
+            $data['response_data'][$key]['dokter_anak'] = 
+                ($detail_dokter_anak['response_result'] > 0) ? $detail_dokter_anak['response_data'][0]['nama'] : "-";
+
+            $perawat_ok_1 = $pegawai->get_detail($value['perawat_ok_1']);
+            $data['response_data'][$key]['perawat_ok_1'] = ($perawat_ok_1['response_result'] > 0) ? $perawat_ok_1['response_data'][0]['nama'] : "-";
+    
+            $perawat_ok_2 = $pegawai->get_detail($value['perawat_ok_2']);
+            $data['response_data'][$key]['perawat_ok_2'] = ($perawat_ok_2['response_result'] > 0) ? $perawat_ok_2['response_data'][0]['nama'] : "-";
+    
+            $perawat_ok_3 = $pegawai->get_detail($value['perawat_ok_3']);
+            $data['response_data'][$key]['perawat_ok_3'] = ($perawat_ok_3['response_result'] > 0) ? $perawat_ok_3['response_data'][0]['nama'] : "-";
+    
+            $perawat_ok_4 = $pegawai->get_detail($value['perawat_ok_4']);
+            $data['response_data'][$key]['perawat_ok_4'] = ($perawat_ok_4['response_result'] > 0) ? $perawat_ok_4['response_data'][0]['nama'] : "-";
+    
+
+            $detail_pasien = $pasien->get_pasien_detail('pasien', $value['pasien']);
+            $data['response_data'][$key]['pasien'] = 
+                ($detail_pasien['response_result'] > 0) ? $detail_pasien['response_data'][0] : "-";
+
+        }
+
+        return $data;
+    }
+
+    private static function add_laporan_bedah($parameter)
+    {
+        $Authorization = new Authorization();
+		$UserData = $Authorization->readBearerToken($parameter['access_token']);
+        
+        $uid = parent::gen_uuid();
+        $asesmen = self::$query->insert('asesmen_medis_operasi', array(
+                    'uid' => $uid,
+                    'kunjungan' => $parameter['kunjungan'],
+                    'pasien' => $parameter['pasien'],
+                    'dokter' => $parameter['dokter'],
+                    'jadwal' => $parameter['jadwal'],
+                    'operator'=> $parameter['operator'],
+                    'asisten'=> $parameter['asisten'],
+                    'instrumen' => $parameter['instrumen'],
+                    'macam_pembedahan' => $parameter['macam_pembedahan'],
+                    'urgensi'  => $parameter['urgensi'],
+                    'luka_operasi'  => $parameter['luka_operasi'],
+                    'diagnosa_pra_bedah' => $parameter['diagnosa_pra_bedah'],
+                    'tindakan_bedah' => $parameter['tindakan_bedah'],
+                    'diagnosa_pasca_bedah' =>$parameter['diagnosa_pasca_bedah'],
+                    'ahli_bius' =>  $parameter['ahli_bius'],
+                    'cara_bius' =>  $parameter['cara_bius'],
+                    'posisi_pasien'  =>  $parameter['posisi_pasien'],
+                    'no_implant'  =>  $parameter['no_implant'],
+                    'mulai'  =>  $parameter['mulai'],
+                    'selesai'  =>  $parameter['selesai'],
+                    'lama_jam' =>  $parameter['lama_jam'],
+                    'lama_menit' =>  $parameter['lama_menit'],
+                    'ok' =>  $parameter['ok'],
+                    'komplikasi' =>  $parameter['komplikasi'],
+                    'perdarahan' => $parameter['perdarahan'],
+                    'jaringan_patologi' =>  $parameter['jaringan_patologi'],
+                    'asal_jaringan' =>  $parameter['asal_jaringan'],
+                    'operator_1' =>  $parameter['operator_1'],
+                    'ket_operator_1' =>  $parameter['ket_operator_1'],
+                    'operator_2' =>  $parameter['operator_1'],
+                    'ket_operator_2' =>  $parameter['ket_operator_2'],
+                    'dokter_anestesi' =>  $parameter['dokter_anestesi'],
+                    'ket_dokter_anestesi' =>  $parameter['ket_dokter_anestesi'],
+                    'dokter_anak' =>  $parameter['dokter_anak'],
+                    'ket_dokter_anak' =>  $parameter['ket_dokter_anak'],
+                    'penata_anestesi' =>  $parameter['penata_anestesi'],
+                    'ket_penata_anestesi' =>  $parameter['ket_penata_anestesi'],
+                    'perawat_ok_1' =>  $parameter['perawat_ok_1'],
+                    'ket_perawat_ok_1' =>  $parameter['ket_perawat_ok_1'],
+                    'perawat_ok_2' =>  $parameter['perawat_ok_2'],
+                    'ket_perawat_ok_2' =>  $parameter['ket_perawat_ok_2'],
+                    'perawat_ok_3' =>  $parameter['perawat_ok_3'],
+                    'ket_perawat_ok_3' =>  $parameter['ket_perawat_ok_3'],
+                    'perawat_ok_4' =>  $parameter['perawat_ok_4'],
+                    'ket_perawat_ok_4' =>  $parameter['ket_perawat_ok_4'],
+                    'created_at' => parent::format_date(),
+                    'updated_at' => parent::format_date()
+                    )
+            )
+            ->execute();
+
+
+        if ($asesmen['response_result'] > 0) {
+            parent::log(array(
+                'type'=>'activity',
+                'column'=>array(
+                    'unique_target',
+                    'user_uid',
+                    'table_name',
+                    'action',
+                    'logged_at',
+                    'status',
+                    'login_id'
+                ),
+                'value'=>array(
+                    $uid,
+                    $UserData['data']->uid,
+                    'asesmen_medis_operasi',
+                    'I',
+                    parent::format_date(),
+                    'N',
+                    $UserData['data']->log_id
+                ),
+                'class'=>__CLASS__
+            ));
+        }
+
+        return $asesmen;
+    }
+
+    private function tambah_asesmen($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $parameter['poli'] = "77cc0eea-fd15-44be-b3b3-e2ebab39c21a";
+        $Antrian = new Antrian(self::$pdo);
+        $parameter['dataObj'] = array(
+            'departemen' => $parameter['poli'],
+            'pasien' => $parameter['pasien'],
+            'penjamin' => $parameter['penjamin'],
+            'prioritas' => 36,
+            'dokter' => $parameter['dokter']
+        );
+        $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+
+        return $AntrianProses;
+    }
      
 	/*======================= END POST FUNCTION ======================*/
 
