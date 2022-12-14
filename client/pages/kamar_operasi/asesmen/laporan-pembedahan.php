@@ -136,17 +136,48 @@
                         <label>Lama Pembedahan</label>
                         <div class="row">
                             <div class="col-lg-6">
-                                <input id="lama_jam" type="text" name="lama_jam" class="form-control mr-2" placeholder="Jam">
+                                <div class="input-group input-group-merge">
+                                    <input type="text" id="lama_jam" name="lama_jam"
+                                        class="form-control form-control-appended inputan" placeholder="jam">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span>jam</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-lg-6">
-                                <input id="lama_menit" type="number" name="menit" maxlength="60" class="form-control"
-                                    placeholder="Menit">
+                                <div class="input-group input-group-merge">
+                                    <input type="text" id="lama_menit" name="lama_menit"
+                                        class="form-control form-control-appended inputan" placeholder="menit">
+                                    <div class="input-group-append">
+                                        <div class="input-group-text">
+                                            <span>menit</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="form-group col-lg-6">
                         <label>OK</label>
                         <input id="ok" type="text" name="ok" class="form-control" placeholder="OK">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg">
+        <div class="card">
+            <div class="card-header card-header-large bg-white d-flex align-items-center">
+                <h5 class="card-header__title flex m-0">Laporan Pembedahan</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="form-group col-lg-12">
+                        <textarea id="laporan_pembedahan" name="laporan_pembedahan" class="form-control" rows="5" placeholder="-"></textarea>
                     </div>
                 </div>
             </div>

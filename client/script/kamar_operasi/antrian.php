@@ -131,6 +131,7 @@
         let lama_jam = $("#lama_jam").val();
         let lama_menit = $("#lama_menit").val();
         let ok = $("#ok").val();
+        let laporan_pembedahan = $("#laporan_pembedahan").val();
         let komplikasi = $("#komplikasi").val();
         let perdarahan = $("#perdarahan").val();
         let jaringan_patologi = $("#jaringan_patologi").val();
@@ -180,6 +181,7 @@
             'lama_jam': lama_jam,
             'lama_menit': lama_menit,
             'ok': ok,
+            'laporan_pembedahan': laporan_pembedahan,
             'komplikasi': komplikasi,
             'perdarahan': perdarahan,
             'jaringan_patologi': jaringan_patologi,
