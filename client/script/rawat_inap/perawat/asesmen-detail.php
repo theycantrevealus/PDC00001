@@ -498,7 +498,7 @@
                         //     "<span><i class=\"fa fa-eye\"></i>Detail</span>" +
                         //     "</a>" +
                         //     "</div>";
-                        return "<a href=\"" + __HOSTNAME__ + "/igdv2/perawat/antrian/" + row.uid + "/" + row.uid_pasien + "/" + row.uid_kunjungan + "/"+ __PAGES__[7]+ "\" class='btn btn-success' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-check-circle'></i> Edit</a>";
+                        return "<a href=\"" + __HOSTNAME__ + "/rawat_inap/perawat/antrian/" + row.uid + "/" + row.uid_pasien + "/" + row.uid_kunjungan + "/"+ __PAGES__[7]+ "\" class='btn btn-success' data-toggle='tooltip' title='Edit Assesmen Pasien'><i class='fa fa-check-circle'></i> Edit</a>";
                     }
                 }
             ]
