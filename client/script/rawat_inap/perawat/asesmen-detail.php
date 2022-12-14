@@ -462,7 +462,7 @@
         url: __HOSTAPI__ + "/Asesmen",
         type: "POST",
         data: function(d) {
-          d.request = "get_antrian_asesmen_rawat_igd";
+          d.request = "get_antrian_asesmen_rawat_inap";
           d.pasien = __PAGES__[3];
         },
         headers:{
