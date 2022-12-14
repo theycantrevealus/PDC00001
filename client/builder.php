@@ -765,6 +765,8 @@ $lastExist = '';
                             }
 
                             $('#igd_ekg').val(currentData.asesmen.ekg)
+                            $('#igd_radiologi').val(currentData.asesmen.radiologi)
+                            $('#igd_laboratorium').val(currentData.asesmen.laboratorium)
                             
 
                             
