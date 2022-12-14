@@ -684,37 +684,37 @@ $lastExist = '';
                              
                               $('#igd_status_alergi_text').val(currentData.asesmen.status_alergi_text);
 
-                              if($("input[name=igd_pupil][value="+currentData.asesmen.pupil+"]").length){
+                              if(currentData.asesmen.pupil != ""){
                                 $("input[name=igd_pupil][value="+currentData.asesmen.pupil+"]").attr('checked',true);
                               }
 
-                              if($("input[name=igd_status_alergi][value="+currentData.asesmen.status_alergi+"]").length){
+                              if(currentData.asesmen.status_alergi != ""){
                                 $("input[name=igd_status_alergi][value="+currentData.asesmen.status_alergi+"]").attr('checked',true);
                               }
 
-                              if($("input[name=igd_skala_selected][value="+currentData.asesmen.ats_skala+"]").length){
+                              if(currentData.asesmen.ats_skala != ""){
                                 $("input[name=igd_skala_selected][value="+currentData.asesmen.ats_skala+"]").attr('checked',true);
                               }
 
-                              if($("input[name=igd_gangguan_perilaku][value="+currentData.asesmen.gangguan_perilaku+"]").length){
+                              if(currentData.asesmen.gangguan_perilaku != ""){
                                 $("input[name=igd_gangguan_perilaku][value="+currentData.asesmen.gangguan_perilaku+"]").attr('checked',true);
                               }
 
-                              if($("input[name=igd_gangguan_terganggu][value="+currentData.asesmen.gangguan_terganggu+"]").length){
+                              if(currentData.asesmen.gangguan_terganggu != ""){
                                 $("input[name=igd_gangguan_terganggu][value="+currentData.asesmen.gangguan_terganggu+"]").attr('checked',true);
                               }
 
-                              if($("input[name=igd_skala_nyeri][value="+currentData.asesmen.skala_nyeri+"]").length){
+                              if(currentData.asesmen.skala_nyeri != ""){
                                 $("input[name=igd_skala_nyeri][value="+currentData.asesmen.skala_nyeri+"]").attr('checked',true);
                               }
 
                               $('#igd_lokasi').val(currentData.asesmen.lokasi);
 
-                              if($("input[name=igd_frekuensi][value="+currentData.asesmen.frekuensi+"]").length){
+                              if(currentData.asesmen.frekuensi != ""){
                                 $("input[name=igd_frekuensi][value="+currentData.asesmen.frekuensi+"]").attr('checked',true);
                               }
 
-                              if($("input[name=igd_karakter_nyeri][value="+currentData.asesmen.karakter_nyeri+"]").length){
+                              if(currentData.asesmen.karakter_nyeri != ""){
                                 $("input[name=igd_karakter_nyeri][value="+currentData.asesmen.karakter_nyeri+"]").attr('checked',true);
                               }
                               
@@ -722,7 +722,7 @@ $lastExist = '';
                               
                               $('#igd_skor_nyeri').val(currentData.asesmen.skor_nyeri);
                               
-                              if($("input[name=igd_tipe_nyeri][value="+currentData.asesmen.tipe_nyeri+"]").length){
+                              if(currentData.asesmen.tipe_nyeri != ""){
                                 $("input[name=igd_tipe_nyeri][value="+currentData.asesmen.tipe_nyeri+"]").attr('checked',true);
                               }
 
