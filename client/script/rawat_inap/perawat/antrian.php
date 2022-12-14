@@ -956,7 +956,7 @@
                         me.parent().html("<button class=\"btn btn-danger btn-sm btn-delete-periksa-penunjang\" id=\"btn_delete_periksa_penunjang_" + id + "\"><span><i class=\"fa fa-trash-alt\"></i> Hapus </span></button>");
                         me.remove();
 
-                        loadPasien(uid_antrian);
+                        // loadPasien(uid_antrian);
                         autoPeriksaPenunjang("#autoPeriksaPenunjang");
                     },
                     error: function (response) {
