@@ -497,6 +497,14 @@
                                 </ol>
                             </div>
                         </div>
+                        <div class="row">
+                        <div class="col-md-3">
+                                <b>NRS</b>
+                            </div>
+                            <div class="col-md-9">
+                                <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/form/nrs1.png" width="550"/>
+                            </div>
+                        </div>
 					</div>
 					<div class="form-group col-lg-3">
 						<label>Nyeri Lainnya: </label>

@@ -301,7 +301,6 @@
                             </div>
                             <div class="col-md-9">
                                 <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/form/nrs1.png" width="550"/>
-                                    
                             </div>
                         </div>
                         <br>
