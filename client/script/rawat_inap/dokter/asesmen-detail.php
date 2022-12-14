@@ -428,7 +428,18 @@
             var request = new XMLHttpRequest();
             request.open('GET', target, true);
             request.responseType = 'blob';
+            console.log(request.response);
             request.onload = function() {
+              var ctx = $("#pdfViewer")[0].getContext('2d');
+              var img = new Image;
+              img.src = target;
+              img.onload = function() {
+                ctx.imageSmoothingEnabled = false;
+                ctx.canvas.width = img.width;
+                ctx.canvas.height = img.height;
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+              }
+              
                 var reader = new FileReader();
                 reader.readAsDataURL(request.response);
                 reader.onload =  function(e){

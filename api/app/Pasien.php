@@ -62,6 +62,10 @@ class Pasien extends Utility
                     return self::asesmen_resep_lupa($parameter);
                     break;
 
+                case 'asesmen_visit_dokter':
+                    return self::asesmen_visit_dokter($parameter);
+                    break;
+
                 default:
                     # code...
                     break;
@@ -1358,6 +1362,47 @@ class Pasien extends Utility
             $data['response_data'][$key]['created_at'] = date('d F Y', strtotime($value['created_at']));
         }
         return $data;
+    }
+
+    private function asesmen_visit_dokter($parameter){
+        $data = self::$query->select('rawat_inap', array(
+            'uid',
+            'pasien',
+            'waktu_masuk',
+            'waktu_keluar',
+            'kamar',
+            'kunjungan',
+            'bed',
+            'keterangan',
+            'dokter',
+            'asal',
+            'penjamin',
+            'created_at',
+            'updated_at'
+            ))
+            ->join('pasien', array(
+                'nama',
+                'no_rm'
+            ))
+            ->on(array(
+                array('rawat_inap.pasien', '=', 'pasien.uid')
+            ))
+            ->where(array(
+                'rawat_inap.waktu_keluar' => 'IS NULL',
+                'AND',
+                '(pasien.nama' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\'',
+                'OR',
+                'pasien.no_rm' => 'ILIKE ' . '\'%' . $_GET['search'] . '%\')',
+                'AND',
+                'rawat_inap.deleted_at' => 'IS NULL'
+            ), array(
+
+            ))
+            ->execute();
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['created_at'] = date('d F Y', strtotime($value['created_at']));
+            }
+            return $data;
     }
 
     private function get_pasien_select2($parameter)

@@ -521,6 +521,14 @@
 						</select>
 					</div>
 				</div>
+                <div class="row">
+                        <div class="col-md-3">
+                                <b>NRS</b>
+                            </div>
+                            <div class="col-md-9">
+                                <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/form/nrs1.png" width="550"/>
+                            </div>
+                        </div>
 			</div>
 		</div>
 

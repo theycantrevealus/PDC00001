@@ -563,33 +563,94 @@ class CPPT extends Utility
 
       $Dokter = $Pegawai->get_detail($value['dokter'])['response_data'][0];
       $Antrian['response_data'][$key]['dokter'] = $Dokter;
+      
 
-      $Asesmen = self::$query->select('asesmen', array(
-        'uid', 'kunjungan', 'antrian', 'pasien'
-      ))
-        ->join('asesmen_medis_' . $Departemen['poli_asesmen'], array(
-          'keluhan_utama',
-          'keluhan_tambahan',
-          'pemeriksaan_fisik',
-          'diagnosa_kerja',
-          'diagnosa_banding',
-          'icd10_kerja',
-          'icd10_banding',
-          'planning'
+      if($value['departemen'] ===__POLI_IGD__) {
+        $Asesmen = self::$query->select('asesmen', array(
+          'uid', 'kunjungan', 'antrian', 'pasien'
         ))
-        ->on(array(
-          array('asesmen_medis_' . $Departemen['poli_asesmen'] . '.asesmen', '=', 'asesmen.uid')
+          ->join('asesmen_medis_' . $Departemen['poli_asesmen'], array(
+            'keluhan_utama',
+            'keluhan_tambahan',
+            'pemeriksaan_fisik',
+            'diagnosa_kerja',
+            'diagnosa_banding',
+            'icd10_kerja',
+            'icd10_banding',
+            'planning',
+            'tekanan_darah',
+            'nadi',
+            'suhu',
+            'gcs_e',
+            'gcs_v',
+            'gcs_m',
+            'gcs_tot',
+            'status_alergi',
+            'status_alergi_text',
+            'refleks_cahaya',
+            'pupil',
+            'refleks_cahaya',
+            'rr',
+            'gangguan_perilaku',
+            'gangguan_terganggu',
+            'skala_nyeri',
+            'lokasi',
+            'frekuensi',
+            'karakter_nyeri',
+            'karakter_nyeri_text',
+            'skor_nyeri',
+            'tipe_nyeri',
+            'ats_list',
+            'ats_skala',
+            'ekg',
+            'saved_lokalis_item',
+            'skala_rasa_sakit',
+            'rad_igd',
+            'lab_igd',
+          ))
+          ->on(array(
+            array('asesmen_medis_' . $Departemen['poli_asesmen'] . '.asesmen', '=', 'asesmen.uid')
+          ))
+          ->where(array(
+            'asesmen.antrian' => '= ?',
+            'AND',
+            'asesmen.kunjungan' => '= ?',
+            'AND',
+            'asesmen.deleted_at' => 'IS NULL'
+          ), array(
+            $value['uid'], $value['kunjungan']
+          ))
+          ->execute();
+      } else {
+        $Asesmen = self::$query->select('asesmen', array(
+          'uid', 'kunjungan', 'antrian', 'pasien'
         ))
-        ->where(array(
-          'asesmen.antrian' => '= ?',
-          'AND',
-          'asesmen.kunjungan' => '= ?',
-          'AND',
-          'asesmen.deleted_at' => 'IS NULL'
-        ), array(
-          $value['uid'], $value['kunjungan']
-        ))
-        ->execute();
+          ->join('asesmen_medis_' . $Departemen['poli_asesmen'], array(
+            'keluhan_utama',
+            'keluhan_tambahan',
+            'pemeriksaan_fisik',
+            'diagnosa_kerja',
+            'diagnosa_banding',
+            'icd10_kerja',
+            'icd10_banding',
+            'planning'
+          ))
+          ->on(array(
+            array('asesmen_medis_' . $Departemen['poli_asesmen'] . '.asesmen', '=', 'asesmen.uid')
+          ))
+          ->where(array(
+            'asesmen.antrian' => '= ?',
+            'AND',
+            'asesmen.kunjungan' => '= ?',
+            'AND',
+            'asesmen.deleted_at' => 'IS NULL'
+          ), array(
+            $value['uid'], $value['kunjungan']
+          ))
+          ->execute();
+      }
+
+      
 
       $parseICD10Kerja = array();
       $ICD10Kerja = explode(',', $Asesmen['response_data'][0]['icd10_kerja']);

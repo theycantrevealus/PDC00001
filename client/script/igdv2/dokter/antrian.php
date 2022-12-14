@@ -1,8 +1,15 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/ckeditor5-build-classic/ckeditor.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.js"></script>
+<script src="<?php echo __HOSTNAME__; ?>/plugins/range-slider-master/js/rSlider.min.js"></script>
+
 <link href="<?php echo __HOSTNAME__; ?>/plugins/paginationjs/pagination.min.css" type="text/css" rel="stylesheet" />
 <script type="text/javascript">
     $(function() {
+        var savedPoint = {};
+        var currentCount = 1;
+        var canvas = $("#myCanvas");
+        var context = canvas.get(0).getContext('2d');
+        
         //var poliListRaw = <?php echo json_encode($_SESSION['poli']['response_data'][0]['poli']['response_data']); ?>;
         var poliListRaw = [];
         var poliListRawList = <?php echo json_encode($_SESSION['poli']['response_data']); ?>;
@@ -955,6 +962,129 @@
         if(poliList[0] !== undefined) {
             $("#current-poli").prepend(poliList[0]['nama']);
         }
+
+
+        function writeMessage(canvas, message, xloc, yloc, context) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.font = '18pt Calibri';
+            context.fillStyle = 'red';
+            context.fillText(message, xloc, yloc); // x,y are bottom left of text
+        }
+
+        function getMousePos(canvas, evt) {
+            var rect = $("#myCanvas").get(0).getBoundingClientRect(),
+                root = $("body");
+
+            // return relative mouse position
+            /*var mouseX = evt.clientX - rect.top - root.scrollTop();
+            var mouseY = evt.clientY - rect.left - root.scrollLeft();*/
+
+            var mouseX = evt.clientX - rect.left - 10;
+            var mouseY = evt.clientY - rect.top;
+            return {
+                x: mouseX,
+                y: mouseY
+            };
+        }
+
+        /*var canvas = document.getElementById('myCanvas');
+        var context = canvas.getContext('2d');*/
+
+
+        $("#myCanvas").click(function(evt) {
+            var c= 215;
+            var mousePos = getMousePos(canvas, evt);
+            var message = String.fromCharCode(c) + " " + currentCount;
+
+
+
+            if(savedPoint["point_" + currentCount] === undefined) {
+                savedPoint["point_" + currentCount] = {
+                    message: message,
+                    keterangan: "",
+                    x: 0,
+                    y: 0
+                };
+            }
+
+            savedPoint["point_" + currentCount] = {
+                message: message,
+                keterangan: "",
+                x: mousePos.x,
+                y: mousePos.y
+            };
+
+
+            $("#lokalis_value tbody tr").each(function(e) {
+                var keterangan = $(this).find("td:eq(1) textarea").val();
+                savedPoint["point_" + (parseInt(e) + 1)].keterangan = keterangan;
+            });
+
+            refreshLokalis(savedPoint, canvas, context);
+            //writeMessage(canvas, message, mousePos.x -10, mousePos.y, context);
+            currentCount++;
+        });
+
+        function refreshLokalis(dataSet, canvas, context) {
+            var savedPoint = {};
+
+            $("#lokalis_value tbody tr").remove();
+
+            var autoNum = 1;
+            context.clearRect(0, 0, canvas.width(), canvas.height());
+
+            for(var key in dataSet) {
+                var c= 215;
+                var message = String.fromCharCode(c) + " " + autoNum;
+
+                var newRow = document.createElement("TR");
+                $(newRow).attr({
+                    "id": "row-" + key
+                });
+                var newNum = document.createElement("TD");
+                $(newNum).html(autoNum);
+                var newRemark = document.createElement("TD");
+                var newAct = document.createElement("TD");
+
+                var remark = document.createElement("TEXTAREA");
+                var deleteBtn = document.createElement("BUTTON");
+
+                $(remark).addClass("form-control").attr({
+                    "placeholder": "Keterangan"
+                }).attr({
+                    "id": "keterangan_lokalis_" + key
+                }).val(dataSet[key].keterangan);
+
+                $(deleteBtn).addClass("btn btn-danger btnHapusLokalis").html("<i class=\"fa fa-times\"></i>").attr({
+                    id: "hapus-" + key
+                });
+
+                $(newRemark).append(remark);
+                $(newAct).append(deleteBtn);
+
+                $(newRow).append(newNum);
+                $(newRow).append(newRemark);
+                $(newRow).append(newAct);
+
+                $("#lokalis_value tbody").append(newRow);
+
+                writeMessage(canvas, message, dataSet[key].x, dataSet[key].y, context);
+
+                autoNum++;
+            }
+        }
+
+        $("body").on("click", ".btnHapusLokalis", function () {
+            var id = $(this).attr("id").split("-");
+            id = id[id.length - 1];
+
+            $("#row-" + id).remove();
+            delete savedPoint[id];
+            refreshLokalis(savedPoint, canvas, context);
+
+            return false;
+        });
+
 
         function generateTindakan2(target, penjamin) {
             var returnedData;
@@ -3246,6 +3376,137 @@
                         keterangan_frenulum: keterangan_frenulum,
 
                         odontogram: JSON.stringify(metaSelOrdo)
+                    };
+                } else if(antrianData.poli_info.uid === __POLI_IGD__) {
+                    var gcs_e = $("#igd_gcs_e").val();
+                    var gcs_v = $("#igd_gcs_v").val();
+                    var gcs_m = $("#igd_gcs_m").val();
+                    var gcs_tot = $("#igd_gcs_tot").val();
+                    var status_alergi = $("input[name=\"igd_status_alergi\"]:checked").val();
+                    var status_alergi_text = $("#igd_status_alergi_text").val();
+                    var refleks_cahaya = $("#igd_refleks_cahaya").val();
+                    var pupil = $("input[name=\"igd_pupil\"]:checked").val();
+                    var refleks_cahaya = $("#igd_refleks_cahaya").val();
+                    var rr = $("#igd_rr").val();
+                    var suhu = $("#igd_suhu").val();
+                    var tekanan_darah = $("#igd_tekanan_darah").val();
+                    var nadi = $("#igd_nadi").val();
+                    var gangguan_perilaku = $("input[name=\"igd_gangguan_perilaku\"]:checked").val();
+                    var gangguan_terganggu = $("input[name=\"igd_gangguan_terganggu\"]:checked").val();
+                    var skala_nyeri = $("input[name=\"igd_skala_nyeri\"]:checked").val();
+                    var lokasi = $("#igd_lokasi").val();
+                    var frekuensi = $("input[name=\"igd_frekuensi\"]:checked").val();
+                    var karakter_nyeri = $("input[name=\"igd_karakter_nyeri\"]:checked").val();
+                    var karakter_nyeri_text = $("#igd_karakter_nyeri_text").val();
+                    var skor_nyeri = $("#igd_skor_nyeri").val();
+                    var tipe_nyeri = $("input[name=\"igd_tipe_nyeri\"]:checked").val();
+                    // var skala_rasa_sakit = mySlider.getValue();
+
+                    var ats_list = [];
+                    $("input[name=\"ats_check\"]").each(function() {
+                        if($(this).is(":checked")) {
+                            if(ats_list.indexOf($(this).val()) < 0) {
+                                ats_list.push($(this).val());
+                            }
+                        } else {
+                            delete ats_list[ats_list.indexOf($(this).val())];
+                        }
+                    });
+
+                    var ats_skala = $("input[name=\"igd_skala_selected\"]:checked").val();
+                    var ekg = $("#igd_ekg").val();
+                    var lab_igd = $("#igd_lab_igd").val();
+                    var rad_igd = $("#igd_rad_igd").val();
+
+                    var savedLokalisItem = {};
+
+                    for(var lokalisKey in savedPoint) {
+                        if(savedLokalisItem[lokalisKey] === undefined) {
+                            savedLokalisItem[lokalisKey] = {
+                                x: 0,
+                                y: 0,
+                                message: "",
+                                keterangan: ""
+                            };
+                        }
+
+                        savedLokalisItem[lokalisKey] = {
+                            x: savedPoint[lokalisKey].x,
+                            y: savedPoint[lokalisKey].y,
+                            message: savedPoint[lokalisKey].message,
+                            keterangan: $("#keterangan_lokalis_" + lokalisKey).val()
+                        };
+                    }
+
+                    formData = {
+                        request: "update_asesmen_medis",
+                        kunjungan: kunjungan,
+                        antrian: antrian,
+                        penjamin: penjamin,
+                        pasien: pasien,
+                        poli: poli,
+                        //==============================
+                        keluhan_utama: keluhanUtamaData,
+                        keluhan_tambahan: keluhanTambahanData,
+                        tekanan_darah: parseFloat(tekanan_darah),
+                        nadi: parseFloat(nadi),
+                        suhu: parseFloat(suhu),
+                        pernafasan: parseFloat(pernafasan),
+                        berat_badan: parseFloat(beratBadan),
+                        tinggi_badan: parseFloat(tinggiBadan),
+                        lingkar_lengan_atas: parseFloat(lingkarLengan),
+                        icd9: selectedICD9,
+                        pemeriksaan_fisik: pemeriksaanFisikData,
+                        //icd10_kerja: parseInt(icd10Kerja),
+                        icd10_kerja: selectedICD10Kerja,
+                        diagnosa_kerja: diagnosaKerjaData,
+                        //icd10_banding: parseInt(icd10Banding),
+                        icd10_banding: selectedICD10Banding,
+                        diagnosa_banding: diagnosaBandingData,
+                        planning: planningData,
+                        charge_invoice: charge_invoice,
+                        /*anamnesa:terapisAnamnesa,
+                        tataLaksana: terapisTataLaksana,
+                        evaluasi: terapisEvaluasi,
+                        anjuranBulan: parseFloat(terapisAnjuranBulan),
+                        anjuranMinggu: parseFloat(terapisAnjuranMinggu),
+                        suspek: terapisSuspek,
+                        hasil:terapisHasil,
+                        kesimpulan:terapisKesimpulan,
+                        rekomendasi:terapisRekomendasi,*/
+                        //==============================
+                        tindakan:tindakan,
+                        resep: resep,
+                        keteranganResep: keteranganResep,
+                        keteranganRacikan: keteranganRacikan,
+                        racikan: racikan,
+                        // editorAlergiObat: editorAlergiObat,
+
+                        gcs_e: gcs_e,
+                        gcs_v: gcs_v,
+                        gcs_m: gcs_m,
+                        gcs_tot: gcs_tot,
+                        status_alergi: status_alergi,
+                        status_alergi_text: status_alergi_text,
+                        refleks_cahaya: refleks_cahaya,
+                        pupil: pupil,
+                        rr: rr,
+                        gangguan_perilaku: gangguan_perilaku,
+                        gangguan_terganggu: gangguan_terganggu,
+                        skala_nyeri: skala_nyeri,
+                        lokasi: lokasi,
+                        frekuensi: frekuensi,
+                        karakter_nyeri: karakter_nyeri,
+                        karakter_nyeri_text: karakter_nyeri_text,
+                        skor_nyeri: skor_nyeri,
+                        tipe_nyeri: tipe_nyeri,
+                        ats_list: ats_list,
+                        ats_skala: ats_skala,
+                        ekg: ekg,
+                        lab_igd: lab_igd,
+                        rad_igd: rad_igd,
+                        savedLokalisItem: savedLokalisItem,
+                        // skala_rasa_sakit: skala_rasa_sakit
                     };
                 } else if(antrianData.poli_info.uid === __POLI_MATA__) {
                     var mataDataList =  {};

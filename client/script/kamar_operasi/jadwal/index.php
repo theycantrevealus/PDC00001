@@ -12,7 +12,7 @@
 				dataSrc:function(response) {
                     var data = response.response_package.response_data;
 
-                    console.clear();
+                    // console.clear();
                     console.log(response);
                     
 					return (data !== undefined && data !== null) ? data : [];
@@ -110,9 +110,17 @@
 									`</button>` +
 								`</div>`;
 
-						} else if (row['status_pelaksanaan'] == 'D') {
-							btn = "";
-						}
+						} else if (row['status_pelaksanaan'] == 'D' && row['asesmen'] == null) {
+							btn = "" +
+								`<div class="btn-group col-md-12" role="group" aria-label="Basic example">` +
+									`<a class="btn btn-info btn-sm btn_asesmen wrap_content" href="${__HOSTNAME__}/kamar_operasi/antrian/${row["uid"]}" data-uid="${row['uid']}" data-pasien="${row['uid_pasien']}" data-dokter="${row['uid_dokter']}" data-kunjungan="${row['kunjungan']}" data-penjamin="${row['penjamin']}" data-toggle='tooltip' title='Tambah Asesmen'>` +
+										`<span><i class="fa fa-edit"></i> Tambah Asesmen</span>` +
+									`</a> ` +
+									
+								`</div>`;
+						} else if(row['asesmen']['uid'] != null){
+                            btn =''
+                        }
 
 						return btn;
 					}
@@ -509,6 +517,42 @@
             }
             rebaseResep();
         });
+
+        // $("body").on('click','.btn_asesmen',function(){
+        //     var uid = $(this).data('uid');
+        //     var penjamin = $(this).data('penjamin');
+        //     var kunjungan = $(this).data('kunjungan');
+        //     var pasien = $(this).data('pasien');
+        //     var dokter = $(this).data('dokter');
+
+        //     var formData = {
+        //         request: "tambah_asesmen",
+        //         penjamin: penjamin,
+        //         kunjungan: kunjungan,
+        //         pasien: pasien,
+        //         dokter: dokter
+        //     };
+
+        //     console.log(formData);
+
+        //     $.ajax({
+        //         url: __HOSTAPI__ + "/KamarOperasi",
+        //         async: false,
+        //         beforeSend: function(request) {
+        //         request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+        //         },
+        //         type: "POST",
+        //         data: formData,
+        //         success: function(response) {
+        //         console.log(response);
+        //             //location.href = __HOSTNAME__ + "/kamar_operasi/antrian/" + response.response_package.response_values[0] + "/"+uid;
+        //         },
+        //         error: function(response) {
+        //         console.log(response);
+        //         }
+        //     });
+            
+        // });
 
 
         $("#btn-selesai-operasi").click(function () {
