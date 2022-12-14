@@ -3413,6 +3413,8 @@
 
                     var ats_skala = $("input[name=\"igd_skala_selected\"]:checked").val();
                     var ekg = $("#igd_ekg").val();
+                    var lab_igd = $("#igd_lab_igd").val();
+                    var rad_igd = $("#igd_rad_igd").val();
 
                     var savedLokalisItem = {};
 
@@ -3499,6 +3501,8 @@
                         ats_list: ats_list,
                         ats_skala: ats_skala,
                         ekg: ekg,
+                        lab_igd: lab_igd,
+                        rad_igd: rad_igd,
                         savedLokalisItem: savedLokalisItem,
                         // skala_rasa_sakit: skala_rasa_sakit
                     };

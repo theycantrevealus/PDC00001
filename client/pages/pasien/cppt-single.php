@@ -882,11 +882,11 @@ $keteranganRacikan = '';
                                                                 </div>
                                                                 <div class="form-group">
                                                                     Radiologi
-                                                                    <textarea type="text" class="form-control" id="igd_radiologi"></textarea>
+                                                                    <textarea type="text" class="form-control" id="igd_rad_igd"></textarea>
                                                                 </div>
                                                                 <div class="form-group">
                                                                     Laboratorium
-                                                                    <textarea type="text" class="form-control" id="igd_radiologi"></textarea>
+                                                                    <textarea type="text" class="form-control" id="igd_lab_igd"></textarea>
                                                                 </div>
                                                             </div>
                                                         </div>

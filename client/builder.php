@@ -726,7 +726,7 @@ $lastExist = '';
                                 $("input[name=igd_tipe_nyeri][value="+currentData.asesmen.tipe_nyeri+"]").attr('checked',true);
                               }
 
-                              let ats_list = JSON.parse(currentData.asesmen.ats_list)
+                              let ats_list = (currentData.asesmen.ats_list !== undefined && currentData.asesmen.ats_list !== "") ? JSON.parse(currentData.asesmen.ats_list) : [];
                               for(ats in ats_list){
                                   $("input[name=ats_check][value="+ats_list[ats]+"]").attr('checked',true);
                               }
@@ -765,8 +765,8 @@ $lastExist = '';
                             }
 
                             $('#igd_ekg').val(currentData.asesmen.ekg)
-                            $('#igd_radiologi').val(currentData.asesmen.radiologi)
-                            $('#igd_laboratorium').val(currentData.asesmen.laboratorium)
+                            $('#igd_rad_igd').val(currentData.asesmen.rad_igd)
+                            $('#igd_lab_igd').val(currentData.asesmen.lab_igd)
                             
 
                             
