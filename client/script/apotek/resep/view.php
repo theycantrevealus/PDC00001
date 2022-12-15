@@ -103,7 +103,7 @@
         }
 
         $.ajax({
-            url:__HOSTAPI__ + "/Apotek/detail_resep_3/" + __PAGES__[3],
+            url:__HOSTAPI__ + "/Apotek/detail_resep_2/" + __PAGES__[3],
             async:false,
             beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
@@ -1060,11 +1060,11 @@
                                     $("#batch_obat_" + rowTarget).attr("harga", finalTotal);
 
                                     //Calculate harga
-                                    $("#harga_obat_" + rowTarget).html(number_format(finalTotal * total_kebutuhan, 2, ".", ",")).attr({
-                                        "harga": (finalTotal * total_kebutuhan)
+                                    $("#harga_obat_" + rowTarget).html(number_format(finalTotal * total_kebutuhan_resep, 2, ".", ",")).attr({
+                                        "harga": (finalTotal * total_kebutuhan_resep)
                                     });
 
-                                    final_price = (finalTotal * total_kebutuhan);
+                                    final_price = (finalTotal * total_kebutuhan_resep);
                                 }
 
 
