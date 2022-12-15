@@ -1418,6 +1418,7 @@ class Apotek extends Utility
       $updateProgress = array();
       $tempProgress = array();
 
+      $stockloginsert = false;
       foreach ($usedBatch as $bKey => $bValue) {
         //Stok Sebelum Update
         $getStok = self::$query->select('inventori_stok', array(
@@ -1501,7 +1502,7 @@ class Apotek extends Utility
                 ->execute();
               array_push($tempProgress, $TempStokRacikan);
             }
-            if (($TempStokResep['response_result'] > 0 || $TempStokRacikan['response_result'] > 0)) {
+            if (($TempStokResep['response_result'] > 0 || $TempStokRacikan['response_result'] > 0) && $stockloginsert == false) {
               $updateStok = self::$query->update('inventori_stok', array(
                 'stok_terkini' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty']))
               ))
@@ -1532,6 +1533,7 @@ class Apotek extends Utility
                   'keterangan' => ''
                 ))
                   ->execute();
+                $stockloginsert = true;
                 $updateResult += $stokLog['response_result'];
               }
               array_push($updateProgress, $updateStok);
