@@ -676,9 +676,9 @@ class Apotek extends Utility
 
       // TODO : Set Per Batch Hilangkan
 
-      if(!in_array($uniqueBatch,$value['batch']) && !in_array($uniqueItem,$value['item'])){ 
-        array_push($uniqueBatch, $value['batch']);
-        array_push($uniqueItem, $value['item']);
+      if(!in_array($value['batch'],$uniqueBatch) && !in_array($value['item'],$uniqueItem)){ 
+        array_push($uniqueBatch,$value['batch']);
+        array_push($uniqueItem,$value['item']);
         array_push($usedBatch, array(
           'batch' => $value['batch'],
           'barang' => $value['item'],
@@ -710,9 +710,9 @@ class Apotek extends Utility
             }
 
             if ($bValue['stok_terkini'] > 0) {
-              if(!in_array($uniqueBatch,$bValue['batch']) && !in_array($uniqueItem,$value['item'])){ 
-                array_push($uniqueBatch, $bValue['batch']);
-                array_push($uniqueItem, $value['item']);
+              if(!in_array($bValue['batch'],$uniqueBatch) && !in_array($value['item'],$uniqueItem)){ 
+                array_push( $uniqueBatch,$bValue['batch']);
+                array_push($uniqueItem,$value['item']);
               array_push($usedBatch, array(
                 'batch' => $bValue['batch'],
                 'barang' => $value['item'],
@@ -736,9 +736,9 @@ class Apotek extends Utility
             }
 
             if ($kebutuhan > 0) {
-              if(!in_array($uniqueBatch,$bValue['batch']) && !in_array($uniqueItem,$value['item'])){ 
-                array_push($uniqueBatch, $bValue['batch']);
-                array_push($uniqueItem, $value['item']);
+              if(!in_array($bValue['batch'],$uniqueBatch) && !in_array($value['item'],$uniqueItem)){ 
+                array_push( $uniqueBatch,$bValue['batch']);
+                array_push($uniqueItem,$value['item']);
               array_push($usedBatch, array(
                 'batch' => $bValue['batch'],
                 'barang' => $value['item'],
@@ -752,7 +752,6 @@ class Apotek extends Utility
         }
       }
     }
-    
 
     $racikan_batch_list = array();
 
@@ -1260,6 +1259,8 @@ class Apotek extends Utility
           }
         }
       }
+
+      return $uniqueBatch;
 
       //Case Racikan
       $updateResult = 0;
