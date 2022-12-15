@@ -1028,7 +1028,9 @@
           denyButtonText: "Tidak",
         }).then((result) => {
           if (result.isConfirmed) {
-            console.log(dokter);
+            $("#btnSelesai").attr({
+                  "disabled": "disabled"
+            })
             $.ajax({
               url: __HOSTAPI__ + "/Apotek",
               async: false,
