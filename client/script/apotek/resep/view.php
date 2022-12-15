@@ -2501,10 +2501,18 @@
             var allowProc = false;
             $(".check_stock_apotek").each(function() {
                 if ($(this).hasClass("text-danger")) {
-                allowProc = false;
-                return false;
+                    $parent = $(this).parent();
+
+                    if($parent.children().hasClass("text-success")){
+                        allowProc = true;
+                    }else{
+                        allowProc = false;
+                        return false; 
+                    }
+
+                    
                 } else {
-                allowProc = true;
+                    allowProc = true;
                 }
             });
             // ------------------------- endCode ------------------------
