@@ -103,7 +103,7 @@
         }
 
         $.ajax({
-            url:__HOSTAPI__ + "/Apotek/detail_resep/" + __PAGES__[3],
+            url:__HOSTAPI__ + "/Apotek/detail_resep_3/" + __PAGES__[3],
             async:false,
             beforeSend: function(request) {
                 request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
