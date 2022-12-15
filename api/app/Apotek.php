@@ -1418,7 +1418,6 @@ class Apotek extends Utility
       $updateProgress = array();
       $tempProgress = array();
 
-      $stockloginsert = false;
       foreach ($usedBatch as $bKey => $bValue) {
         //Stok Sebelum Update
         $getStok = self::$query->select('inventori_stok', array(
@@ -1502,7 +1501,7 @@ class Apotek extends Utility
                 ->execute();
               array_push($tempProgress, $TempStokRacikan);
             }
-            if (($TempStokResep['response_result'] > 0 || $TempStokRacikan['response_result'] > 0) && $stockloginsert == false) {
+            if (($TempStokResep['response_result'] > 0 || $TempStokRacikan['response_result'] > 0)) {
               $updateStok = self::$query->update('inventori_stok', array(
                 'stok_terkini' => (floatval($getStok['response_data'][0]['stok_terkini']) - floatval($bValue['qty']))
               ))
@@ -1533,7 +1532,6 @@ class Apotek extends Utility
                   'keterangan' => ''
                 ))
                   ->execute();
-                $stockloginsert = true;
                 $updateResult += $stokLog['response_result'];
               }
               array_push($updateProgress, $updateStok);
@@ -1680,57 +1678,57 @@ class Apotek extends Utility
       $InventoriBatch = $Inventori->get_item_batch($value['item']);
 
       $kebutuhan = floatval($value['qty']);
-      foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
-        if ($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
-        {
-          if ($kebutuhan >= $bValue['stok_terkini']) {
-            if ($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
-              //Racikan tidak usah charge stok karena stok dianggap habis diproses
-              if ($bValue['stok_terkini'] > 0) {
-                array_push($usedBatchInap, array(
-                  'batch' => $bValue['batch'],
-                  'barang' => $value['item'],
-                  'gudang' => $bValue['gudang']['uid'],
-                  'qty' => $bValue['stok_terkini']
-                ));
-                $kebutuhan -= $bValue['stok_terkini'];
-              }
-            }
+      // foreach ($InventoriBatch['response_data'] as $bKey => $bValue) {
+      //   if ($bValue['gudang']['uid'] === $UserData['data']->gudang) //Ambil gudang dari user yang sedang login
+      //   {
+      //     if ($kebutuhan >= $bValue['stok_terkini']) {
+      //       if ($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
+      //         //Racikan tidak usah charge stok karena stok dianggap habis diproses
+      //         if ($bValue['stok_terkini'] > 0) {
+      //           array_push($usedBatchInap, array(
+      //             'batch' => $bValue['batch'],
+      //             'barang' => $value['item'],
+      //             'gudang' => $bValue['gudang']['uid'],
+      //             'qty' => $bValue['stok_terkini']
+      //           ));
+      //           $kebutuhan -= $bValue['stok_terkini'];
+      //         }
+      //       }
 
-            if ($bValue['stok_terkini'] > 0) {
-              array_push($usedBatch, array(
-                'batch' => $bValue['batch'],
-                'barang' => $value['item'],
-                'gudang' => $bValue['gudang']['uid'],
-                'qty' => $bValue['stok_terkini']
-              ));
-              $kebutuhan -= $bValue['stok_terkini'];
-            }
-          } else {
-            if ($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
-              if ($kebutuhan > 0) {
-                array_push($usedBatchInap, array(
-                  'batch' => $bValue['batch'],
-                  'barang' => $value['item'],
-                  'gudang' => $bValue['gudang']['uid'],
-                  'qty' => $kebutuhan
-                ));
-                $kebutuhan = 0;
-              }
-            }
+      //       if ($bValue['stok_terkini'] > 0) {
+      //         array_push($usedBatch, array(
+      //           'batch' => $bValue['batch'],
+      //           'barang' => $value['item'],
+      //           'gudang' => $bValue['gudang']['uid'],
+      //           'qty' => $bValue['stok_terkini']
+      //         ));
+      //         $kebutuhan -= $bValue['stok_terkini'];
+      //       }
+      //     } else {
+      //       if ($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
+      //         if ($kebutuhan > 0) {
+      //           array_push($usedBatchInap, array(
+      //             'batch' => $bValue['batch'],
+      //             'barang' => $value['item'],
+      //             'gudang' => $bValue['gudang']['uid'],
+      //             'qty' => $kebutuhan
+      //           ));
+      //           $kebutuhan = 0;
+      //         }
+      //       }
 
-            if ($kebutuhan > 0) {
-              array_push($usedBatch, array(
-                'batch' => $bValue['batch'],
-                'barang' => $value['item'],
-                'gudang' => $bValue['gudang']['uid'],
-                'qty' => $kebutuhan
-              ));
-              $kebutuhan = 0;
-            }
-          }
-        }
-      }
+      //       if ($kebutuhan > 0) {
+      //         array_push($usedBatch, array(
+      //           'batch' => $bValue['batch'],
+      //           'barang' => $value['item'],
+      //           'gudang' => $bValue['gudang']['uid'],
+      //           'qty' => $kebutuhan
+      //         ));
+      //         $kebutuhan = 0;
+      //       }
+      //     }
+      //   }
+      // }
     }
 
     $racikan_batch_list = array();
