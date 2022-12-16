@@ -1260,7 +1260,6 @@ class Apotek extends Utility
         }
       }
 
-      return $uniqueBatch;
 
       //Case Racikan
       $updateResult = 0;
