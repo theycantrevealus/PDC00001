@@ -2418,6 +2418,8 @@ class Invoice extends Utility
             ))
             ->execute();
 
+        $specialCaseRekap = array(4, 15, 20, 27, 28, 29);
+
         foreach ($parameter['invoice_item'] as $key => $value) { //Update status bayar pada invoice item
             $getPaymentDetail = self::$query->select('invoice_detail', array(
                 'invoice',
@@ -2466,12 +2468,17 @@ class Invoice extends Utility
                 ->execute();
 
             if ($paymentDetail['response_result'] > 0) { //Berhasil Bayar
+                $allowMiscRecap = true;
 
                 //Jika Resep maka ubah status jadi lunas agar apotek bisa proses obat
                 if (
                     // count($ResepMaster['response_data']) > 0 &&
                     $getPaymentDetail['response_data'][0]['item_type'] == 'master_inv'
                 ) { //Obat
+
+                    // Rekap
+                    self::rekap_log(floatval($getPaymentDetail['response_data'][0]['subtotal']), 27);
+                    $allowMiscRecap = false;
 
                     foreach ($ResepMaster['response_data'] as $RMKey => $RMValue) {
                         $updateResep = self::$query->update('resep_detail', array(
@@ -2512,6 +2519,7 @@ class Invoice extends Utility
                 if (
                     $getPaymentDetail['response_data'][0]['item_type'] == 'master_tindakan'
                 ) { //Tindakan Check LAB / RAD
+
                     $TindakanInfo = self::$query->select('master_tindakan', array(
                         'uid',
                         'kelompok'
@@ -2528,6 +2536,12 @@ class Invoice extends Utility
                         $TindakanInfo['response_data'][0]['kelompok'] === 'LAB' ||
                         $TindakanInfo['response_data'][0]['kelompok'] === 'RAD'
                     ) {
+                        if($TindakanInfo['response_data'][0]['kelompok'] === 'LAB') {
+                            self::rekap_log(floatval($getPaymentDetail['response_data'][0]['subtotal']), 28);
+                        } else if($TindakanInfo['response_data'][0]['kelompok'] === 'RAD') {
+                            self::rekap_log(floatval($getPaymentDetail['response_data'][0]['subtotal']), 29);
+                        }
+                        $allowMiscRecap = false;
                         $chargedItemTindakan = array();
                         $chargedOrder = array();
                         //Check Terbayar
@@ -3012,7 +3026,50 @@ class Invoice extends Utility
             } else {
                 $worker['response_message'] = '';
             }
+
+            // Rekap tagihan per poli
+            $TemplateSet = self::$query->select('laporan_rekap_pendapatan_template', array('id'))->where(array('identifier' => '= ?'), array($parameter['poli']))->execute();
+            
+            if($allowMiscRecap) {
+                $checkRekap = self::$query->select('laporan_rekap_pendapatan', array('id', 'total'))
+                    ->where(array('
+                        template_rekap' => '= ?',
+                        'AND',
+                        'tahun' => '= ?',
+                        'AND',
+                        'bulan' => '= ?'
+                    ), array(
+                        $TemplateSet['response_data'][0]['id'], date('Y'), date('m')
+                    ))->execute();
+                    
+                if(count($checkRekap['response_data']) > 0) {
+                    $rekapInv = self::$query->update('laporan_rekap_pendapatan', array(
+                        'total' => floatval($checkRekap['response_data'][0]['total']) + $totalPayment
+                    ))
+                        ->where(array(
+                            'id' => '= ?'
+                        ), array(
+                            $checkRekap['response_data'][0]['id']
+                        ))
+                        ->execute();
+                } else {
+                    // Get template
+                    
+                    if(count($TemplateSet['response_data']) > 0) {
+                        $rekapInv = self::$query->insert('laporan_rekap_pendapatan', array(
+                            'total' => $totalPayment,
+                            'template_rekap' => $TemplateSet['response_data'][0]['id'],
+                            'bulan' => date('m'),
+                            'tahun' => date('Y')
+                        ))
+                            ->execute();
+                    }
+                }
+            }
+            
+
             $worker['parameter_list'] = $parameter;
+            $worker['rekap'] = $rekapInv;
             $worker['antrian_item'] = $antrian_item;
             $worker['konsul_request'] = $KonsulRequest;
             $worker['response_notifier'] = $notifier_target;
@@ -3021,6 +3078,40 @@ class Invoice extends Utility
             return $allowAntrian;
         }
 
+    }
+
+    private function rekap_log($totalPayment, $template) {
+        $checkRekap = self::$query->select('laporan_rekap_pendapatan', array('id', 'total'))
+            ->where(array('
+                template_rekap' => '= ?',
+                'AND',
+                'tahun' => '= ?',
+                'AND',
+                'bulan' => '= ?'
+            ), array(
+                $template, date('Y'), date('m')
+            ))->execute();
+            
+        if(count($checkRekap['response_data']) > 0) {
+            $rekapInv = self::$query->update('laporan_rekap_pendapatan', array(
+                'total' => floatval($checkRekap['response_data'][0]['total']) + $totalPayment
+            ))
+                ->where(array(
+                    'id' => '= ?'
+                ), array(
+                    $checkRekap['response_data'][0]['id']
+                ))
+                ->execute();
+        } else {
+            // Get template
+            $rekapInv = self::$query->insert('laporan_rekap_pendapatan', array(
+                'total' => $totalPayment,
+                'template_rekap' => $template,
+                'bulan' => date('m'),
+                'tahun' => date('Y')
+            ))
+                ->execute();
+        }
     }
 
     private function retur_biaya($parameter)

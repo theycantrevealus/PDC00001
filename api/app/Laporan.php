@@ -23,6 +23,14 @@ class Laporan extends Utility
         self::$query = new Query(self::$pdo);
     }
 
+    public function __GET__($parameter = array()) {
+        switch($parameter[1]) {
+            case 'template_rekap':
+                return self::template_rekap($parameter);
+                break;
+        }
+    }
+
     public function __POST__($parameter = array())
     {
         switch ($parameter['request']) {
@@ -41,8 +49,36 @@ class Laporan extends Utility
             case 'laboratorium':
                 return self::report_laboratorium($parameter);
                 break;
+            case 'recalculate':
+                return '';
+                break;
     
         }
+    }
+
+    private function template_rekap($parameter) {
+        $data = self::$query->select('laporan_rekap_pendapatan_template', array(
+            'id', 'kategori', 'subkategori', 'identifier'
+        ))
+            ->where(array(
+                'deleted_at' => 'IS NULL'
+            ), array())
+            ->execute();
+        foreach($data['response_data'] as $key => $value) {
+            $count = self::$query->select('laporan_rekap_pendapatan', array(
+                'id', 'bulan', 'tahun', 'total'
+            ))
+                ->where(array(
+                    'template_rekap' => '= ?',
+                    'AND',
+                    'bulan' => '= ?',
+                    'AND',
+                    'tahun' => '= ?'
+                ), array($value['id'], $parameter[2], $parameter[3]))
+                ->execute();
+            $data['response_data'][$key]['total'] = floatval($count['response_data'][0]['total']);
+        }
+        return $data;
     }
 
     private function penyakit($parameter) {
