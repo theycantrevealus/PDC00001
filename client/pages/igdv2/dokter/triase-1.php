@@ -294,6 +294,16 @@
                                 </div>
                             </div>
                         </div>
+                        <br>
+                        <div class="row">
+                        <div class="col-md-3">
+                                <b>NRS</b>
+                            </div>
+                            <div class="col-md-9">
+                                <img src="<?php echo __HOSTNAME__; ?>/template/assets/images/form/nrs1.png" width="550"/>
+                            </div>
+                        </div>
+                        <br>
                         <!-- <div class="row" style="margin-top: 50px; padding: 0px 100px;">
                             <div class="col-md-12 scale-loader-image" id="scale-loader-image"></div>
                             <div class="col-md-12" id="scale-loader-define"></div>
@@ -346,10 +356,10 @@
                                                     <input type="checkbox" name="ats_check" value="1_8" /> Kejang berkepanjangan(lebih dari 10 menit/tidak berhenti)
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name="ats_check" value="1_9" /> Henti Jantung
+                                                    <input type="checkbox" name="ats_check" value="1_9" /> Indra Vena over dosis tidak respon atau hipoventilasi
                                                 </li>
                                                 <li>
-                                                    <input type="checkbox" name="ats_check" value="1_10" /> Henti Jantung
+                                                    <input type="checkbox" name="ats_check" value="1_10" /> Gangguan perilaku berat dengan ancaman tindak kekerasan / destruktif
                                                 </li>
                                             </ul>
                                         </td>

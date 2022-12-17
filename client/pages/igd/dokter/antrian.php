@@ -29,7 +29,7 @@
 		<div class="col-lg-12 col-md-12">
 			<div class="z-0">
 				<ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-asesmen-dokter">
-					<!--<li class="nav-item">
+					<li class="nav-item">
 						<a href="#tab-poli-1" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
 							<span class="nav-link__count">
 								<i class="fa fa-address-book"></i>
@@ -60,7 +60,7 @@
 							</span>
 							Asesmen Medis 03
 						</a>
-					</li>-->
+					</li>
                     <?php
                     if(in_array(__UIDFISIOTERAPI__, $PoliList)) {
                     ?>

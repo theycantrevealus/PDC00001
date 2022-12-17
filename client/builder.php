@@ -668,6 +668,71 @@ $lastExist = '';
                           var context = canvas.get(0).getContext('2d');
                           var savedPoint = {};
 
+                          console.log(currentData.asesmen);
+
+                          if(currentData.asesmen !== "") {
+                              $('#igd_gcs_e').val(currentData.asesmen.gcs_e);
+                              $('#igd_gcs_v').val(currentData.asesmen.gcs_v);
+                              $('#igd_gcs_m').val(currentData.asesmen.gcs_m);
+                              $('#igd_gcs_tot').val(currentData.asesmen.gcs_tot);
+                              $('#igd_tekanan_darah').val(currentData.asesmen.tekanan_darah);
+                              $('#igd_nadi').val(currentData.asesmen.nadi);
+                              
+                              $('#igd_refleks_cahaya').val(currentData.asesmen.refleks_cahaya);
+                              $('#igd_rr').val(currentData.asesmen.rr);
+                              $('#igd_suhu').val(currentData.asesmen.suhu);
+                             
+                              $('#igd_status_alergi_text').val(currentData.asesmen.status_alergi_text);
+
+                              if(currentData.asesmen.pupil != ""){
+                                $("input[name=igd_pupil][value="+currentData.asesmen.pupil+"]").attr('checked',true);
+                              }
+
+                              if(currentData.asesmen.status_alergi != ""){
+                                $("input[name=igd_status_alergi][value="+currentData.asesmen.status_alergi+"]").attr('checked',true);
+                              }
+
+                              if(currentData.asesmen.ats_skala != ""){
+                                $("input[name=igd_skala_selected][value="+currentData.asesmen.ats_skala+"]").attr('checked',true);
+                              }
+
+                              if(currentData.asesmen.gangguan_perilaku != ""){
+                                $("input[name=igd_gangguan_perilaku][value="+currentData.asesmen.gangguan_perilaku+"]").attr('checked',true);
+                              }
+
+                              if(currentData.asesmen.gangguan_terganggu != ""){
+                                $("input[name=igd_gangguan_terganggu][value="+currentData.asesmen.gangguan_terganggu+"]").attr('checked',true);
+                              }
+
+                              if(currentData.asesmen.skala_nyeri != ""){
+                                $("input[name=igd_skala_nyeri][value="+currentData.asesmen.skala_nyeri+"]").attr('checked',true);
+                              }
+
+                              $('#igd_lokasi').val(currentData.asesmen.lokasi);
+
+                              if(currentData.asesmen.frekuensi != ""){
+                                $("input[name=igd_frekuensi][value="+currentData.asesmen.frekuensi+"]").attr('checked',true);
+                              }
+
+                              if(currentData.asesmen.karakter_nyeri != ""){
+                                $("input[name=igd_karakter_nyeri][value="+currentData.asesmen.karakter_nyeri+"]").attr('checked',true);
+                              }
+                              
+                              $('#igd_karakter_nyeri_text').val(currentData.asesmen.karakter_nyeri_text);
+                              
+                              $('#igd_skor_nyeri').val(currentData.asesmen.skor_nyeri);
+                              
+                              if(currentData.asesmen.tipe_nyeri != ""){
+                                $("input[name=igd_tipe_nyeri][value="+currentData.asesmen.tipe_nyeri+"]").attr('checked',true);
+                              }
+
+                              let ats_list = (currentData.asesmen.ats_list !== undefined && currentData.asesmen.ats_list !== "") ? JSON.parse(currentData.asesmen.ats_list) : [];
+                              for(ats in ats_list){
+                                  $("input[name=ats_check][value="+ats_list[ats]+"]").attr('checked',true);
+                              }
+
+                            
+                          }
                           
                           if(currentData.asesmen.saved_lokalis_item !== "") {
                             var saved_pascalis = JSON.parse(currentData.asesmen.saved_lokalis_item);
@@ -698,6 +763,13 @@ $lastExist = '';
                             for(var atsKey in ats_list) {
                                 $("#dataset__" + currentData.uid + " input[value=\"" + ats_list[atsKey] + "\"]").prop("checked", true);
                             }
+
+                            $('#igd_ekg').val(currentData.asesmen.ekg)
+                            $('#igd_rad_igd').val(currentData.asesmen.rad_igd)
+                            $('#igd_lab_igd').val(currentData.asesmen.lab_igd)
+                            
+
+                            
 
                             // LANJUTAKN DISINI BRO
                             // Data asesmen IGD ada di currentData.asesmen dari table asesmen_medis_igd

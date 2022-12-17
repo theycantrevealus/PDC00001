@@ -640,6 +640,8 @@ class Apotek extends Utility
 
     $usedBatch = array();
     $usedBatchInap = array();
+    $uniqueItem = array();
+    $uniqueBatch = array();
     $rawBatch = array();
     $Inventori = new Inventori(self::$pdo);
 
@@ -674,13 +676,17 @@ class Apotek extends Utility
 
       // TODO : Set Per Batch Hilangkan
 
-      array_push($usedBatch, array(
-        'batch' => $value['batch'],
-        'barang' => $value['item'],
-        'gudang' => __GUDANG_APOTEK__,
-        'qty' => floatval($value['qty']),
-        'temp_stat' => 'resep'
-      ));
+      if(!in_array($value['batch'],$uniqueBatch) && !in_array($value['item'],$uniqueItem)){ 
+        array_push($uniqueBatch,$value['batch']);
+        array_push($uniqueItem,$value['item']);
+        array_push($usedBatch, array(
+          'batch' => $value['batch'],
+          'barang' => $value['item'],
+          'gudang' => __GUDANG_APOTEK__,
+          'qty' => floatval($value['qty']),
+          'temp_stat' => 'resep'
+        ));
+      }
 
       // Potong Batch terdekat
       $InventoriBatch = $Inventori->get_item_batch($value['item']);
@@ -704,6 +710,9 @@ class Apotek extends Utility
             }
 
             if ($bValue['stok_terkini'] > 0) {
+              if(!in_array($bValue['batch'],$uniqueBatch) && !in_array($value['item'],$uniqueItem)){ 
+                array_push( $uniqueBatch,$bValue['batch']);
+                array_push($uniqueItem,$value['item']);
               array_push($usedBatch, array(
                 'batch' => $bValue['batch'],
                 'barang' => $value['item'],
@@ -711,6 +720,7 @@ class Apotek extends Utility
                 'qty' => $bValue['stok_terkini']
               ));
               $kebutuhan -= $bValue['stok_terkini'];
+            }
             }
           } else {
             if ($parameter['departemen'] === __POLI_INAP__ || $parameter['departemen'] === __POLI_IGD__) {
@@ -726,6 +736,9 @@ class Apotek extends Utility
             }
 
             if ($kebutuhan > 0) {
+              if(!in_array($bValue['batch'],$uniqueBatch) && !in_array($value['item'],$uniqueItem)){ 
+                array_push( $uniqueBatch,$bValue['batch']);
+                array_push($uniqueItem,$value['item']);
               array_push($usedBatch, array(
                 'batch' => $bValue['batch'],
                 'barang' => $value['item'],
@@ -733,6 +746,7 @@ class Apotek extends Utility
                 'qty' => $kebutuhan
               ));
               $kebutuhan = 0;
+            }
             }
           }
         }
@@ -1245,6 +1259,7 @@ class Apotek extends Utility
           }
         }
       }
+
 
       //Case Racikan
       $updateResult = 0;

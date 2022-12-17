@@ -1441,6 +1441,8 @@ class Asesmen extends Utility
             'ats_list' => (!empty($parameter['ats_list'])) ? json_encode($parameter['ats_list']) : '',
             'ats_skala' => (!empty($parameter['ats_skala'])) ? $parameter['ats_skala'] : '',
             'ekg' => (!empty($parameter['ekg'])) ? $parameter['ekg'] : '',
+            'lab_igd' => (!empty($parameter['lab_igd'])) ? $parameter['lab_igd'] : '',
+            'rad_igd' => (!empty($parameter['rad_igd'])) ? $parameter['rad_igd'] : '',
             'saved_lokalis_item' => (!empty($parameter['savedLokalisItem'])) ? json_encode($parameter['savedLokalisItem']) : '',
             'skala_rasa_sakit' => intval($parameter['skala_rasa_sakit']),
 

@@ -3389,6 +3389,8 @@
                     var refleks_cahaya = $("#igd_refleks_cahaya").val();
                     var rr = $("#igd_rr").val();
                     var suhu = $("#igd_suhu").val();
+                    var tekanan_darah = $("#igd_tekanan_darah").val();
+                    var nadi = $("#igd_nadi").val();
                     var gangguan_perilaku = $("input[name=\"igd_gangguan_perilaku\"]:checked").val();
                     var gangguan_terganggu = $("input[name=\"igd_gangguan_terganggu\"]:checked").val();
                     var skala_nyeri = $("input[name=\"igd_skala_nyeri\"]:checked").val();
@@ -3413,6 +3415,8 @@
 
                     var ats_skala = $("input[name=\"igd_skala_selected\"]:checked").val();
                     var ekg = $("#igd_ekg").val();
+                    var lab_igd = $("#igd_lab_igd").val();
+                    var rad_igd = $("#igd_rad_igd").val();
 
                     var savedLokalisItem = {};
 
@@ -3444,7 +3448,7 @@
                         //==============================
                         keluhan_utama: keluhanUtamaData,
                         keluhan_tambahan: keluhanTambahanData,
-                        tekanan_darah: parseFloat(tekananDarah),
+                        tekanan_darah: parseFloat(tekanan_darah),
                         nadi: parseFloat(nadi),
                         suhu: parseFloat(suhu),
                         pernafasan: parseFloat(pernafasan),
@@ -3499,6 +3503,8 @@
                         ats_list: ats_list,
                         ats_skala: ats_skala,
                         ekg: ekg,
+                        lab_igd: lab_igd,
+                        rad_igd: rad_igd,
                         savedLokalisItem: savedLokalisItem,
                         // skala_rasa_sakit: skala_rasa_sakit
                     };

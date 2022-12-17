@@ -578,6 +578,9 @@ class CPPT extends Utility
             'icd10_kerja',
             'icd10_banding',
             'planning',
+            'tekanan_darah',
+            'nadi',
+            'suhu',
             'gcs_e',
             'gcs_v',
             'gcs_m',
@@ -601,7 +604,9 @@ class CPPT extends Utility
             'ats_skala',
             'ekg',
             'saved_lokalis_item',
-            'skala_rasa_sakit'
+            'skala_rasa_sakit',
+            'rad_igd',
+            'lab_igd',
           ))
           ->on(array(
             array('asesmen_medis_' . $Departemen['poli_asesmen'] . '.asesmen', '=', 'asesmen.uid')
