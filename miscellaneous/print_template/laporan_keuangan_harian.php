@@ -18,6 +18,19 @@
             }
         }
 
+        table.table, table.table th , table.table td{
+            border: 1px solid #000;
+            border-collapse: collapse;
+        }
+
+        table.table tr th {
+            text-align: left;
+        }
+
+        table.table thead {
+            background-color: #000!important;
+        }
+
 
         body{
             width: 90%;
@@ -25,6 +38,20 @@
             padding: 1cm;
             color: #000;
             font-family: "Arial", sans-serif;
+        }
+
+        span{
+            display:block;
+        }
+
+        span.title{
+            font-weight: bold;
+            font-size:1.2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
         .header{
@@ -75,9 +102,10 @@
             text-align: left;
         }
 
-        table.data {
+        /* table.data {
             width: 100%;
-        }
+        } */
+        
 
         table {
             width: 100%;
@@ -88,20 +116,19 @@
             background-color:#F2F2F2;
         }
 
+        table.table {
+            border-collapse: collapse;
+        }
+
         table.table tr td, table.table tr th{
-            padding:0.3rem;
+            padding:0.4rem;
             font-size: 9pt !important;
         }
 
-        table.table thead tr th {
+        /* table.table thead tr th {
             border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
-        }
-
-        table.table, table.table th , table.table td{
-            border: 1px solid #000;
-            border-collapse: collapse;
-        }
+        } */
 
         .text-left{
             text-align:left;
@@ -156,49 +183,52 @@
             </td>
             <td style="width:45%;">
                 <span class="title"><b><?php echo $_POST['__PC_CUSTOMER__']; ?></b></span>
-                <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span>
-                <span class="telepon">Telp. <?php echo $_POST['__PC_CUSTOMER_CONTACT__']; ?></span>
+                <span>Sub. Bagian Keuangan dan Perlengkapan</span>
+                <!-- <span class="alamat"><?php echo $_POST['__PC_CUSTOMER_ADDRESS__']; ?></span> -->
+                <!-- <span class="telepon">Telp. <?php echo $_POST['__PC_CUSTOMER_CONTACT__']; ?></span> -->
             </td>
             <td style="width:2%;"></td>
         </tr>
     </table>
+    <br/>
+    <hr style="border-color: #5B9BD5"/>
+    <br/>
     <center>
+        <span style="color: #FF0000 ;">RINCIAN BILING HARIAN</span>
+    </center>
         <b>
             <br /><br />
-            <span><?php echo $_POST['__JUDUL__']; ?></span>
-            <small><?php echo date('d F Y', strtotime($_POST['__PERIODE_AWAL__'])); ?> - <?php echo date('d F Y', strtotime($_POST['__PERIODE_AKHIR__'])); ?></small>
+            <span style="margin-bottom:4px"><em>Date:</em> <?php echo date('d F Y', strtotime($_POST['__PERIODE_AWAL__'])); ?> - <?php echo date('d F Y', strtotime($_POST['__PERIODE_AKHIR__'])); ?></span>
+            <span><em>Type:</em> RINCIAN BILING HARIAN</span>
         </b>
-    </center>
 </div>
 <div>
-    <table class="table border-bottom mb-5 data">
-        <thead class="thead-dark">
+    <table class="table mb-5 data">
+        <thead>
             <tr>
-                <th>Waktu Order</th>
-                <th>No. Order</th>
-                <th>No. RM</th>
-                <th>Pasien</th>
-                <th>Poliklinik</th>
-                <th>Dokter</th>
-                <th>Jenis Pemeriksaan</th>
-                <th>Mitra</th>
-                <th>Penjamin</th>
+                <th style="width: 10px">NO</th>
+                <th>NAMA PASIEN</th>
+                <th>NO. MR</th>
+                <th>TGL MSK</th>
+                <th>TGL KLR</th>
+                <th>JAMINAN</th>
+                <th>TOTAL BILLING</th>
             </tr>
         </thead>
         <tbody>
         <?php
 
         $dataBuild = array();
-        // var_dump($_POST['data']);
         foreach ($_POST['data'] as $datKey => $datValue) {
-            if(!isset($dataBuild[$datValue['nama_penjamin']])) {
-                $dataBuild[$datValue['nama_penjamin']] = array(
-                    'nama' => $datValue['nama_penjamin'],
+            if(!isset($dataBuild[$datValue['penjamin']['uid']])) {
+                $dataBuild[$datValue['penjamin']['uid']] = array(
+                    'nama' => $datValue['penjamin']['nama'],
                     'data' => array()
                 );
             }
-            array_push($dataBuild[$datValue['nama_penjamin']]['data'], $datValue);
+            array_push($dataBuild[$datValue['penjamin']['uid']]['data'], $datValue);
         }
+        
 
         $JumlahInvoice = 0;
         $totalBayar = 0;
@@ -206,30 +236,39 @@
         $totalBelumBayar = 0;
         foreach ($dataBuild as $parseKey => $parseValue) {
             foreach ($parseValue['data'] as $itemKey => $itemValue) {
-                // $total = $itemValue['total_after_discount'] - (isset($itemValue['payment']) ? $itemValue['payment']['terbayar'] : 0);
-                // $totalBayar += $itemValue['payment']['terbayar'];
-                // $totalBelumBayar += $total;
-                // $JumlahInvoice++;
-                // $totalSemua += $itemValue['total_after_discount'];
+                $total = $itemValue['total_after_discount'] - (isset($itemValue['payment']) ? $itemValue['payment']['terbayar'] : 0);
+                $totalBayar += $itemValue['payment']['terbayar'];
+                $totalBelumBayar += $total;
+                $JumlahInvoice++;
+                $totalSemua += $itemValue['total_after_discount'];
 
                 ?>
                 <tr>
-                    <td><?php echo date('d/m/Y', strtotime($itemValue["waktu_order"])); ?></td>
-                    <td><?php echo $itemValue["no_order"]; ?></td>
-                    <td><?php echo $itemValue["no_rm"]; ?></td>
-                    <td><?php echo $itemValue["pasien"]; ?></td>
-                    <td><?php echo $itemValue["departemen"]; ?></td>
-                    <td><?php echo $itemValue["dokter"]; ?></td>
-                    <td><?php echo $itemValue["nama_tindakan"]; ?></td>
-                    <td><?php echo $itemValue["nama_mitra"]; ?></td>
-                    <td><?php echo $itemValue["nama_penjamin"]; ?></td>
+                    <td><?php echo $itemValue['autonum']  ?></td>
+                    <td style="word-wrap: break-word"><?php echo $itemValue['pasien']['panggilan_name']['nama'].' '.$itemValue['nama']  ?></td>
+                    <td><?php echo $itemValue['pasien']['no_rm']  ?></td>
+                    <td><?php echo date('d/m/Y', strtotime($itemValue['waktu_masuk']))  ?></td>
+                    <td><?php echo date('d/m/Y', strtotime($itemValue['waktu_keluar']))  ?></td>
+                    <td><?php echo $itemValue['penjamin']['nama']  ?></td>
+                    <td><?php echo number_format($itemValue['payment']['terbayar'], 2, '.', ',');   ?></td>
                 </tr>
+                <!-- <tr>
+                    <td><?php echo date('d/m/Y', strtotime($itemValue['created_at'])); ?></td>
+                    <td><?php echo $itemValue['nomor_invoice']; ?></td>
+                    <td><?php echo (isset($itemValue['payment']) ? $itemValue['payment']['metode_bayar'] : '-'); ?></td>
+                    <td><?php $itemValue['pasien']['nama']; ?></td>
+                    <td class="number_style"><?php echo number_format($itemValue['total_after_discount'], 2, '.', ','); ?></td>
+                    <td class="number_style"><?php echo (isset($itemValue['payment']) ? number_format($itemValue['payment']['terbayar'], 2, '.', ',') : '0.00'); ?></td>
+                    <td class="number_style"><?php echo number_format($total, 2, '.', ','); ?></td>
+                    <td class="number_style"><?php echo isset($itemValue['payment']) ? $itemValue['payment']['nomor_kwitansi'] : '-'; ?></td>
+                </tr> -->
                 <?php
             }
         }
         ?>
         </tbody>
     </table>
+
     <!-- <table style="width: 50%">
         <tr>
             <td>Jumlah Invoice</td>

@@ -16,9 +16,8 @@
             html {
                 overflow: hidden;
             }
-
-            .pagebreak { page-break-before: always; }
         }
+
 
         body{
             width: 90%;
@@ -77,6 +76,11 @@
             text-align: left;
         }
 
+        table.table, table.table th , table.table td{
+            border: 1px solid #000;
+            border-collapse: collapse;
+        }
+
         table.data {
             width: 100%;
         }
@@ -98,11 +102,6 @@
         table.table thead tr th {
             border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
-        }
-
-        table.table, table.table th , table.table td{
-            border: 1px solid #000;
-            border-collapse: collapse;
         }
 
         .text-left{

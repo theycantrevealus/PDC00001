@@ -1,7 +1,7 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function () {
-
+        var totalData = [];
         function getDateRange(target) {
             var rangeLaporan = $(target).val().split(" to ");
             if(rangeLaporan.length > 1) {
@@ -13,16 +13,17 @@
 
         $("#range_laporan").change(function() {
             tableLaporan.ajax.reload();
+            console.log(totalData);
         });
 
-        var totalData = [];
+        
 
         var tableLaporan = $("#tabel-laporan").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 async:false,
@@ -37,24 +38,16 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-
+                    console.log(response);
                     var returnedData = [];
-                    var rawData = response.response_package.response_data;
-                    if(response.response_package == undefined) {
-                        rawData = [];
-                    }
-
-                    for(var keyData in rawData) {
-                        returnedData.push(rawData[keyData]);
-                    }
-
-
+                    var returnedData = response.response_package.response_data;
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
                     totalData = returnedData;
                     return returnedData;
+
                 }
             },
             autoWidth: false,
@@ -75,7 +68,7 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return ((row.pasien.panggilan_name !== null && row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name : "") + " " + row.pasien.nama;
+                        return ((row.pasien.panggilan_name !== null && row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name.nama : "") + " " + row.pasien.nama;
                     }
                 },
                 {
@@ -95,6 +88,7 @@
                 }
             ]
         });
+
 
 
         $("#btnCetak").click(function () {

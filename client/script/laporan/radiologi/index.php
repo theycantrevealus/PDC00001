@@ -59,10 +59,12 @@
                 url: __HOSTAPI__ + "/Laporan",
                 type: "POST",
                 data: function(d) {
-                    d.request = "keuangan_billing_harian";
+                    d.request = "radiologi";
                     d.from = getDateRange("#range_laporan")[0];
                     d.to = getDateRange("#range_laporan")[1];
-                    d.penjamin = $("#txt_penjamin").val()
+                    d.mode = "history";
+                    d.status = 'D';
+                    // d.penjamin = $("#txt_penjamin").val()
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
@@ -78,9 +80,7 @@
                     }
 
                     for(var keyData in rawData) {
-                        if(rawData[keyData].payment !== null && rawData[keyData].payment !== undefined) {
-                            returnedData.push(rawData[keyData]);
-                        }
+                        returnedData.push(rawData[keyData]);
                     }
 
 
@@ -95,66 +95,79 @@
             autoWidth: false,
             language: {
                 search: "",
-                searchPlaceholder: "Cari Nomor Invoice"
+                searchPlaceholder: "Cari Nama Pasien"
             },
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.created_at_parse;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.nomor_invoice;
+                        return "<span id=\"tanggal_labor_" + row.uid + "\">" + row["waktu_order"] + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return (row.payment !== null) ? row.payment.metode_bayar : "-";
+                        return "<span id=\"kode_" + row.uid + "\">" + row["no_order"] + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return ((row.pasien.panggilan_name !== null && row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name.nama : "") + " " + row.pasien.nama;
+                        return row["no_rm"];
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.penjamin.nama;
+                        return row["pasien"];
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h6 class=\"number_style\">" + number_format(row.total_after_discount, 2, '.', ',') + "<h6>";
+                        return row["departemen"];
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        var terbayar = (row.payment !== null) ? row.payment.terbayar : 0;
-                        return "<h6 class=\"number_style\">" + number_format(terbayar, 2, '.', ',') + "<h6>";
+                        return row["dokter"];
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        var terbayar = (row.payment !== null) ? row.payment.terbayar : 0;
-                        var sisa_bayar = row.total_after_discount - terbayar;
-                        return "<h6 class=\"number_style\">" + number_format(sisa_bayar, 2, '.', ',') + "<h6>";
+                        return row["nama_tindakan"];
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return "<h6 class=\"number_style\">" + (row.payment !== null) ? row.payment.nomor_kwitansi : "-" + "<h6>";
+                        return row["nama_mitra"];
                     }
-                }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["nama_penjamin"];
+                    }
+                },
+                // {
+                //     "data" : null, render: function(data, type, row, meta) {
+                //         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                //             "<a href=\"" + __HOSTNAME__ + "/laboratorium/view/" + row['uid'] + "/\" class=\"btn btn-info btn-sm\">" +
+                //             "<i class=\"fa fa-eye\"></i> Detail" +
+                //             "</a>" +
+                //             "<button class=\"btn btn-purple btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                //             "<i class=\"fa fa-print\"></i> Cetak" +
+                //             "</button>" +
+                //             "</div>";
+                //     }
+                // }
             ]
         });
-
 
 
         $("#btnCetak").click(function () {
             $.ajax({
                 async: false,
-                url: __HOST__ + "miscellaneous/print_template/laporan_keuangan_harian.php",
+                url: __HOST__ + "miscellaneous/print_template/laporan_radiologi.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
@@ -165,7 +178,7 @@
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     __NAMA_SAYA__ : __MY_NAME__,
-                    __JUDUL__ : "Invoice Listing",
+                    __JUDUL__ : "Laporan Radiologi",
                     __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
                     __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
                     data: totalData
