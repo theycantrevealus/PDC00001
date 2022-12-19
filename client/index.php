@@ -51,6 +51,7 @@
     var __UIDADMIN__ = <?php echo json_encode(__UIDADMIN__); ?>;
     var __UIDDOKTER__ = <?php echo json_encode(__UIDDOKTER__); ?>;
     var __UIDFISIOTERAPI__ = <?php echo json_encode(__UIDFISIOTERAPI__); ?>;
+    var __UIDREHABMEDIK__ = <?php echo json_encode(__UIDREHABMEDIK__); ?>;
     var __UIDPETUGASLAB__ = <?php echo json_encode(__UIDPETUGASLAB__); ?>;
     var __UIDPETUGASRAD__ = <?php echo json_encode(__UIDPETUGASRAD__); ?>;
     var __UIDAPOTEKER__ = <?php echo json_encode(__UIDAPOTEKER__); ?>;

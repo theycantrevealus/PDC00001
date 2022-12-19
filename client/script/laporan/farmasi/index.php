@@ -23,7 +23,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[15, 50, -1], [15, 50, "All"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 async:false,
@@ -38,7 +38,6 @@
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
-                    console.log(response);
                     var returnedData = [];
                     var returnedData = response.response_package.response_data;
 

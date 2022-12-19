@@ -212,7 +212,7 @@
 
                 ?>
                 <tr>
-                    <td><?php echo date('d/m/Y', strtotime($itemValue["created_at"])); ?></td>
+                    <td><?php echo $itemValue["tanggal"]; ?></td>
                     <td><?php echo $itemValue["no_rm"]; ?></td>
                     <td><?php echo $itemValue["pasien"]; ?></td>
                     <td><?php echo $itemValue["departemen"]; ?></td>

@@ -627,6 +627,7 @@ $lastExist = '';
                       data: {
                         uid: currentData.uid,
                         currentData: UID,
+                        uid_igd: __POLI_IGD__,
                         __HOSTNAME__: __HOSTNAME__,
                         __HOST__: __HOST__,
                         __ME__: __ME__,
@@ -639,6 +640,7 @@ $lastExist = '';
                         group_tanggal_name: a,
                         waktu_masuk: listData[b].parsed,
                         waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
+                        departemen_id: currentData.departemen.uid,
                         departemen: (currentData.departemen !== undefined && currentData.departemen !== null) ? currentData.departemen.nama : "Rawat Inap",
                         dokter_uid: currentData.dokter.uid,
                         dokter: currentData.dokter.nama,

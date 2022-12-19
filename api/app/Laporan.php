@@ -1329,7 +1329,7 @@ class Laporan extends Utility
         foreach ($data['response_data'] as $key => $value) {
             $data['response_data'][$key]['autonum'] = $autonum;
             $data['response_data'][$key]['created_at'] = date('d F Y', strtotime($value['created_at'])) . ' - [' . date('H:i', strtotime($value['created_at'])) . ']';
-    
+            $data['response_data'][$key]['tanggal'] = date('d F Y', strtotime($value['created_at']));
             $autonum++;
         }
 
@@ -1805,13 +1805,39 @@ class Laporan extends Utility
         }
 
         $KunjunganTotal = self::$query->select('invoice', array(
-            'uid'
+            'uid',
+            'kunjungan',
+            'pasien',
+            'total_pre_discount',
+            'discount',
+            'discount_type',
+            'total_after_discount',
+            'keterangan',
+            'created_at',
+            'nomor_invoice'
         ))
+            ->join('pasien', array(
+                'nama'
+            ))
+
+            ->join('antrian', array(
+                'uid as uid_antrian',
+                'waktu_masuk',
+                'waktu_keluar'
+            ))
+
+            ->on(array(
+                array('invoice.pasien', '=', 'pasien.uid'),
+                array('antrian.kunjungan', '=', 'invoice.kunjungan')
+            ))
+            ->order(array(
+                'invoice.created_at' => 'ASC'
+            ))
             ->where($paramData, $paramValue)
             ->execute();
 
         $data['recordsTotal'] = count($KunjunganTotal['response_data']);
-        $data['recordsFiltered'] = count($dataResult);
+        $data['recordsFiltered'] = count($KunjunganTotal['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
 

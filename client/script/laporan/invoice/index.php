@@ -52,7 +52,7 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 async:false,
@@ -69,7 +69,7 @@
                 },
                 dataSrc:function(response) {
 
-                    console.log(response);
+                    // console.log(response);
 
                     var returnedData = [];
                     var rawData = response.response_package.response_data;

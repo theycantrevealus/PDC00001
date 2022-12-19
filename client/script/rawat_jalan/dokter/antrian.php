@@ -365,7 +365,7 @@
 
             selectedICD10Kerja = asesmen_detail.icd10_kerja;
             selectedICD10Banding = asesmen_detail.icd10_banding;
-            if (antrianData.poli_info.uid === __UIDFISIOTERAPI__) {
+            if (antrianData.poli_info.uid === __UIDFISIOTERAPI__ || antrianData.poli_info.uid === __UIDREHABMEDIK__) {
               if (asesmen_detail.icd9 !== undefined && asesmen_detail.icd9 !== null) {
                 selectedICD9 = asesmen_detail.icd9;
 
@@ -656,9 +656,9 @@
                 }
               }
             }
-
+            console.log(antrianData.poli_info.uid);
             //Terapis CKEDITOR
-            if (antrianData.poli_info.uid === __UIDFISIOTERAPI__) {
+            if (antrianData.poli_info.uid === __UIDFISIOTERAPI__ || antrianData.poli_info.uid === __UIDREHABMEDIK__) {
               $("#txt_terapis_frekuensi_minggu").val(asesmen_detail.anjuran_minggu);
               $("#txt_terapis_frekuensi_bulan").val(asesmen_detail.anjuran_bulan);
               if (
@@ -3022,7 +3022,7 @@
       var tinggiBadan = $("#txt_tinggi_badan").inputmask("unmaskedvalue");
       var lingkarLengan = $("#txt_lingkar_lengan").inputmask("unmaskedvalue");
       var pemeriksaanFisikData = (editorPeriksaFisikData === undefined || editorPeriksaFisikData === null) ? metaSwitchEdit.txt_pemeriksaan_fisik.data : editorPeriksaFisikData.getData();
-
+      console.log(antrianData.poli_info.uid)
       if (antrianData.poli_info.uid === __UIDFISIOTERAPI__) {
         var terapisAnamnesa = editorTerapisAnamnesa.getData();
         var terapisTataLaksana = editorTerapisTataLaksana.getData();
@@ -3189,8 +3189,54 @@
       }
 
       var formData = {};
-
+      //INI REHAB MEDIK, DULUNYA DIGABUNG SAMA FISIOTERAPI SEKARANG DIPISAH
       if (antrianData.poli_info.uid === __UIDFISIOTERAPI__) {
+        formData = {
+          request: "update_asesmen_medis",
+          kunjungan: kunjungan,
+          antrian: antrian,
+          penjamin: penjamin,
+          pasien: pasien,
+          poli: poli,
+          charge_invoice: charge_invoice,
+          //==============================
+          keluhan_utama: keluhanUtamaData,
+          keluhan_tambahan: keluhanTambahanData,
+          tekanan_darah: parseFloat(tekananDarah),
+          nadi: parseFloat(nadi),
+          suhu: parseFloat(suhu),
+          pernafasan: parseFloat(pernafasan),
+          berat_badan: parseFloat(beratBadan),
+          tinggi_badan: parseFloat(tinggiBadan),
+          lingkar_lengan_atas: parseFloat(lingkarLengan),
+          icd9: selectedICD9,
+          pemeriksaan_fisik: pemeriksaanFisikData,
+          //icd10_kerja: parseInt(icd10Kerja),
+          icd10_kerja: selectedICD10Kerja,
+          diagnosa_kerja: diagnosaKerjaData,
+          //icd10_banding: parseInt(icd10Banding),
+          icd10_banding: selectedICD10Banding,
+          diagnosa_banding: diagnosaBandingData,
+          planning: planningData,
+          anamnesa: terapisAnamnesa,
+          tataLaksana: terapisTataLaksana,
+          evaluasi: terapisEvaluasi,
+          anjuranBulan: parseFloat(terapisAnjuranBulan),
+          anjuranMinggu: parseFloat(terapisAnjuranMinggu),
+          suspek: terapisSuspek,
+          hasil: terapisHasil,
+          kesimpulan: terapisKesimpulan,
+          rekomendasi: terapisRekomendasi,
+          //==============================
+          tindakan: tindakan,
+          resep: resep,
+          keteranganResep: keteranganResep,
+          keteranganRacikan: keteranganRacikan,
+          racikan: racikan,
+          iterasi: iterasiObat,
+          editorAlergiObat: editorAlergiObat
+        };
+      } else if (antrianData.poli_info.uid === __UIDREHABMEDIK__) { //INI BARU FISIOTERAPI
         formData = {
           request: "update_asesmen_medis",
           kunjungan: kunjungan,
@@ -4070,6 +4116,7 @@
               metaSwitchEdit,
               "Y"));
           }).then(function(result) {
+            console.log(result);
             if (result.response_package.response_result > 0) {
               notification("success", "Asesmen Berhasil Disimpan", 3000, "hasil_tambah_dev");
 
