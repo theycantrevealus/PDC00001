@@ -3059,6 +3059,8 @@
         });
       });
 
+      
+
       var resep = [];
       $("#table-resep tbody tr").each(function() {
         var isTemplate = $(this).hasClass("last-resep");
@@ -3187,6 +3189,10 @@
       if(racikan.length === 0) {
         notification("warning", "Tidak ada racikan terdeteksi. Pastikan Anda sudah mengisi signa dan jumlah", 3000, "asesmen_unmatch_format");
       }
+
+      console.log('Tes');
+      console.log(__UIDREHABMEDIK__);
+      console.log(antrianData.poli_info.uid === __UIDFISIOTERAPI__)
 
       var formData = {};
       //INI REHAB MEDIK, DULUNYA DIGABUNG SAMA FISIOTERAPI SEKARANG DIPISAH
