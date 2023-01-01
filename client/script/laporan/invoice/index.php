@@ -52,14 +52,14 @@
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
+            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
             serverMethod: "POST",
             "ajax":{
                 async:false,
                 url: __HOSTAPI__ + "/Laporan",
                 type: "POST",
                 data: function(d) {
-                    d.request = "keuangan";
+                    d.request = "keuangan_billing_harian";
                     d.from = getDateRange("#range_laporan")[0];
                     d.to = getDateRange("#range_laporan")[1];
                     d.penjamin = $("#txt_penjamin").val()
@@ -69,7 +69,7 @@
                 },
                 dataSrc:function(response) {
 
-                    console.log(response);
+                    // console.log(response);
 
                     var returnedData = [];
                     var rawData = response.response_package.response_data;
@@ -150,10 +150,11 @@
         });
 
 
+
         $("#btnCetak").click(function () {
             $.ajax({
                 async: false,
-                url: __HOST__ + "miscellaneous/print_template/laporan_keuangan.php",
+                url: __HOST__ + "miscellaneous/print_template/laporan_keuangan_harian.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },

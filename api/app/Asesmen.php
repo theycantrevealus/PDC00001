@@ -1290,6 +1290,7 @@ class Asesmen extends Utility
     $Poli = new Poli(self::$pdo);
     $PoliDetail = $Poli->get_poli_detail($parameter['poli'])['response_data'][0];
 
+
     //Check
     $check = self::$query->select('asesmen', array(
       'uid'

@@ -58,6 +58,7 @@
                     <?php
                 }
                 ?>
+               
                 <li class="nav-item">
                     <a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
@@ -66,6 +67,9 @@
                         Tindakan
                     </a>
                 </li>
+                <?php
+                if(!in_array(__UIDREHABMEDIK__, $PoliList)) {
+                    ?>
                 <li class="nav-item">
                     <a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
@@ -82,6 +86,9 @@
                         Laboratorium
                     </a>
                 </li>
+                <?php
+                }
+                ?>
                 <li class="nav-item">
                     <a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
 							<span class="nav-link__count">
