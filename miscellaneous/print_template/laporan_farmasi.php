@@ -16,9 +16,8 @@
             html {
                 overflow: hidden;
             }
-
-            .pagebreak { page-break-before: always; }
         }
+
 
         body{
             width: 90%;
@@ -26,7 +25,6 @@
             padding: 1cm;
             color: #000;
             font-family: "Arial", sans-serif;
-            text-align:center;
         }
 
         .header{
@@ -139,6 +137,10 @@
             float: left;
         }
 
+        .number_style {
+            text-align: right !important;
+        }
+
         .col-4 {
             width: 33.33%;
         }
@@ -150,7 +152,7 @@
     <table>
         <tr>
             <td style="text-align:center; width:5%">
-            <img class="navbar-brand-icon mb-2" src="<?php echo $_POST['__HOSTNAME__']; ?>/template/assets/images/clients/logo-icon-petala2.png" width="50" alt="<?php echo $_POST['__PC_CUSTOMER__']; ?>">
+                <img class="navbar-brand-icon mb-2" src="<?php echo $_POST['__HOSTNAME__']; ?>/template/assets/images/clients/logo-icon-petala2.png" width="50" alt="<?php echo $_POST['__PC_CUSTOMER__']; ?>">
             </td>
             <td style="width:45%;">
                 <span class="title"><b><?php echo $_POST['__PC_CUSTOMER__']; ?></b></span>
@@ -171,76 +173,84 @@
 <div>
     <table class="table border-bottom mb-5 data">
         <thead class="thead-dark">
-        <tr>
-            <th>Tanggal Masuk</th>
-            <th>Tanggal Keluar</th>
-            <th>Nama Pasien</th>
-            <th>Alamat</th>
-            <th>Perusahaan Penjamin</th>
-            <th>Rekam Medis</th>
-        </tr>
+            <tr>
+                <th>Tanggal</th>
+                <th>No. RM</th>
+                <th>Pasien</th>
+                <th>Poliklinik</th>
+                <th>Nama Obat</th>
+                <th>Qty Obat</th>
+                <th>Penjamin</th>
+            </tr>
         </thead>
         <tbody>
         <?php
 
         $dataBuild = array();
-        
-        $dataBuild = array();
+        // var_dump($_POST['data']);
         foreach ($_POST['data'] as $datKey => $datValue) {
-            if(!isset($dataBuild[$datValue['penjamin']['uid']])) {
-                $dataBuild[$datValue['penjamin']['uid']] = array(
-                    'nama' => $datValue['penjamin']['nama'],
+            if(!isset($dataBuild[$datValue['penjamin']])) {
+                $dataBuild[$datValue['penjamin']] = array(
+                    'nama' => $datValue['penjamin'],
                     'data' => array()
                 );
             }
-            array_push($dataBuild[$datValue['penjamin']['uid']]['data'], $datValue);
+            array_push($dataBuild[$datValue['penjamin']]['data'], $datValue);
         }
 
-        
-
+        $JumlahInvoice = 0;
+        $totalBayar = 0;
+        $totalSemua = 0;
+        $totalBelumBayar = 0;
         foreach ($dataBuild as $parseKey => $parseValue) {
             foreach ($parseValue['data'] as $itemKey => $itemValue) {
+                // $total = $itemValue['total_after_discount'] - (isset($itemValue['payment']) ? $itemValue['payment']['terbayar'] : 0);
+                // $totalBayar += $itemValue['payment']['terbayar'];
+                // $totalBelumBayar += $total;
+                // $JumlahInvoice++;
+                // $totalSemua += $itemValue['total_after_discount'];
+
                 ?>
                 <tr>
-                    <td><?php echo $itemValue['waktu_masuk']; ?></td>
-                    <td><?php echo $itemValue['waktu_keluar']; ?></td>
-                    <td><?php echo $itemValue['pasien']['panggilan_name']['nama'] . ' ' . $itemValue['pasien']['nama']; ?></td>
-                    <td><?php echo $itemValue['pasien']['alamat']; ?></td>
-                    <td><?php echo $itemValue['penjamin']['nama']; ?></td>
-                    <td><?php echo $itemValue['pasien']['no_rm']; ?></td>
+                    <td><?php echo $itemValue["tanggal"]; ?></td>
+                    <td><?php echo $itemValue["no_rm"]; ?></td>
+                    <td><?php echo $itemValue["pasien"]; ?></td>
+                    <td><?php echo $itemValue["departemen"]; ?></td>
+                    <td><?php echo $itemValue["item"]; ?></td>
+                    <td><?php echo $itemValue["qty"]; ?></td>
+                    <td><?php echo $itemValue["penjamin"]; ?></td>
                 </tr>
                 <?php
             }
-            ?>
-            <!-- <tr>
-                <td colspan="2"></td>
-                <td style="border-top: solid 1px #000;">Jumlah Pasien : <?php echo count($parseValue['data']); ?></td>
-                <td colspan="3"></td>
-            </tr> -->
-        <?php
         }
         ?>
         </tbody>
     </table>
-    <!-- <table class="status">
+    <!-- <table style="width: 50%">
         <tr>
-            <td>Count of Queue Status</td>
-            <td></td>
+            <td>Jumlah Invoice</td>
+            <td class="number_style">
+                <?php echo $JumlahInvoice; ?>
+            </td>
         </tr>
         <tr>
-            <td>Company Name</td>
-            <td>Total</td>
+            <td>Total Biaya Invoice</td>
+            <td class="number_style">
+                <?php echo number_format($totalSemua, 2, '.', ','); ?>
+            </td>
         </tr>
-        <?php
-        foreach ($dataBuild as $parseKey => $parseValue) {
-            ?>
-            <tr>
-                <td><?php echo $parseValue['nama']; ?></td>
-                <td><?php echo count($parseValue['data']); ?></td>
-            </tr>
-        <?php
-        }
-        ?>
+        <tr>
+            <td>Pembayaran Diterima</td>
+            <td class="number_style">
+                <?php echo number_format($totalBayar, 2, '.', ','); ?>
+            </td>
+        </tr>
+        <tr>
+            <td>Pembayaran Belum Diterima</td>
+            <td class="number_style">
+                <?php echo number_format($totalBelumBayar, 2, '.', ','); ?>
+            </td>
+        </tr>
     </table> -->
 </div>
 </body>

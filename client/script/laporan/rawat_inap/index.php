@@ -30,7 +30,7 @@
                 url: __HOSTAPI__ + "/Laporan",
                 type: "POST",
                 data: function(d) {
-                    d.request = "kunjungan_rawat_jalan";
+                    d.request = "kunjungan_rawat_inap";
                     d.from = getDateRange("#range_laporan")[0];
                     d.to = getDateRange("#range_laporan")[1];
                 },
@@ -94,7 +94,7 @@
         $("#btnCetak").click(function () {
             $.ajax({
                 async: false,
-                url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_rawat_jalan.php",
+                url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_rawat_inap.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
@@ -105,7 +105,7 @@
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     __NAMA_SAYA__ : __MY_NAME__,
-                    __JUDUL__ : "Laporan Kunjungan Rawat Jalan",
+                    __JUDUL__ : "Laporan Kunjungan Rawat Inap",
                     __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
                     __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
                     data: totalData

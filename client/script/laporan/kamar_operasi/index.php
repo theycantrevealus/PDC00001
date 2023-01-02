@@ -13,7 +13,6 @@
 
         $("#range_laporan").change(function() {
             tableLaporan.ajax.reload();
-            console.log(totalData);
         });
 
         
@@ -30,7 +29,7 @@
                 url: __HOSTAPI__ + "/Laporan",
                 type: "POST",
                 data: function(d) {
-                    d.request = "kunjungan_rawat_jalan";
+                    d.request = "kamar_operasi";
                     d.from = getDateRange("#range_laporan")[0];
                     d.to = getDateRange("#range_laporan")[1];
                 },
@@ -58,12 +57,17 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_masuk;
+                        return row.autonum;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_keluar;
+                        return row.tgl_operasi_parsed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return ((row.pasien.no_rm !== null && row.pasien.no_rm !== undefined) ? row.pasien.no_rm : "") + " " + row.pasien.no_rm;
                     }
                 },
                 {
@@ -73,17 +77,23 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.alamat;
+                        return row.dokter;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.jenis_operasi;
+                    }
+                },
+                
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.ruangan;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
                         return row.penjamin.nama;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.no_rm;
                     }
                 }
             ]
@@ -94,7 +104,7 @@
         $("#btnCetak").click(function () {
             $.ajax({
                 async: false,
-                url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_rawat_jalan.php",
+                url: __HOST__ + "miscellaneous/print_template/laporan_kamar_operasi.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
@@ -105,7 +115,7 @@
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     __NAMA_SAYA__ : __MY_NAME__,
-                    __JUDUL__ : "Laporan Kunjungan Rawat Jalan",
+                    __JUDUL__ : "Laporan Kunjungan Rawat Inap",
                     __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
                     __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
                     data: totalData

@@ -627,6 +627,7 @@ $lastExist = '';
                       data: {
                         uid: currentData.uid,
                         currentData: UID,
+                        uid_igd: __POLI_IGD__,
                         __HOSTNAME__: __HOSTNAME__,
                         __HOST__: __HOST__,
                         __ME__: __ME__,
@@ -639,6 +640,7 @@ $lastExist = '';
                         group_tanggal_name: a,
                         waktu_masuk: listData[b].parsed,
                         waktu_masuk_name: listData[b].parsed.replaceAll(":", "_"),
+                        departemen_id: currentData.departemen.uid,
                         departemen: (currentData.departemen !== undefined && currentData.departemen !== null) ? currentData.departemen.nama : "Rawat Inap",
                         dokter_uid: currentData.dokter.uid,
                         dokter: currentData.dokter.nama,
@@ -1419,6 +1421,29 @@ $lastExist = '';
       return ans;
     }
 
+    var weekday = new Array(7);
+    weekday[0] = "Minggu";
+    weekday[1] = "Senin";
+    weekday[2] = "Selasa";
+    weekday[3] = "Rabu";
+    weekday[4] = "Kamis";
+    weekday[5] = "Jumat";
+    weekday[6] = "Sabtu";
+
+    var monthName = new Array(7);
+    monthName[0] = "Januari";
+    monthName[1] = "Februari";
+    monthName[2] = "Maret";
+    monthName[3] = "April";
+    monthName[4] = "Mei";
+    monthName[5] = "Juni";
+    monthName[6] = "Juli";
+    monthName[7] = "Agustus";
+    monthName[8] = "September";
+    monthName[9] = "Oktober";
+    monthName[10] = "November";
+    monthName[11] = "Desember";
+
     $(function() {
       var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
       var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
@@ -1462,28 +1487,7 @@ $lastExist = '';
         });
       });
 
-      var weekday = new Array(7);
-      weekday[0] = "Minggu";
-      weekday[1] = "Senin";
-      weekday[2] = "Selasa";
-      weekday[3] = "Rabu";
-      weekday[4] = "Kamis";
-      weekday[5] = "Jumat";
-      weekday[6] = "Sabtu";
-
-      var monthName = new Array(7);
-      monthName[0] = "Januari";
-      monthName[1] = "Februari";
-      monthName[2] = "Maret";
-      monthName[3] = "April";
-      monthName[4] = "Mei";
-      monthName[5] = "Juni";
-      monthName[6] = "Juli";
-      monthName[7] = "Agustus";
-      monthName[8] = "September";
-      monthName[9] = "Oktober";
-      monthName[10] = "November";
-      monthName[11] = "Desember";
+      
 
       $("#logoutButton").click(function() {
         push_socket("system", "loggedOut", "*", "User logged out", "info").then(function() {

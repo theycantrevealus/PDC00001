@@ -16,9 +16,8 @@
             html {
                 overflow: hidden;
             }
-
-            .pagebreak { page-break-before: always; }
         }
+
 
         body{
             width: 90%;
@@ -77,6 +76,11 @@
             text-align: left;
         }
 
+        table.table, table.table th , table.table td{
+            border: 1px solid #000;
+            border-collapse: collapse;
+        }
+
         table.data {
             width: 100%;
         }
@@ -98,11 +102,6 @@
         table.table thead tr th {
             border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
-        }
-
-        table.table, table.table th , table.table td{
-            border: 1px solid #000;
-            border-collapse: collapse;
         }
 
         .text-left{
@@ -172,12 +171,13 @@
     <table class="table border-bottom mb-5 data">
         <thead class="thead-dark">
         <tr>
-            <th>Tanggal Masuk</th>
-            <th>Tanggal Keluar</th>
+            <th>Tanggal</th>
+            <th>No. RM</th>
             <th>Nama Pasien</th>
-            <th>Alamat</th>
-            <th>Perusahaan Penjamin</th>
-            <th>Rekam Medis</th>
+            <th>Dokter</th>
+            <th>Jenis Operasi</th>
+            <th>Ruangan</th>
+            <th>Penjamin</th>
         </tr>
         </thead>
         <tbody>
@@ -202,12 +202,14 @@
             foreach ($parseValue['data'] as $itemKey => $itemValue) {
                 ?>
                 <tr>
-                    <td><?php echo $itemValue['waktu_masuk']; ?></td>
-                    <td><?php echo $itemValue['waktu_keluar']; ?></td>
-                    <td><?php echo $itemValue['pasien']['panggilan_name']['nama'] . ' ' . $itemValue['pasien']['nama']; ?></td>
-                    <td><?php echo $itemValue['pasien']['alamat']; ?></td>
-                    <td><?php echo $itemValue['penjamin']['nama']; ?></td>
+                    <td><?php echo $itemValue['tgl_operasi_parsed']; ?></td>
                     <td><?php echo $itemValue['pasien']['no_rm']; ?></td>
+                    <td><?php echo $itemValue['pasien']['panggilan_name']['nama'] . ' ' . $itemValue['pasien']['nama']; ?></td>
+                    <td><?php echo $itemValue['dokter']; ?></td>
+                    <td><?php echo $itemValue['jenis_operasi']; ?></td>
+                    <td><?php echo $itemValue['ruangan']; ?></td>
+                    <td><?php echo $itemValue['penjamin']['nama']; ?></td>
+                    
                 </tr>
                 <?php
             }

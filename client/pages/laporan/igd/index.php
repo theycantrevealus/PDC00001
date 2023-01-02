@@ -1,5 +1,5 @@
 <?php
-    $judul_laporan = 'Laporan Kunjungan Rawat Jalan';
+    $judul_laporan = 'Laporan Kunjungan IGD';
 ?>
 <div class="mdk-header-layout__content">
     <div class="mdk-drawer-layout js-mdk-drawer-layout" data-push data-responsive-width="992px">
