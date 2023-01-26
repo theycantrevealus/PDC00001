@@ -4058,6 +4058,31 @@ class Apotek extends Utility
           'uid' => __POLI_INAP__,
           'nama' => 'Rawat Inap'
         );
+
+        //NS Info
+        $NS = self::$query->select('rawat_inap', array(
+          'nurse_station'
+        ))
+          ->join('nurse_station', array(
+            'kode as kode_ns', 'nama as nama_ns'
+          ))
+          ->on(array(
+            array('rawat_inap.nurse_station', '=', 'nurse_station.uid')
+          ))
+          ->where(array(
+            'rawat_inap.kunjungan' => '= ?',
+            // 'AND',
+            // 'rawat_inap.dokter' => '= ?',
+            'AND',
+            'rawat_inap.pasien' => '= ?'
+          ), array(
+            $AntrianInfo['response_data'][0]['kunjungan'],
+            // $value['dokter'],
+            $value['pasien']
+          ))
+          ->execute();
+          $resep_dokter['response_data'][$key]['ns_detail'] = $NS['response_data'][0];
+
       } else {
         $PoliInfo = $Poli->get_poli_info($AntrianInfo['response_data'][0]['departemen']);
         $AntrianInfo['response_data'][0]['departemen'] = $PoliInfo['response_data'][0];

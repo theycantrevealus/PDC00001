@@ -766,7 +766,7 @@
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
                     // console.clear();
-                    // console.log(targettedData);
+                    console.log(targettedData);
                     var kajian = targettedData.kajian;
                     for(var kaj in kajian) {
                         $("#hasil_" + kajian[kaj].parameter_kajian).html((kajian[kaj].nilai === "y") ? "<span class=\"text-success wrap_content\"><i class=\"fa fa-check-circle\"></i> Ya</span>" : "<span class=\"text-danger wrap_content\"><i class=\"fa fa-times-circle\"></i> Tidak</span>");
@@ -944,7 +944,7 @@
                                     no_mr: targettedData.pasien.no_rm,
                                     jenis_pasien: jenis_pasien,
                                     nama_pasien: targettedData.pasien.nama,
-                                    departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null) ? targettedData.antrian.poli_info.nama : "Rawat Inap",
+                                    departemen: (targettedData.antrian.poli_info !== undefined && targettedData.antrian.poli_info !== null && targettedData.antrian.departemen !== __POLI_INAP__) ? targettedData.antrian.poli_info.nama : targettedData.ns_detail.nama_ns,
                                     tanggal_lahir: targettedData.pasien.tanggal_lahir_parsed,
                                     dokter: targettedData.dokter.nama,
                                     jenis_kelamin: (targettedData.pasien.jenkel_detail !== undefined && targettedData.pasien.jenkel_detail !== null) ? targettedData.pasien.jenkel_detail.nama : "-",
