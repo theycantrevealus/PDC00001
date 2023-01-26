@@ -105,7 +105,9 @@
                                 <th>Tanggal</th>
                                 <th>Poliklinik</th>
                                 <th>Pasien</th>
-                                <th>Dokter</th>
+                                <th>Ruangan</th>
+								<th>Dokter DPJP</th>
+								<th>Dokter Penulis Resep</th>
                                 <th>Penjamin</th>
                                 <th>Aksi</th>
                             </tr>

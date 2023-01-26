@@ -430,6 +430,16 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return  "<span>" + row.rawat_inap.kamar + "</span><br />" + row.rawat_inap.bed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.rawat_inap.dokter;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         return row.dokter.nama;
                     }
                 },

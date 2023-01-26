@@ -68,7 +68,8 @@
                                 <th>Tanggal</th>
                                 <th>Poliklinik</th>
                                 <th>Pasien</th>
-                                <th>Dokter</th>
+                                <th>Dokter DPJP</th>
+								<th>Dokter Penulis Resep</th>
                                 <th>Penjamin</th>
                                 <th class="wrap_content">Aksi</th>
                             </tr>
@@ -78,12 +79,22 @@
                     </div>
                     <div class="tab-pane show fade" id="list-resep-riwayat">
                         <div class="row">
-                            <div class="col-lg-6">
+                            <div class="col-lg-3">
+                                <label for="filter_departemen_riwayat">Poliklinik</label>
                                 <select class="form-control" id="filter_departemen_riwayat">
                                     <option value="all">Semua</option>
                                 </select>  
                             </div>
+                            <div class="col-lg-3">
+                            <label for="filter_ruangan">Ruangan</label>
+                                <select class="form-control" id="filter_ruangan">
+                                    <option value="all">Semua</option>
+                                </select>  
+                            </div>
                             <div class="col-lg-6">
+                            <label for="range_tanggal">Tanggal</label>
+                                <input id="range_tanggal" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                              
                             </div>
                             <div class="col-lg-12">
                                 <br />

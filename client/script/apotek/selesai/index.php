@@ -145,8 +145,8 @@
                 },
                 dataSrc:function(response) {
                     var forReturn = [];
-                    console.clear();
-                    console.log(response);
+                    // console.clear();
+                    // console.log(response);
 
                     var dataSet = response.response_package.response_data;
                     if(dataSet == undefined) {
@@ -459,6 +459,16 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return  "<span>" + row.rawat_inap.kamar + "</span><br />" + row.rawat_inap.bed;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row.rawat_inap.dokter;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         return row.dokter.nama;
                     }
                 },
@@ -488,13 +498,36 @@
             ]
         });
 
-
+        var filterPoli,filterRuangan = 'all';
 
         loadPoli("#filter_departemen_riwayat");
         $("#filter_departemen_riwayat").select2();
         $("#filter_departemen_riwayat").change(function() {
+            filterPoli = $(this).val();
+            filterRuangan = 'all';
             tableResepRiwayat.ajax.reload();
         });
+
+        loadRuangan("#filter_ruangan");
+        $("#filter_ruangan").select2();
+        $("#filter_ruangan").change(function() {
+            filterRuangan = $(this).val();
+            filterPoli = 'all';
+            tableResepRiwayat.ajax.reload();
+        });
+
+        $("#range_tanggal").change(function() {
+            tableResepRiwayat.ajax.reload();
+        });
+
+        function getDateRange(target) {
+            var rangeTanggal = $(target).val().split(" to ");
+            if(rangeTanggal.length > 1) {
+                return rangeTanggal;
+            } else {
+                return [rangeTanggal, rangeTanggal];
+            }
+        }
 
 
         var tableResepRiwayat = $("#table-resep-history").DataTable({
@@ -509,13 +542,17 @@
                 type: "POST",
                 data: function(d){
                     d.request = "get_resep_backend_v3";
-                    d.filter_departemen = $("#filter_departemen_riwayat option:selected").val();
+                    d.filter_departemen = filterPoli;
+                    d.filter_ruangan = filterRuangan;
+                    d.from = getDateRange("#range_tanggal")[0];
+                    d.to = getDateRange("#range_tanggal")[1];
                     d.request_type = "riwayat";
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.log(response)
                     var forReturn = [];
 
                     var dataSet = response.response_package.response_data;
@@ -560,7 +597,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.departemen.nama;
+                        if(row.departemen.uid === __POLI_INAP__){
+                            return row.departemen.nama+ "<br />" +"<span class=\"text-info\">"+row.rawat_inap.kamar+"</span>"+" "+row.rawat_inap.bed;
+                        }else{
+                            return row.departemen.nama;
+                        }
                     }
                 },
                 {
@@ -664,6 +705,37 @@
         }
 
 
+        function loadRuangan(targetDOM, targetted = ""){
+            var dataRuangan = null;
+
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Ruangan/ruangan",
+                type: "GET",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                success: function(response){
+                    console.log(response)
+                    var MetaData = dataRuangan = response.response_package.response_data;
+
+                    if (MetaData != ""){ 
+                        for(i = 0; i < MetaData.length; i++){
+                            if(MetaData[i].uid !== '58b9320b-f53b-46c8-8f58-b89db7a218ab'){ //BUKAN KAMAR IGD
+                                var selection = document.createElement("OPTION");
+                                $(selection).attr("value", MetaData[i].uid).html(MetaData[i].nama);
+                                $(targetDOM).append(selection);
+                            }
+                        }
+                    }
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            });
+
+            return dataRuangan;
+        }
 
 
 
@@ -693,8 +765,8 @@
                 type:"GET",
                 success:function(response) {
                     targettedData = response.response_package.response_data[0];
-                    console.clear();
-                    console.log(targettedData);
+                    // console.clear();
+                    // console.log(targettedData);
                     var kajian = targettedData.kajian;
                     for(var kaj in kajian) {
                         $("#hasil_" + kajian[kaj].parameter_kajian).html((kajian[kaj].nilai === "y") ? "<span class=\"text-success wrap_content\"><i class=\"fa fa-check-circle\"></i> Ya</span>" : "<span class=\"text-danger wrap_content\"><i class=\"fa fa-times-circle\"></i> Tidak</span>");

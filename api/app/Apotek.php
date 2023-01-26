@@ -7391,6 +7391,7 @@ class Apotek extends Utility
 
         $paramValue = array('D', 'P', __POLI_INAP__);
       } else if ($parameter['request_type'] === 'riwayat') {
+
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
           if (isset($parameter['filter_departemen']) && $parameter['filter_departemen'] !== 'all') {
             $paramData = array(
@@ -7398,6 +7399,8 @@ class Apotek extends Utility
               'AND',
               'resep.status_resep' => '= ?',
               'AND',
+              'resep.created_at' => 'BETWEEN ? AND ?',
+              'AND',
               '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
               'OR',
               'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
@@ -7406,11 +7409,31 @@ class Apotek extends Utility
               'AND',
               'antrian.departemen' => '= ?'
             );
+          }else if (isset($parameter['filter_ruangan']) && $parameter['filter_ruangan'] !== 'all') {
+            $paramData = array(
+              'resep.deleted_at' => 'IS NULL',
+              'AND',
+              'resep.status_resep' => '= ?',
+              'AND',
+              'resep.created_at' => 'BETWEEN ? AND ?',
+              'AND',
+              '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+              'OR',
+              'pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+              'AND',
+              'pasien.deleted_at' => 'IS NULL',
+              'AND',
+              'rawat_inap.kamar' => '= ?',
+              'AND',
+              'antrian.departemen' => '= ?'
+            );
           } else {
             $paramData = array(
               'resep.deleted_at' => 'IS NULL',
               'AND',
               'resep.status_resep' => '= ?',
+              'AND',
+              'resep.created_at' => 'BETWEEN ? AND ?',
               'AND',
               '(pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
               'OR',
@@ -7426,7 +7449,23 @@ class Apotek extends Utility
               'AND',
               'resep.status_resep' => '= ?',
               'AND',
+              'resep.created_at' => 'BETWEEN ? AND ?',
+              'AND',
               'pasien.deleted_at' => 'IS NULL',
+              'AND',
+              'antrian.departemen' => '= ?'
+            );
+          }else if (isset($parameter['filter_ruangan']) && $parameter['filter_ruangan'] !== 'all') {
+            $paramData = array(
+              'resep.deleted_at' => 'IS NULL',
+              'AND',
+              'resep.status_resep' => '= ?',
+              'AND',
+              'resep.created_at' => 'BETWEEN ? AND ?',
+              'AND',
+              'pasien.deleted_at' => 'IS NULL',
+              'AND',
+              'rawat_inap.kamar' => '= ?',
               'AND',
               'antrian.departemen' => '= ?'
             );
@@ -7436,15 +7475,19 @@ class Apotek extends Utility
               'AND',
               'resep.status_resep' => '= ?',
               'AND',
+              'resep.created_at' => 'BETWEEN ? AND ?',
+              'AND',
               'pasien.deleted_at' => 'IS NULL'
             );
           }
         }
 
         if (isset($parameter['filter_departemen']) && $parameter['filter_departemen'] !== 'all') {
-          $paramValue = array('S', $parameter['filter_departemen']);
+          $paramValue = array('S', $parameter['from'], $parameter['to'], $parameter['filter_departemen']);
+        }else if (isset($parameter['filter_ruangan']) && $parameter['filter_ruangan'] !== 'all') {
+          $paramValue = array('S', $parameter['from'], $parameter['to'], $parameter['filter_ruangan'], __POLI_INAP__);
         } else {
-          $paramValue = array('S');
+          $paramValue = array('S', $parameter['from'], $parameter['to']);
         }
       } else if ($parameter['request_type'] === 'igd') {
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
@@ -7727,6 +7770,82 @@ class Apotek extends Utility
         'response_data' => array_merge($dataIGD['response_data'], $dataMixed['response_data']),
         'response_igd' => $dataIGD
       );
+    } else if($parameter['request_type'] === 'riwayat' && $parameter['filter_ruangan'] !== 'all') {
+      if ($parameter['length'] < 0) {
+        $data = self::$query->select('resep', array(
+          'uid',
+          'kunjungan',
+          'antrian',
+          'asesmen',
+          'dokter',
+          'pasien',
+          'total',
+          'status_resep',
+          'waktu_panggil',
+          'waktu_terima',
+          'created_at',
+          'updated_at'
+        ))
+          ->join('pasien', array(
+            'nama as nama_pasien',
+            'no_rm'
+          ))
+          ->join('antrian', array(
+            'departemen',
+            'penjamin'
+          ))
+          ->join('rawat_inap', array(
+            'kamar',
+          ))
+          ->on(array(
+            array('resep.pasien', '=', 'pasien.uid'),
+            array('resep.antrian', '=', 'antrian.uid'),
+            array('resep.kunjungan', '=', 'rawat_inap.kunjungan'),
+          ))
+          ->order(array(
+            'resep.created_at' => 'ASC'
+          ))
+          ->where($paramData, $paramValue)
+          ->execute();
+      } else {
+        $data = self::$query->select('resep', array(
+          'uid',
+          'kunjungan',
+          'antrian',
+          'asesmen',
+          'dokter',
+          'pasien',
+          'total',
+          'status_resep',
+          'waktu_panggil',
+          'waktu_terima',
+          'created_at',
+          'updated_at'
+        ))
+          ->join('pasien', array(
+            'nama as nama_pasien',
+            'no_rm'
+          ))
+          ->join('antrian', array(
+            'departemen',
+            'penjamin'
+          ))
+          ->join('rawat_inap', array(
+            'kamar',
+          ))
+          ->on(array(
+            array('resep.pasien', '=', 'pasien.uid'),
+            array('resep.antrian', '=', 'antrian.uid'),
+            array('resep.kunjungan', '=', 'rawat_inap.kunjungan'),
+          ))
+          ->order(array(
+            'resep.created_at' => 'ASC'
+          ))
+          ->where($paramData, $paramValue)
+          ->offset(intval($parameter['start']))
+          ->limit(intval($parameter['length']))
+          ->execute();
+      }
     } else {
       if ($parameter['length'] < 0) {
         $data = self::$query->select('resep', array(
@@ -7897,15 +8016,15 @@ class Apotek extends Utility
           'nama' => 'Rawat Inap'
         );
 
-        //NS Info
+        //NS Info 
         $NS = self::$query->select('rawat_inap', array(
-          'nurse_station'
+          'nurse_station',
         ))
           ->join('nurse_station', array(
             'kode as kode_ns', 'nama as nama_ns'
           ))
           ->on(array(
-            array('rawat_inap.nurse_station', '=', 'nurse_station.uid')
+            array('rawat_inap.nurse_station', '=', 'nurse_station.uid'),
           ))
           ->where(array(
             'rawat_inap.kunjungan' => '= ?',
@@ -7921,6 +8040,40 @@ class Apotek extends Utility
           ->execute();
         $data['response_data'][$key]['ns_response'] = $NS;
         $data['response_data'][$key]['ns_detail'] = $NS['response_data'][0];
+
+        //RANAP INFO
+        $RawatInap = self::$query->select('rawat_inap', array(
+          'dokter',
+          'kamar',
+          'bed'
+        ))
+          ->join('pegawai', array(
+            'nama as dokter'
+          ))
+          ->join('master_unit_ruangan', array(
+            'nama as kamar'
+          ))
+          ->join('master_unit_bed', array(
+            'nama as bed'
+          ))
+          ->on(array(
+            array('rawat_inap.dokter', '=', 'pegawai.uid'),
+            array('rawat_inap.kamar', '=', 'master_unit_ruangan.uid'),
+            array('rawat_inap.bed', '=', 'master_unit_bed.uid'),
+          ))
+          ->where(array(
+            'rawat_inap.kunjungan' => '= ?',
+            'AND',
+            // 'rawat_inap.dokter' => '= ?',
+            // 'AND',
+            'rawat_inap.pasien' => '= ?'
+          ), array(
+            $value['kunjungan'],
+            //$value['dokter'],
+            $value['pasien']
+          ))
+          ->execute();
+          $data['response_data'][$key]['rawat_inap'] = $RawatInap['response_data'][0];
       } else if ($value['departemen'] === __POLI_IGD__) {
         $data['response_data'][$key]['departemen'] = array(
           'uid' => __POLI_IGD__,
@@ -7962,22 +8115,62 @@ class Apotek extends Utility
       $autonum++;
     }
 
-    $itemTotal = self::$query->select('resep', array(
-      'uid', 'pasien', 'antrian'
-    ))
-      ->join('pasien', array(
-        'nama as nama_pasien',
-        'no_rm'
+    if(isset($parameter['filter_ruangan']) && $parameter['filter_ruangan'] !== 'all'){
+      $itemTotal = self::$query->select('resep', array(
+        'uid',
+        'kunjungan',
+        'antrian',
+        'asesmen',
+        'dokter',
+        'pasien',
+        'total',
+        'status_resep',
+        'waktu_panggil',
+        'waktu_terima',
+        'created_at',
+        'updated_at'
       ))
-      ->join('antrian', array(
-        'departemen'
+        ->join('pasien', array(
+          'nama as nama_pasien',
+          'no_rm'
+        ))
+        ->join('antrian', array(
+          'departemen',
+          'penjamin'
+        ))
+        ->join('rawat_inap', array(
+          'kamar',
+        ))
+        ->on(array(
+          array('resep.pasien', '=', 'pasien.uid'),
+          array('resep.antrian', '=', 'antrian.uid'),
+          array('resep.kunjungan', '=', 'rawat_inap.kunjungan'),
+        ))
+        ->order(array(
+          'resep.created_at' => 'ASC'
+        ))
+        ->where($paramData, $paramValue)
+        ->execute();
+    }else{
+
+      $itemTotal = self::$query->select('resep', array(
+        'uid', 'pasien', 'antrian'
       ))
-      ->on(array(
-        array('resep.pasien', '=', 'pasien.uid'),
-        array('resep.antrian', '=', 'antrian.uid')
-      ))
-      ->where($paramData, $paramValue)
-      ->execute();
+        ->join('pasien', array(
+          'nama as nama_pasien',
+          'no_rm'
+        ))
+        ->join('antrian', array(
+          'departemen'
+        ))
+        ->on(array(
+          array('resep.pasien', '=', 'pasien.uid'),
+          array('resep.antrian', '=', 'antrian.uid')
+        ))
+        ->where($paramData, $paramValue)
+        ->execute();
+
+    }
 
     // $data['recordsTotal'] = ($parameter['request_type'] === 'verifikasi') ? (count($itemTotal['response_data']) + count($dataIGD['response_data'])) : count($itemTotal['response_data']);
     $data['recordsTotal'] = count($itemTotal['response_data']);
