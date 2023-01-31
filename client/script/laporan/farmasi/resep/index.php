@@ -29,14 +29,16 @@
                 url: __HOSTAPI__ + "/Laporan",
                 type: "POST",
                 data: function(d) {
-                    d.request = "kunjungan_rawat_inap";
+                    d.request = "farmasi_resep";
                     d.from = getDateRange("#range_laporan")[0];
                     d.to = getDateRange("#range_laporan")[1];
+                    
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+                    console.log(response);
                     var returnedData = [];
                     var returnedData = response.response_package.response_data;
 
@@ -51,52 +53,49 @@
             autoWidth: false,
             language: {
                 search: "",
-                searchPlaceholder: "Cari Nomor Invoice"
+                searchPlaceholder: "Cari Nama Pasien"
             },
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_masuk;
+                        return row.autonum;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_keluar;
+                        return row.nama_pasien;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return ((row.pasien.panggilan_name !== null && row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name.nama : "") + " " + row.pasien.nama;
+                        if(row.departemen === __POLI_INAP__){
+                            return row.rawat_inap.kamar
+                        }else{
+                            return row.nama_departemen;
+                        }
+                        
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.jenkel_detail.nama;
+                        return row.nama_penjamin;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.alamat;
+                        return row.total.qty;
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.nama_ruangan+"<br><span class=\"text-info\">"+row.nama_bed+"</span>";
+                        return "Rp. "+row.total.subtotal;
                     }
                 },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row.penjamin.nama;
-                    }
-                },
-                {
-                    "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.no_rm;
-                    }
-                }
+               
+                
+
             ]
         });
-
 
 
         $("#btnCetak").click(function () {
@@ -111,16 +110,17 @@
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 data: {
-                    request : "print_kunjungan_rawat_inap",
+                    request : "print_farmasi_resep",
                     from : getDateRange("#range_laporan")[0],
                     to : getDateRange("#range_laporan")[1]
                 },
                 success: function(response) {
+                    console.log(response)
                     t.prop("disabled", false).html("<i class=\"fa fa-print\"></i> Cetak");
                     var data =  response.response_package.response_data
                     $.ajax({
                         async: false,
-                        url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_rawat_inap.php",
+                        url: __HOST__ + "miscellaneous/print_template/laporan_farmasi_resep.php",
                         beforeSend: function (request) {
                             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                         },
@@ -131,9 +131,7 @@
                             __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                             __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                             __NAMA_SAYA__ : __MY_NAME__,
-                            __JUDUL__ : "Laporan Kunjungan Rawat Inap",
-                            __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
-                            __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
+                            __JUDUL__ : "Laporan Resep",
                             data: data
 
                         },
@@ -146,7 +144,7 @@
                                 importStyle: true,
                                 header: null,
                                 footer: null,
-                                pageTitle: "Laporan Kunjungan Rawat Inap",
+                                pageTitle: "Laporan Resep",
                                 afterPrint: function() {
                                     $("#form-payment-detail").modal("hide");
                                 }
@@ -165,48 +163,6 @@
 
         });
 
-
-
-        // $("#btnCetak").click(function () {
-        //     $.ajax({
-        //         async: false,
-        //         url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_rawat_inap.php",
-        //         beforeSend: function (request) {
-        //             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-        //         },
-        //         type: "POST",
-        //         data: {
-        //             __HOSTNAME__: __HOSTNAME__,
-        //             __PC_CUSTOMER__: __PC_CUSTOMER__,
-        //             __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
-        //             __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
-        //             __NAMA_SAYA__ : __MY_NAME__,
-        //             __JUDUL__ : "Laporan Kunjungan Rawat Inap",
-        //             __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
-        //             __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
-        //             data: totalData
-
-        //         },
-        //         success: function (response) {
-        //             var containerItem = document.createElement("DIV");
-        //             $(containerItem).html(response);
-        //             $(containerItem).printThis({
-        //                 importCSS: true,
-        //                 base: false,
-        //                 importStyle: true,
-        //                 header: null,
-        //                 footer: null,
-        //                 pageTitle: "Kwitansi",
-        //                 afterPrint: function() {
-        //                     $("#form-payment-detail").modal("hide");
-        //                 }
-        //             });
-        //         },
-        //         error: function (response) {
-        //             //
-        //         }
-        //     });
-        //     return false;
-        // });
+       
     });
 </script>

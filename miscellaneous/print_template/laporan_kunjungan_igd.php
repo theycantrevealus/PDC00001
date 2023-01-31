@@ -3,8 +3,7 @@
     <style type='text/css'>
 
         @page {
-            size: A4 landscape;
-            margin: 0;
+            size: A4 landscape;  
         }
 
         @media print {
@@ -16,16 +15,19 @@
             html {
                 overflow: hidden;
             }
-        }
 
+            .pagebreak { page-break-before: always; }
+        }
 
         body{
             width: 90%;
+            margin: 0 auto;
             overflow: hidden;
             padding: 1cm;
             color: #000;
             font-family: "Arial", sans-serif;
             text-align:center;
+            page-break-after: auto;
         }
 
         .header{
@@ -76,11 +78,6 @@
             text-align: left;
         }
 
-        table.table, table.table th , table.table td{
-            border: 1px solid #000;
-            border-collapse: collapse;
-        }
-
         table.data {
             width: 100%;
         }
@@ -88,6 +85,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.6rem;
         }
 
         tr td.gray{
@@ -95,13 +93,18 @@
         }
 
         table.table tr td, table.table tr th{
-            padding:0.3rem;
-            font-size: 9pt !important;
+            padding:0.1rem;
+            font-size: 8pt !important;
         }
 
         table.table thead tr th {
             border-top: 1px solid #ccc;
             border-bottom: 1px solid #ccc;
+        }
+
+        table.table, table.table th , table.table td{
+            border: 1px solid #000;
+            border-collapse: collapse;
         }
 
         .text-left{
@@ -174,6 +177,7 @@
             <th>Tanggal Masuk</th>
             <th>Tanggal Keluar</th>
             <th>Nama Pasien</th>
+            <th>Jenis Kelamin</th>
             <th>Alamat</th>
             <th>Perusahaan Penjamin</th>
             <th>Rekam Medis</th>
@@ -182,28 +186,29 @@
         <tbody>
         <?php
 
-        $dataBuild = array();
+        // $dataBuild = array();
         
-        $dataBuild = array();
-        foreach ($_POST['data'] as $datKey => $datValue) {
-            if(!isset($dataBuild[$datValue['penjamin']['uid']])) {
-                $dataBuild[$datValue['penjamin']['uid']] = array(
-                    'nama' => $datValue['penjamin']['nama'],
-                    'data' => array()
-                );
-            }
-            array_push($dataBuild[$datValue['penjamin']['uid']]['data'], $datValue);
-        }
+        // $dataBuild = array();
+        // foreach ($_POST['data'] as $datKey => $datValue) {
+        //     if(!isset($dataBuild[$datValue['penjamin']['uid']])) {
+        //         $dataBuild[$datValue['penjamin']['uid']] = array(
+        //             'nama' => $datValue['penjamin']['nama'],
+        //             'data' => array()
+        //         );
+        //     }
+        //     array_push($dataBuild[$datValue['penjamin']['uid']]['data'], $datValue);
+        // }
 
         
 
-        foreach ($dataBuild as $parseKey => $parseValue) {
-            foreach ($parseValue['data'] as $itemKey => $itemValue) {
+        // foreach ($dataBuild as $parseKey => $parseValue) {
+            foreach ($_POST['data'] as $itemKey => $itemValue) {
                 ?>
                 <tr>
                     <td><?php echo $itemValue['waktu_masuk']; ?></td>
                     <td><?php echo $itemValue['waktu_keluar']; ?></td>
                     <td><?php echo $itemValue['pasien']['panggilan_name']['nama'] . ' ' . $itemValue['pasien']['nama']; ?></td>
+                    <td><?php echo $itemValue['pasien']['jenkel_detail']['nama']; ?></td>
                     <td><?php echo $itemValue['pasien']['alamat']; ?></td>
                     <td><?php echo $itemValue['penjamin']['nama']; ?></td>
                     <td><?php echo $itemValue['pasien']['no_rm']; ?></td>
@@ -213,7 +218,7 @@
             ?>
            
         <?php
-        }
+        //}
         ?>
          <!-- <tr>
                 <td colspan="2"></td>

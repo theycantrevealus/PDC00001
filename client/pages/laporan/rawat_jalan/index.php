@@ -45,7 +45,9 @@
                                         <th>Tanggal Masuk</th>
                                         <th>Tanggal Keluar</th>
                                         <th>Nama Pasien</th>
+                                        <th>Jenis Kelamin</th>
                                         <th>Alamat</th>
+                                        <th>Poliklinik</th>
                                         <th>Perusahaan Penjamin</th>
                                         <th>Rekam Medis</th>
                                     </tr>

@@ -57,7 +57,7 @@
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.created_at;
+                        return row.tanggal_po;
                     }
                 },
                 {

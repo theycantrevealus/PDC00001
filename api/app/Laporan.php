@@ -64,8 +64,35 @@ class Laporan extends Utility
             case 'farmasi':
                 return self::report_farmasi($parameter);
                 break;
+            case 'farmasi_item':
+                return self::report_farmasi_item($parameter);
+                break;
+            case 'farmasi_resep':
+                return self::report_farmasi_resep($parameter);
+                break;
+            case 'farmasi_mutasi':
+                return self::report_farmasi_mutasi($parameter);
+                break;
             case 'kamar_operasi':
                 return self::report_kamar_operasi($parameter);
+                break;
+            case 'print_kunjungan_rawat_jalan':
+                return self::print_kunjungan_rawat_jalan($parameter);
+                break;
+            case 'print_kunjungan_rawat_inap':
+                return self::print_kunjungan_rawat_inap($parameter);
+                break;
+            case 'print_kunjungan_igd':
+                return self::print_kunjungan_igd($parameter);
+                break;
+            case 'print_farmasi_item':
+                return self::print_report_farmasi_item($parameter);
+                break;
+            case 'print_farmasi_resep':
+                return self::print_report_farmasi_resep($parameter);
+                break;
+            case 'print_farmasi_mutasi':
+                return self::print_report_farmasi_mutasi($parameter);
                 break;
             case 'recalculate':
                 return '';
@@ -1405,6 +1432,1022 @@ class Laporan extends Utility
         return $data;
     }
 
+
+    private function report_farmasi_item($parameter){
+
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'master_inv.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'AND',  
+                'master_inv.kategori' => '= ?'
+            );
+            $paramValue = array(__UID_KATEGORI_OBAT);
+        } else {
+            $paramData = array(
+                'master_inv.deleted_at' => 'IS NULL',
+                'AND',  
+                'master_inv.kategori' => '= ?'
+            );
+            $paramValue = array(__UID_KATEGORI_OBAT);
+            
+            
+        }
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query
+                ->select(
+                'master_inv',
+                array(
+                    'uid',
+                    'nama',
+                )
+                )
+                ->join(
+                    'master_inv_satuan',
+                    array(
+                        'nama as nama_satuan'
+                    )
+                )
+                ->on(
+                    array(
+                        array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid'),
+                    )
+                )
+                ->where($paramData, $paramValue)
+                ->execute();
+            } else {
+                $data = self::$query
+                ->select(
+                'master_inv',
+                array(
+                    'uid',
+                    'nama',
+                )
+                )
+                ->join(
+                    'master_inv_satuan',
+                    array(
+                        'nama as nama_satuan'
+                    )
+                )
+                ->on(
+                    array(
+                        array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid'),
+                    )
+                )
+                ->where($paramData, $paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+            }
+
+        
+
+        $data['response_draw'] = $parameter['draw'];
+        $autonum = intval($parameter['start']) + 1;
+        //$KategoriObat = new Inventori(self::$pdo);
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            
+
+            $KategoriObat = self::$query
+                    ->select('master_inv_obat_kategori_item')
+                    ->join(
+                        'master_inv_obat_kategori',
+                        array(
+                            'nama as kategori'
+                        )
+                    )
+                    ->on(
+                        array(
+                            array('master_inv_obat_kategori_item.kategori', '=', 'master_inv_obat_kategori.uid'),
+                        )
+                    )
+                    ->where(
+                        array(
+                            'master_inv_obat_kategori_item.obat' => '= ?'
+                        ),
+                        array(
+                            $value['uid']
+                        ))
+                    ->execute();
+
+            //KATEGORI OBAT
+            
+            
+            $arrKategoriObat = array();
+            foreach($KategoriObat['response_data'] as $ItemObat){
+                array_push($arrKategoriObat, $ItemObat['kategori']);
+            }
+
+            if(in_array('FORNAS', $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['fornas'] = 'FORNAS';
+            }else {
+                $data['response_data'][$key]['kategori']['fornas'] = 'NON-FORNAS';
+            }
+
+            if(in_array("NARKOTIKA", $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['narkotika'] = "NARKOTIKA";
+            }else {
+                $data['response_data'][$key]['kategori']['narkotika'] = "NON-NARKOTIKA";
+            }
+
+            if(in_array("PSIKOTROPIKA", $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['psikotropika'] = "PSIKOTROPIKA";
+            }else {
+                $data['response_data'][$key]['kategori']['psikotropika'] = "NON-PSIKOTROPIKA";
+            }
+
+            if(in_array('GENERIK', $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['generik'] = 'GENERIK';
+            }else {
+                $data['response_data'][$key]['kategori']['generik'] = 'NON-GENERIK';
+            }
+            
+            if(in_array("ANTIBIOTIK", $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['antibiotik'] = "ANTIBIOTIK";
+            }else {
+                $data['response_data'][$key]['kategori']['antibiotik'] = "NON-ANTIBIOTIK";
+            }
+            
+            $data['response_data'][$key]['debug'] = $KategoriObat['response_data'];
+            
+            $autonum++;
+        }
+
+        $itemTotal = self::$query
+                ->select(
+                'master_inv',
+                array(
+                    'uid',
+                    'nama',
+                )
+                )
+                ->join(
+                    'master_inv_satuan',
+                    array(
+                        'nama as nama_satuan'
+                    )
+                )
+                ->on(
+                    array(
+                        array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid'),
+                    )
+                )
+                ->where($paramData, $paramValue)
+                ->execute();
+
+        $data['recordsTotal'] = count($itemTotal['response_data']);
+        $data['recordsFiltered'] = count($itemTotal['response_data']);
+        $data['length'] = intval($parameter['length']);
+        $data['start'] = intval($parameter['start']);
+        return $data;
+    }
+
+    //PRINT 
+    private function print_report_farmasi_item($parameter){
+
+        $paramData = array(
+            'master_inv.deleted_at' => 'IS NULL',
+            'AND',  
+            'master_inv.kategori' => '= ?'
+        );
+        $paramValue = array(__UID_KATEGORI_OBAT);
+        
+
+        $data = self::$query
+            ->select(
+            'master_inv',
+            array(
+                'uid',
+                'nama',
+            )
+            )
+            ->join(
+                'master_inv_satuan',
+                array(
+                    'nama as nama_satuan'
+                )
+            )
+            ->on(
+                array(
+                    array('master_inv.satuan_terkecil', '=', 'master_inv_satuan.uid'),
+                )
+            )
+            ->where($paramData, $paramValue)
+            ->execute();
+           
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['autonum'] = $autonum;
+            
+
+            $KategoriObat = self::$query
+                    ->select('master_inv_obat_kategori_item')
+                    ->join(
+                        'master_inv_obat_kategori',
+                        array(
+                            'nama as kategori'
+                        )
+                    )
+                    ->on(
+                        array(
+                            array('master_inv_obat_kategori_item.kategori', '=', 'master_inv_obat_kategori.uid'),
+                        )
+                    )
+                    ->where(
+                        array(
+                            'master_inv_obat_kategori_item.obat' => '= ?'
+                        ),
+                        array(
+                            $value['uid']
+                        ))
+                    ->execute();
+
+            //KATEGORI OBAT
+            
+            
+            $arrKategoriObat = array();
+            foreach($KategoriObat['response_data'] as $ItemObat){
+                array_push($arrKategoriObat, $ItemObat['kategori']);
+            }
+
+            if(in_array('FORNAS', $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['fornas'] = 'FORNAS';
+            }else {
+                $data['response_data'][$key]['kategori']['fornas'] = 'NON-FORNAS';
+            }
+
+            if(in_array("NARKOTIKA", $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['narkotika'] = "NARKOTIKA";
+            }else {
+                $data['response_data'][$key]['kategori']['narkotika'] = "NON-NARKOTIKA";
+            }
+
+            if(in_array("PSIKOTROPIKA", $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['psikotropika'] = "PSIKOTROPIKA";
+            }else {
+                $data['response_data'][$key]['kategori']['psikotropika'] = "NON-PSIKOTROPIKA";
+            }
+
+            if(in_array('GENERIK', $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['generik'] = 'GENERIK';
+            }else {
+                $data['response_data'][$key]['kategori']['generik'] = 'NON-GENERIK';
+            }
+            
+            if(in_array("ANTIBIOTIK", $arrKategoriObat)){
+                $data['response_data'][$key]['kategori']['antibiotik'] = "ANTIBIOTIK";
+            }else {
+                $data['response_data'][$key]['kategori']['antibiotik'] = "NON-ANTIBIOTIK";
+            }
+            
+            $data['response_data'][$key]['debug'] = $KategoriObat['response_data'];
+            
+            $autonum++;
+        }
+
+        return $data;
+    }
+
+    public function report_farmasi_resep($parameter){
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'resep.deleted_at' => 'IS NULL',
+                'AND',
+                '(pasien.no_rm' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'OR',
+                'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\')',
+                'AND',
+                'resep.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array($parameter['from'], $parameter['to']);
+            
+        } else {
+            $paramData = array(
+                'resep.deleted_at' => 'IS NULL',
+                'AND',  
+                'resep.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array($parameter['from'], $parameter['to']);
+            
+        }
+
+
+        if ($parameter['length'] < 0) {
+            $data = self::$query
+                    ->select('resep',
+                        array(
+                            'uid',
+                            'kode',
+                            'kunjungan',
+                            'antrian',
+                            'asesmen',
+                            'dokter',
+                            'apoteker',
+                            'pasien',
+                            'total',
+                            'alergi_obat',
+                            'status_resep',
+                            'keterangan',
+                            'keterangan_racikan',
+                            'created_at',
+                            'updated_at',
+                            'alasan_ubah'
+                        )
+                    )
+                    ->join(
+                        'pasien',
+                        array(
+                            'no_rm',
+                            'nama as nama_pasien',
+                        )
+                    )
+                    ->join(
+                        'antrian',
+                        array(
+                            'penjamin',
+                            'departemen'
+                        )
+                    )
+                    ->join(
+                        'master_penjamin',
+                        array(
+                            'nama as nama_penjamin'
+                        )
+                    )
+                    ->join(
+                        'master_poli',
+                        array(
+                            'nama as nama_departemen'
+                        )
+                    )
+                    ->on(
+                        array(
+                            array('resep.pasien', '=', 'pasien.uid'),
+                            array('resep.antrian', '=', 'antrian.uid'),
+                            array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                            array('antrian.departemen', '=', 'master_poli.uid'),
+                        )
+                    )
+                    ->where($paramData,$paramValue)
+                    ->execute();
+            } else {
+                $data = self::$query
+                        ->select('resep',
+                            array(
+                                'uid',
+                                'kode',
+                                'kunjungan',
+                                'antrian',
+                                'asesmen',
+                                'dokter',
+                                'apoteker',
+                                'pasien',
+                                'total',
+                                'alergi_obat',
+                                'status_resep',
+                                'keterangan',
+                                'keterangan_racikan',
+                                'created_at',
+                                'updated_at',
+                                'alasan_ubah'
+                            )
+                        )
+                        ->join(
+                            'pasien',
+                            array(
+                                'no_rm',
+                                'nama as nama_pasien',
+                            )
+                        )
+                        ->join(
+                            'antrian',
+                            array(
+                                'penjamin',
+                                'departemen'
+                            )
+                        )
+                        ->join(
+                            'master_penjamin',
+                            array(
+                                'nama as nama_penjamin'
+                            )
+                        )
+                        ->join(
+                            'master_poli',
+                            array(
+                                'nama as nama_departemen'
+                            )
+                        )
+                        ->on(
+                            array(
+                                array('resep.pasien', '=', 'pasien.uid'),
+                                array('resep.antrian', '=', 'antrian.uid'),
+                                array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                                array('antrian.departemen', '=', 'master_poli.uid'),
+                            )
+                        )
+                        ->where($paramData,$paramValue)
+                        ->offset(intval($parameter['start']))
+                        ->limit(intval($parameter['length']))
+                        ->execute();
+            }
+
+            $pegawai = new Pegawai(self::$pdo);
+            $pasien = new Pasien(self::$pdo);
+            $ruangan = new Ruangan(self::$pdo);
+            $Penjamin = new Penjamin(self::$pdo);
+            $KamarOperasi = new KamarOperasi(self::$pdo);
+            $data['response_draw'] = $parameter['draw'];
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+
+                if($value['departemen'] === __POLI_INAP__){
+                    //RANAP INFO
+                    $RawatInap = self::$query->select('rawat_inap', array(
+                        'dokter',
+                        'kamar',
+                        'bed'
+                    ))
+                        ->join('pegawai', array(
+                            'nama as dokter'
+                        ))
+                        ->join('master_unit_ruangan', array(
+                            'nama as kamar'
+                        ))
+                        ->join('master_unit_bed', array(
+                            'nama as bed'
+                        ))
+                        ->on(array(
+                            array('rawat_inap.dokter', '=', 'pegawai.uid'),
+                            array('rawat_inap.kamar', '=', 'master_unit_ruangan.uid'),
+                            array('rawat_inap.bed', '=', 'master_unit_bed.uid'),
+                        ))
+                        ->where(array(
+                            'rawat_inap.kunjungan' => '= ?',
+                            'AND',
+                            // 'rawat_inap.dokter' => '= ?',
+                            // 'AND',
+                            'rawat_inap.pasien' => '= ?'
+                        ), array(
+                            $value['kunjungan'],
+                            //$value['dokter'],
+                            $value['pasien']
+                        ))
+                        ->execute();
+                    $data['response_data'][$key]['rawat_inap'] = $RawatInap['response_data'][0];
+                }
+
+                //RESEP
+               
+               
+                $Resep = self::$pdo->query("SELECT SUM(subtotal) as subtotal, SUM(qty) as qty FROM resep JOIN invoice ON resep.kunjungan = invoice.kunjungan JOIN invoice_detail ON invoice.uid =invoice_detail.invoice WHERE resep.uid = '".$value['uid']."' AND invoice_detail.billing_group = 'obat'")->fetchAll(\PDO::FETCH_ASSOC); 
+
+                $Resep[0]['subtotal'] = number_format($Resep[0]['subtotal'], 2, ".", ",");
+                
+                $data['response_data'][$key]['total'] = $Resep[0];
+               
+                $autonum++;
+            }
+
+            $itemTotal = self::$query
+                    ->select('resep',
+                        array(
+                            'uid',
+                            'kode',
+                            'kunjungan',
+                            'antrian',
+                            'asesmen',
+                            'dokter',
+                            'apoteker',
+                            'pasien',
+                            'total',
+                            'alergi_obat',
+                            'status_resep',
+                            'keterangan',
+                            'keterangan_racikan',
+                            'created_at',
+                            'updated_at',
+                            'alasan_ubah'
+                        )
+                    )
+                    ->join(
+                        'pasien',
+                        array(
+                            'no_rm',
+                            'nama as nama_pasien',
+                        )
+                    )
+                    ->join(
+                        'antrian',
+                        array(
+                            'penjamin',
+                            'departemen'
+                        )
+                    )
+                    ->join(
+                        'master_penjamin',
+                        array(
+                            'nama as nama_penjamin'
+                        )
+                    )
+                    ->join(
+                        'master_poli',
+                        array(
+                            'nama as nama_departemen'
+                        )
+                    )
+                    ->on(
+                        array(
+                            array('resep.pasien', '=', 'pasien.uid'),
+                            array('resep.antrian', '=', 'antrian.uid'),
+                            array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                            array('antrian.departemen', '=', 'master_poli.uid'),
+                        )
+                    )
+                    ->where($paramData,$paramValue)
+                    ->execute();
+
+            $data['recordsTotal'] = count($itemTotal['response_data']);
+            $data['recordsFiltered'] = count($itemTotal['response_data']);
+            $data['length'] = intval($parameter['length']);
+            $data['start'] = intval($parameter['start']);
+            return $data;
+    }
+
+    //KEPERLUAN PRINT
+    public function print_report_farmasi_resep($parameter){
+       
+        $paramData = array(
+            'resep.deleted_at' => 'IS NULL',
+            'AND',  
+            'resep.created_at' => 'BETWEEN ? AND ?',
+        );
+        $paramValue = array($parameter['from'], $parameter['to']);
+    
+        $data = self::$query
+                ->select('resep',
+                    array(
+                        'uid',
+                        'kode',
+                        'kunjungan',
+                        'antrian',
+                        'asesmen',
+                        'dokter',
+                        'apoteker',
+                        'pasien',
+                        'total',
+                        'alergi_obat',
+                        'status_resep',
+                        'keterangan',
+                        'keterangan_racikan',
+                        'created_at',
+                        'updated_at',
+                        'alasan_ubah'
+                    )
+                )
+                ->join(
+                    'pasien',
+                    array(
+                        'no_rm',
+                        'nama as nama_pasien',
+                    )
+                )
+                ->join(
+                    'antrian',
+                    array(
+                        'penjamin',
+                        'departemen'
+                    )
+                )
+                ->join(
+                    'master_penjamin',
+                    array(
+                        'nama as nama_penjamin'
+                    )
+                )
+                ->join(
+                    'master_poli',
+                    array(
+                        'nama as nama_departemen'
+                    )
+                )
+                ->on(
+                    array(
+                        array('resep.pasien', '=', 'pasien.uid'),
+                        array('resep.antrian', '=', 'antrian.uid'),
+                        array('antrian.penjamin', '=', 'master_penjamin.uid'),
+                        array('antrian.departemen', '=', 'master_poli.uid'),
+                    )
+                )
+                ->where($paramData,$paramValue)
+                ->execute();
+          
+
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+
+                if($value['departemen'] === __POLI_INAP__){
+                    //RANAP INFO
+                    $RawatInap = self::$query->select('rawat_inap', array(
+                        'dokter',
+                        'kamar',
+                        'bed'
+                    ))
+                        ->join('pegawai', array(
+                            'nama as dokter'
+                        ))
+                        ->join('master_unit_ruangan', array(
+                            'nama as kamar'
+                        ))
+                        ->join('master_unit_bed', array(
+                            'nama as bed'
+                        ))
+                        ->on(array(
+                            array('rawat_inap.dokter', '=', 'pegawai.uid'),
+                            array('rawat_inap.kamar', '=', 'master_unit_ruangan.uid'),
+                            array('rawat_inap.bed', '=', 'master_unit_bed.uid'),
+                        ))
+                        ->where(array(
+                            'rawat_inap.kunjungan' => '= ?',
+                            'AND',
+                            // 'rawat_inap.dokter' => '= ?',
+                            // 'AND',
+                            'rawat_inap.pasien' => '= ?'
+                        ), array(
+                            $value['kunjungan'],
+                            //$value['dokter'],
+                            $value['pasien']
+                        ))
+                        ->execute();
+                    $data['response_data'][$key]['rawat_inap'] = $RawatInap['response_data'][0];
+                }
+
+                //RESEP
+               
+               
+                $Resep = self::$pdo->query("SELECT SUM(subtotal) as subtotal, SUM(qty) as qty FROM resep JOIN invoice ON resep.kunjungan = invoice.kunjungan JOIN invoice_detail ON invoice.uid =invoice_detail.invoice WHERE resep.uid = '".$value['uid']."' AND invoice_detail.billing_group = 'obat'")->fetchAll(\PDO::FETCH_ASSOC); 
+
+                $Resep[0]['subtotal'] = number_format($Resep[0]['subtotal'], 2, ".", ",");
+                
+                $data['response_data'][$key]['total'] = $Resep[0];
+               
+                $autonum++;
+            }
+
+            return $data;
+    }
+
+    public function report_farmasi_mutasi($parameter){
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'resep.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'AND',
+                'resep.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array($parameter['from'], $parameter['to']);
+            
+        } else {
+            $paramData = array(
+                'inventori_mutasi.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv.kategori' => '= ?',
+                'AND',  
+                'inventori_mutasi.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array(__UID_KATEGORI_OBAT,$parameter['from'], $parameter['to']);
+            
+        }
+
+
+        if ($parameter['length'] < 0) {
+
+            $data = self::$query->select('inventori_mutasi', array(
+                'tanggal',
+                'dari',
+                'ke',
+                'pegawai',
+                'kode'
+              ))
+                ->join('inventori_mutasi_detail',array(
+                    'item',
+                    'qty',
+                    'keterangan',
+                    'created_at',
+                    'updated_at'
+                    )
+                )
+                ->join('master_inv',array(
+                    'nama',
+                    'kategori',
+                    )
+                )
+                ->join('inventori_batch',array(
+                    'uid as uid_batch',
+                    'batch',
+                    'po',
+                    'expired_date'
+                ))
+                ->join('inventori_po',array(
+                    'tanggal_po',
+                ))
+                ->on(
+                    array(
+                        array('inventori_mutasi.uid', '=', 'inventori_mutasi_detail.mutasi'),
+                        array('master_inv.uid', '=', 'inventori_mutasi_detail.item'),
+                        array('inventori_mutasi_detail.batch', '=', 'inventori_batch.uid'),
+                        array('inventori_batch.po', '=', 'inventori_po.uid'),
+                    )
+                )
+                ->where($paramData,$paramValue)
+                ->execute();
+
+           
+        } else {
+            $data = self::$query->select('inventori_mutasi', array(
+                    'tanggal',
+                    'dari',
+                    'ke',
+                    'pegawai',
+                    'kode'
+                    ))
+                ->join('inventori_mutasi_detail',array(
+                    'item',
+                    'qty',
+                    'keterangan',
+                    'created_at',
+                    'updated_at'
+                    )
+                )
+                ->join('master_inv',array(
+                    'nama',
+                    'kategori',
+                    )
+                )
+            ->join('inventori_batch',array(
+                'uid as uid_batch',
+                'batch',
+                'po',
+                'expired_date'
+            ))
+            ->join('inventori_po',array(
+                'tanggal_po',
+            ))
+            ->on(
+                array(
+                    array('inventori_mutasi.uid', '=', 'inventori_mutasi_detail.mutasi'),
+                    array('master_inv.uid', '=', 'inventori_mutasi_detail.item'),
+                    array('inventori_mutasi_detail.batch', '=', 'inventori_batch.uid'),
+                    array('inventori_batch.po', '=', 'inventori_po.uid'),
+                )
+            )
+                ->where($paramData,$paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+            $pegawai = new Pegawai(self::$pdo);
+            $pasien = new Pasien(self::$pdo);
+            $ruangan = new Ruangan(self::$pdo);
+            $Penjamin = new Penjamin(self::$pdo);
+            $Inventori = new Inventori(self::$pdo);
+            $data['response_draw'] = $parameter['draw'];
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+                $data['response_data'][$key]['tanggal_po'] = date('Y', strtotime($value['tanggal_po']));
+                $data['response_data'][$key]['expired_date'] = date('d F Y', strtotime($value['expired_date']));
+                $data['response_data'][$key]['item_detail'] = $Inventori->get_item_detail($value['item'])['response_data'][0];
+
+                $KategoriObat = self::$query
+                    ->select('master_inv_obat_kategori_item')
+                    ->join(
+                        'master_inv_obat_kategori',
+                        array(
+                            'nama as kategori'
+                        )
+                    )
+                    ->on(
+                        array(
+                            array('master_inv_obat_kategori_item.kategori', '=', 'master_inv_obat_kategori.uid'),
+                        )
+                    )
+                    ->where(
+                        array(
+                            'master_inv_obat_kategori_item.obat' => '= ?'
+                        ),
+                        array(
+                            $value['item']
+                        ))
+                    ->execute();
+
+                //KATEGORI OBAT
+                
+                
+                $arrKategoriObat = array();
+                foreach($KategoriObat['response_data'] as $ItemObat){
+                    array_push($arrKategoriObat, $ItemObat['kategori']);
+                }
+
+                if(in_array("NARKOTIKA", $arrKategoriObat)){
+                    $data['response_data'][$key]['kategori_obat']['narkotika'] = "NARKOTIKA";
+                }else {
+                    $data['response_data'][$key]['kategori_obat']['narkotika'] = "NON-NARKOTIKA";
+                }
+
+       
+
+                if(in_array('GENERIK', $arrKategoriObat)){
+                    $data['response_data'][$key]['kategori_obat']['generik'] = 'GENERIK';
+                }else {
+                    $data['response_data'][$key]['kategori_obat']['generik'] = 'NON-GENERIK';
+                }
+    
+                
+                $data['response_data'][$key]['debug'] = $KategoriObat['response_data'];
+
+
+                $autonum++;
+            }
+
+            $itemTotal =    self::$query->select('inventori_mutasi', array(
+                    'tanggal',
+                    'dari',
+                    'ke',
+                    'pegawai',
+                    'kode'
+              ))
+              ->join('inventori_mutasi_detail',array(
+                    'item',
+                    'qty',
+                    'keterangan',
+                    'created_at',
+                    'updated_at'
+                    )
+                )
+                ->join('master_inv',array(
+                    'nama',
+                    'kategori',
+                    )
+                )
+                ->join('inventori_batch',array(
+                    'batch',
+                    'po',
+                    'expired_date'
+                ))
+                ->join('inventori_po',array(
+                    'tanggal_po',
+                ))
+                ->on(
+                    array(
+                        array('inventori_mutasi.uid', '=', 'inventori_mutasi_detail.mutasi'),
+                        array('master_inv.uid', '=', 'inventori_mutasi_detail.item'),
+                        array('inventori_mutasi_detail.batch', '=', 'inventori_batch.uid'),
+                        array('inventori_batch.po', '=', 'inventori_po.uid'),
+                    )
+                )
+                ->where($paramData,$paramValue)
+                ->execute();
+
+            $data['recordsTotal'] = count($itemTotal['response_data']);
+            $data['recordsFiltered'] = count($itemTotal['response_data']);
+            $data['length'] = intval($parameter['length']);
+            $data['start'] = intval($parameter['start']);
+            return $data;
+    }
+
+    public function print_report_farmasi_mutasi($parameter){
+        
+        $paramData = array(
+            'inventori_mutasi.deleted_at' => 'IS NULL',
+            'AND',
+            'master_inv.kategori' => '= ?',
+            'AND',  
+            'inventori_mutasi.created_at' => 'BETWEEN ? AND ?',
+        );
+        $paramValue = array(__UID_KATEGORI_OBAT,$parameter['from'], $parameter['to']);
+        
+    
+
+
+
+        $data = self::$query->select('inventori_mutasi', array(
+            'tanggal',
+            'dari',
+            'ke',
+            'pegawai',
+            'kode'
+            ))
+            ->join('inventori_mutasi_detail',array(
+                'item',
+                'qty',
+                'keterangan',
+                'created_at',
+                'updated_at'
+                )
+            )
+            ->join('master_inv',array(
+                'nama',
+                'kategori',
+                )
+            )
+            ->join('inventori_batch',array(
+                'uid as uid_batch',
+                'batch',
+                'po',
+                'expired_date'
+            ))
+            ->join('inventori_po',array(
+                'tanggal_po',
+            ))
+            ->on(
+                array(
+                    array('inventori_mutasi.uid', '=', 'inventori_mutasi_detail.mutasi'),
+                    array('master_inv.uid', '=', 'inventori_mutasi_detail.item'),
+                    array('inventori_mutasi_detail.batch', '=', 'inventori_batch.uid'),
+                    array('inventori_batch.po', '=', 'inventori_po.uid'),
+                )
+            )
+            ->where($paramData,$paramValue)
+            ->execute();
+
+       
+
+            $pegawai = new Pegawai(self::$pdo);
+            $pasien = new Pasien(self::$pdo);
+            $ruangan = new Ruangan(self::$pdo);
+            $Penjamin = new Penjamin(self::$pdo);
+            $Inventori = new Inventori(self::$pdo);
+            $data['response_draw'] = $parameter['draw'];
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+                $data['response_data'][$key]['tanggal_po'] = date('Y', strtotime($value['tanggal_po']));
+                $data['response_data'][$key]['expired_date'] = date('d F Y', strtotime($value['expired_date']));
+                $data['response_data'][$key]['item_detail'] = $Inventori->get_item_detail($value['item'])['response_data'][0];
+
+                $KategoriObat = self::$query
+                    ->select('master_inv_obat_kategori_item')
+                    ->join(
+                        'master_inv_obat_kategori',
+                        array(
+                            'nama as kategori'
+                        )
+                    )
+                    ->on(
+                        array(
+                            array('master_inv_obat_kategori_item.kategori', '=', 'master_inv_obat_kategori.uid'),
+                        )
+                    )
+                    ->where(
+                        array(
+                            'master_inv_obat_kategori_item.obat' => '= ?'
+                        ),
+                        array(
+                            $value['item']
+                        ))
+                    ->execute();
+
+                //KATEGORI OBAT
+                
+                
+                $arrKategoriObat = array();
+                foreach($KategoriObat['response_data'] as $ItemObat){
+                    array_push($arrKategoriObat, $ItemObat['kategori']);
+                }
+
+                if(in_array("NARKOTIKA", $arrKategoriObat)){
+                    $data['response_data'][$key]['kategori_obat']['narkotika'] = "NARKOTIKA";
+                }else {
+                    $data['response_data'][$key]['kategori_obat']['narkotika'] = "NON-NARKOTIKA";
+                }
+
+       
+
+                if(in_array('GENERIK', $arrKategoriObat)){
+                    $data['response_data'][$key]['kategori_obat']['generik'] = 'GENERIK';
+                }else {
+                    $data['response_data'][$key]['kategori_obat']['generik'] = 'NON-GENERIK';
+                }
+    
+                
+                $data['response_data'][$key]['debug'] = $KategoriObat['response_data'];
+
+
+                $autonum++;
+            }
+
+            return $data;
+    }
+
     public function report_kamar_operasi($parameter){
         if (!isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
             $paramData = array(
@@ -1847,72 +2890,85 @@ class Laporan extends Utility
     private function kunjungan_rawat_jalan($parameter) {
 
         if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            
             $paramData = array(
-                'kunjungan.deleted_at' => 'IS NULL',
+                'antrian.deleted_at' => 'IS NULL',
                 'AND',
-                'kunjungan.created_at' => 'BETWEEN ? AND ?',
+                '(antrian.departemen' => '!= ?',
+                'AND',
+                'antrian.departemen' => '!= ?)',
+                'AND',
+                'antrian.created_at' => 'BETWEEN ? AND ?',
                 'AND',
                 'pasien.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
+    
             );
-
+    
             $paramValue = array(
-              $parameter['from'], $parameter['to']
+                __POLI_INAP__,__POLI_IGD__,$parameter['from'], $parameter['to']
             );
         } else {
             $paramData = array(
-                'kunjungan.deleted_at' => 'IS NULL',
+                'antrian.deleted_at' => 'IS NULL',
                 'AND',
-                'kunjungan.created_at' => 'BETWEEN ? AND ?'
+                '(antrian.departemen' => '!= ?',
+                'AND',
+                'antrian.departemen' => '!= ?)',
+                'AND',
+                'antrian.created_at' => 'BETWEEN ? AND ?'
+    
             );
-
+    
             $paramValue = array(
-              $parameter['from'], $parameter['to']
+                __POLI_INAP__,__POLI_IGD__,$parameter['from'], $parameter['to']
             );
         }
 
         if (intval($parameter['length']) < 0) {
-            $data = self::$query->select('kunjungan', array(
+            $data = self::$query->select('antrian', array(
                 'uid',
-
+                'pasien',
+                'departemen',
+                'penjamin',
+                'waktu_masuk',
+                'waktu_keluar'
+    
             ))
-                ->join('antrian', array(
-                    'uid',
-                    'pasien',
-                    'penjamin',
-                    'waktu_masuk',
-                    'waktu_keluar'
-                ))
-
                 ->join('pasien', array(
                     'nama'
                 ))
-
+    
+                ->join('master_poli', array(
+                    'nama as nama_departemen'
+                ))
+    
                 ->on(array(
-                    array('antrian.kunjungan', '=', 'kunjungan.uid'),
-                    array('antrian.pasien', '=', 'pasien.uid')
+                    array('antrian.pasien', '=', 'pasien.uid'),
+                    array('antrian.departemen', '=', 'master_poli.uid')
                 ))
                 ->where($paramData, $paramValue)
                 ->execute();
         } else {
-            $data = self::$query->select('kunjungan', array(
+            $data = self::$query->select('antrian', array(
                 'uid',
+                'pasien',
+                'departemen',
+                'penjamin',
+                'waktu_masuk',
+                'waktu_keluar'
+    
             ))
-                
-                ->join('antrian', array(
-                    'uid',
-                    'pasien',
-                    'penjamin',
-                    'waktu_masuk',
-                    'waktu_keluar'
-                ))
-
                 ->join('pasien', array(
                     'nama'
                 ))
-
+    
+                ->join('master_poli', array(
+                    'nama as nama_departemen'
+                ))
+    
                 ->on(array(
-                    array('antrian.kunjungan', '=', 'kunjungan.uid'),
-                    array('antrian.pasien', '=', 'pasien.uid')
+                    array('antrian.pasien', '=', 'pasien.uid'),
+                    array('antrian.departemen', '=', 'master_poli.uid')
                 ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
@@ -1942,7 +2998,7 @@ class Laporan extends Utility
         )) ->join('antrian', array(
             'uid',
             'pasien',
-            'penjamin'
+            'penjamin',
         ))
         ->on(array(
             array('antrian.kunjungan', '=', 'kunjungan.uid'),
@@ -1954,6 +3010,71 @@ class Laporan extends Utility
         $data['recordsFiltered'] = count($KunjunganTotal['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
+
+        return $data;
+
+    }
+
+    //GET DATA KEPERLUAN PRINT
+    private function print_kunjungan_rawat_jalan($parameter) {
+     
+        $paramData = array(
+            'antrian.deleted_at' => 'IS NULL',
+            'AND',
+            '(antrian.departemen' => '!= ?',
+            'AND',
+            'antrian.departemen' => '!= ?)',
+            'AND',
+            'antrian.created_at' => 'BETWEEN ? AND ?'
+
+        );
+
+        $paramValue = array(
+            __POLI_INAP__,__POLI_IGD__,$parameter['from'], $parameter['to']
+        );
+        
+
+        $data = self::$query->select('antrian', array(
+            'uid',
+            'pasien',
+            'departemen',
+            'penjamin',
+            'waktu_masuk',
+            'waktu_keluar'
+
+        ))
+            ->join('pasien', array(
+                'nama'
+            ))
+
+            ->join('master_poli', array(
+                'nama as nama_departemen'
+            ))
+
+            ->on(array(
+                array('antrian.pasien', '=', 'pasien.uid'),
+                array('antrian.departemen', '=', 'master_poli.uid')
+            ))
+            ->where($paramData, $paramValue)
+            ->execute();
+       
+
+        $dataResult = array();
+        $Pasien = new Pasien(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['waktu_masuk'] = date('d-m-Y', strtotime($value['waktu_masuk']));
+            $data['response_data'][$key]['waktu_keluar'] =!empty($value['waktu_keluar']) ?  date('d-m-Y', strtotime($value['waktu_keluar'])) : '-';
+
+            $data['response_data'][$key]['pasien'] = $Pasien->get_pasien_detail('pasien', $value['pasien'])['response_data'][0];
+
+            $data['response_data'][$key]['penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $autonum++;
+        }
 
         return $data;
 
@@ -1991,15 +3112,25 @@ class Laporan extends Utility
                 'uid',
                 'pasien',
                 'penjamin',
+                'kamar',
+                'bed',
                 'waktu_masuk',
                 'waktu_keluar'
             ))
                 ->join('pasien', array(
                     'nama'
                 ))
-
+                ->join('master_unit_ruangan', array(
+                    'nama as nama_ruangan'
+                ))
+                ->join('master_unit_bed', array(
+                    'nama as nama_bed'
+                ))
+    
                 ->on(array(
-                    array('rawat_inap.pasien', '=', 'pasien.uid')
+                    array('rawat_inap.pasien', '=', 'pasien.uid'),
+                    array('rawat_inap.kamar', '=', 'master_unit_ruangan'),
+                    array('rawat_inap.bed', '=', 'master_unit_bed')
                 ))
                 ->where($paramData, $paramValue)
                 ->execute();
@@ -2008,15 +3139,24 @@ class Laporan extends Utility
                 'uid',
                 'pasien',
                 'penjamin',
+                'kamar',
+                'bed',
                 'waktu_masuk',
                 'waktu_keluar'
             ))
                 ->join('pasien', array(
                     'nama'
                 ))
-
+                ->join('master_unit_ruangan', array(
+                    'nama as nama_ruangan'
+                ))
+                ->join('master_unit_bed', array(
+                    'nama as nama_bed'
+                ))
                 ->on(array(
-                    array('rawat_inap.pasien', '=', 'pasien.uid')
+                    array('rawat_inap.pasien', '=', 'pasien.uid'),
+                    array('rawat_inap.kamar', '=', 'master_unit_ruangan.uid'),
+                    array('rawat_inap.bed', '=', 'master_unit_bed.uid')
                 ))
                 ->where($paramData, $paramValue)
                 ->offset(intval($parameter['start']))
@@ -2053,6 +3193,70 @@ class Laporan extends Utility
         $data['recordsFiltered'] = count($KunjunganTotal['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
+
+        return $data;
+
+    }
+
+    //KEPERLUAN PRINT RAWAT INAP
+    private function print_kunjungan_rawat_inap($parameter) {
+    
+        $paramData = array(
+            'rawat_inap.deleted_at' => 'IS NULL',
+            'AND',
+            'rawat_inap.created_at' => 'BETWEEN ? AND ?'
+        );
+
+        $paramValue = array(
+            $parameter['from'], $parameter['to']
+        );
+    
+
+
+        $data = self::$query->select('rawat_inap', array(
+            'uid',
+            'pasien',
+            'penjamin',
+            'kamar',
+            'bed',
+            'waktu_masuk',
+            'waktu_keluar'
+        ))
+            ->join('pasien', array(
+                'nama'
+            ))
+            ->join('master_unit_ruangan', array(
+                'nama as nama_ruangan'
+            ))
+            ->join('master_unit_bed', array(
+                'nama as nama_bed'
+            ))
+            ->on(array(
+                array('rawat_inap.pasien', '=', 'pasien.uid'),
+                array('rawat_inap.kamar', '=', 'master_unit_ruangan.uid'),
+                array('rawat_inap.bed', '=', 'master_unit_bed.uid')
+            ))
+            ->where($paramData, $paramValue)
+            ->execute();
+    
+
+        $dataResult = array();
+        $data['response_draw'] = intval($parameter['draw']);
+        $Pasien = new Pasien(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk']));
+            $data['response_data'][$key]['waktu_keluar'] =!empty($value['waktu_keluar']) ?  date('d F Y', strtotime($value['waktu_keluar'])) : '-';
+
+            $data['response_data'][$key]['pasien'] = $Pasien->get_pasien_detail('pasien', $value['pasien'])['response_data'][0];
+
+            $data['response_data'][$key]['penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $autonum++;
+        }
 
         return $data;
 
@@ -2152,6 +3356,63 @@ class Laporan extends Utility
         $data['recordsFiltered'] = count($KunjunganTotal['response_data']);
         $data['length'] = intval($parameter['length']);
         $data['start'] = intval($parameter['start']);
+
+        return $data;
+
+    }
+
+
+    //KEPERLUAN PRINT
+    private function print_kunjungan_igd($parameter) {
+       
+
+        
+        $paramData = array(
+            'igd.deleted_at' => 'IS NULL',
+            'AND',
+            'igd.created_at' => 'BETWEEN ? AND ?'
+        );
+
+        $paramValue = array(
+            $parameter['from'], $parameter['to']
+        );
+    
+        $data = self::$query->select('igd', array(
+            'uid',
+            'pasien',
+            'penjamin',
+            'waktu_masuk',
+            'waktu_keluar'
+        ))
+            ->join('pasien', array(
+                'nama'
+            ))
+
+            ->on(array(
+                array('igd.pasien', '=', 'pasien.uid')
+            ))
+            ->where($paramData, $paramValue)
+            ->execute();
+        
+
+
+        $dataResult = array();
+        $data['response_draw'] = intval($parameter['draw']);
+        $Pasien = new Pasien(self::$pdo);
+        $Penjamin = new Penjamin(self::$pdo);
+        $autonum = intval($parameter['start']) + 1;
+        foreach ($data['response_data'] as $key => $value) {
+            $data['response_data'][$key]['waktu_masuk'] = date('d F Y', strtotime($value['waktu_masuk']));
+            $data['response_data'][$key]['waktu_keluar'] =!empty($value['waktu_keluar']) ?  date('d F Y', strtotime($value['waktu_keluar'])) : '-';
+
+            $data['response_data'][$key]['pasien'] = $Pasien->get_pasien_detail('pasien', $value['pasien'])['response_data'][0];
+
+            $data['response_data'][$key]['penjamin'] = $Penjamin->get_penjamin_detail($value['penjamin'])['response_data'][0];
+
+            $data['response_data'][$key]['autonum'] = $autonum;
+
+            $autonum++;
+        }
 
         return $data;
 

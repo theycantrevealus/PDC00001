@@ -73,6 +73,11 @@
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
+                        return row.pasien.jenkel_detail.nama;
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
                         return row.pasien.alamat;
                     }
                 },
@@ -90,47 +95,114 @@
         });
 
 
-
         $("#btnCetak").click(function () {
+            var t = $(this);
+            t.prop("disabled", true).text("proses...");
+    
             $.ajax({
-                async: false,
-                url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_igd.php",
+                async:true,
+                url: __HOSTAPI__ + "/Laporan",
+                type: "POST",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
-                type: "POST",
                 data: {
-                    __HOSTNAME__: __HOSTNAME__,
-                    __PC_CUSTOMER__: __PC_CUSTOMER__,
-                    __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
-                    __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
-                    __NAMA_SAYA__ : __MY_NAME__,
-                    __JUDUL__ : "Laporan Kunjungan IGD",
-                    __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
-                    __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
-                    data: totalData
-
+                    request : "print_kunjungan_igd",
+                    from : getDateRange("#range_laporan")[0],
+                    to : getDateRange("#range_laporan")[1]
                 },
-                success: function (response) {
-                    var containerItem = document.createElement("DIV");
-                    $(containerItem).html(response);
-                    $(containerItem).printThis({
-                        importCSS: true,
-                        base: false,
-                        importStyle: true,
-                        header: null,
-                        footer: null,
-                        pageTitle: "Kwitansi",
-                        afterPrint: function() {
-                            $("#form-payment-detail").modal("hide");
+                success: function(response) {
+                    t.prop("disabled", false).html("<i class=\"fa fa-print\"></i> Cetak");
+                    var data =  response.response_package.response_data
+                    $.ajax({
+                        async: false,
+                        url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_igd.php",
+                        beforeSend: function (request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        type: "POST",
+                        data: {
+                            __HOSTNAME__: __HOSTNAME__,
+                            __PC_CUSTOMER__: __PC_CUSTOMER__,
+                            __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+                            __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+                            __NAMA_SAYA__ : __MY_NAME__,
+                            __JUDUL__ : "Laporan Kunjungan IGD",
+                            __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
+                            __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
+                            data: data
+
+                        },
+                        success: function (response) {
+                            var containerItem = document.createElement("DIV");
+                            $(containerItem).html(response);
+                            $(containerItem).printThis({
+                                importCSS: true,
+                                base: false,
+                                importStyle: true,
+                                header: null,
+                                footer: null,
+                                pageTitle: "Laporan Kunjungan IGD",
+                                afterPrint: function() {
+                                    $("#form-payment-detail").modal("hide");
+                                }
+                            });
+                        },
+                        error: function (response) {
+                            //
                         }
                     });
                 },
-                error: function (response) {
-                    //
+                error: function(err){
+                    console.log("error");
                 }
+
             });
-            return false;
+
         });
+
+
+
+        // $("#btnCetak").click(function () {
+        //     $.ajax({
+        //         async: false,
+        //         url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_igd.php",
+        //         beforeSend: function (request) {
+        //             request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+        //         },
+        //         type: "POST",
+        //         data: {
+        //             __HOSTNAME__: __HOSTNAME__,
+        //             __PC_CUSTOMER__: __PC_CUSTOMER__,
+        //             __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
+        //             __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
+        //             __NAMA_SAYA__ : __MY_NAME__,
+        //             __JUDUL__ : "Laporan Kunjungan IGD",
+        //             __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
+        //             __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
+        //             data: totalData
+
+        //         },
+        //         success: function (response) {
+        //             var containerItem = document.createElement("DIV");
+        //             $(containerItem).html(response);
+        //             $(containerItem).printThis({
+        //                 importCSS: true,
+        //                 base: false,
+        //                 importStyle: true,
+        //                 header: null,
+        //                 footer: null,
+        //                 pageTitle: "Kwitansi",
+        //                 afterPrint: function() {
+        //                     $("#form-payment-detail").modal("hide");
+        //                 }
+        //             });
+        //         },
+        //         error: function (response) {
+        //             //
+        //         }
+        //     });
+        //     return false;
+        // });
     });
 </script>
