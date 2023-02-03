@@ -73,6 +73,12 @@ class Laporan extends Utility
             case 'farmasi_mutasi':
                 return self::report_farmasi_mutasi($parameter);
                 break;
+            case 'farmasi_stok_opname':
+                return self::report_farmasi_stok_opname($parameter);
+                break;
+            case 'farmasi_retur':
+                    return self::report_farmasi_retur($parameter);
+                    break;
             case 'kamar_operasi':
                 return self::report_kamar_operasi($parameter);
                 break;
@@ -93,6 +99,12 @@ class Laporan extends Utility
                 break;
             case 'print_farmasi_mutasi':
                 return self::print_report_farmasi_mutasi($parameter);
+                break;
+            case 'print_farmasi_stok_opname':
+                return self::print_report_farmasi_stok_opname($parameter);
+                break;
+            case 'print_farmasi_retur':
+                return self::print_report_farmasi_retur($parameter);
                 break;
             case 'recalculate':
                 return '';
@@ -2565,6 +2577,529 @@ class Laporan extends Utility
             $data['recordsFiltered'] = count($itemTotal['response_data']);
             $data['length'] = intval($parameter['length']);
             $data['start'] = intval($parameter['start']);
+            return $data;
+    }
+
+    public function report_farmasi_stok_opname($parameter){
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_stok_opname.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                // 'AND',
+                // 'inventori_stok_opname_detail.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array($parameter['from'], $parameter['to']);
+            
+        } else {
+            $paramData = array(
+                'inventori_stok_opname.deleted_at' => 'IS NULL',
+                // 'AND',  
+                // 'inventori_stok_opname_detail.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array();
+            
+        }
+
+
+        if ($parameter['length'] < 0) {
+
+            $data = self::$query->select('inventori_stok_opname_detail', array(
+                
+                'item',
+                'batch',
+                'qty_awal',
+                'qty_akhir',
+                'keterangan',
+                'created_at',
+                'updated_at'
+              ))
+                ->join('inventori_stok_opname',array(
+                    'dari',
+                    'sampai',
+                    'pegawai',
+                    'created_at',
+                    'updated_at'
+                    )
+                )
+                ->join('pegawai',array(
+                    'nama as nama_pegawai',
+                    )
+                )
+                ->join('master_inv',array(
+                    'nama',
+                    'kategori',
+                    )
+                )
+                ->join('inventori_batch',array(
+                    'uid as uid_batch',
+                    'batch',
+                    'po',
+                    'expired_date'
+                ))
+                ->on(
+                    array(
+                        array('inventori_stok_opname.uid', '=', 'inventori_stok_opname_detail.opname'),
+                        array('inventori_stok_opname.pegawai', '=', 'pegawai.uid'),
+                        array('inventori_stok_opname_detail.item', '=', 'master_inv.uid'),
+                        array('inventori_stok_opname_detail.batch', '=', 'inventori_batch.uid'),
+                 
+                    )
+                )
+                ->where($paramData,$paramValue)
+                ->execute();
+
+           
+        } else {
+            $data = self::$query->select('inventori_stok_opname_detail', array(
+                'item',
+                'batch',
+                'qty_awal',
+                'qty_akhir',
+                'keterangan',
+                'created_at',
+                'updated_at'
+              ))
+                ->join('inventori_stok_opname',array(
+                    'dari',
+                    'sampai',
+                    'pegawai',
+                    'created_at',
+                    'updated_at'
+                    )
+                )
+                ->join('pegawai',array(
+                    'nama as nama_pegawai',
+                    )
+                )
+                ->join('master_inv',array(
+                    'nama',
+                    'kategori',
+                    )
+                )
+                ->join('inventori_batch',array(
+                    'uid as uid_batch',
+                    'batch',
+                    'po',
+                    'expired_date'
+                ))
+                ->on(
+                    array(
+                        array('inventori_stok_opname.uid', '=', 'inventori_stok_opname_detail.opname'),
+                        array('inventori_stok_opname.pegawai', '=', 'pegawai.uid'),
+                        array('inventori_stok_opname_detail.item', '=', 'master_inv.uid'),
+                        array('inventori_stok_opname_detail.batch', '=', 'inventori_batch.uid'),
+                 
+                    )
+                )
+                ->where($paramData,$paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+            $pegawai = new Pegawai(self::$pdo);
+            $pasien = new Pasien(self::$pdo);
+            $ruangan = new Ruangan(self::$pdo);
+            $Penjamin = new Penjamin(self::$pdo);
+            $Inventori = new Inventori(self::$pdo);
+            $data['response_draw'] = $parameter['draw'];
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+                $data['response_data'][$key]['dari'] = date('Y', strtotime($value['dari']));
+                $data['response_data'][$key]['sampai'] = date('Y', strtotime($value['sampai']));
+                $data['response_data'][$key]['item_detail'] = $Inventori->get_item_detail($value['item'])['response_data'][0];
+
+                $autonum++;
+            }
+
+            $itemTotal = self::$query->select('inventori_stok_opname_detail', array(      
+                        'item',
+                        'batch',
+                        'qty_awal',
+                        'qty_akhir',
+                        'keterangan',
+                        'created_at',
+                        'updated_at'
+                    ))
+                        ->join('inventori_stok_opname',array(
+                            'dari',
+                            'sampai',
+                            'pegawai',
+                            'created_at',
+                            'updated_at'
+                            )
+                        )
+                        ->join('pegawai',array(
+                            'nama as nama_pegawai',
+                            )
+                        )
+                        ->join('master_inv',array(
+                            'nama',
+                            'kategori',
+                            )
+                        )
+                        ->join('inventori_batch',array(
+                            'uid as uid_batch',
+                            'batch',
+                            'po',
+                            'expired_date'
+                        ))
+                        ->on(
+                            array(
+                                array('inventori_stok_opname.uid', '=', 'inventori_stok_opname_detail.opname'),
+                                array('inventori_stok_opname.pegawai', '=', 'pegawai.uid'),
+                                array('inventori_stok_opname_detail.item', '=', 'master_inv.uid'),
+                                array('inventori_stok_opname_detail.batch', '=', 'inventori_batch.uid'),
+                        
+                            )
+                        )
+                        ->where($paramData,$paramValue)
+                        ->execute();
+
+            $data['recordsTotal'] = count($itemTotal['response_data']);
+            $data['recordsFiltered'] = count($itemTotal['response_data']);
+            $data['length'] = intval($parameter['length']);
+            $data['start'] = intval($parameter['start']);
+            return $data;
+    }
+
+    public function print_report_farmasi_stok_opname($parameter){
+       
+        $paramData = array(
+            'inventori_stok_opname.deleted_at' => 'IS NULL',
+            // 'AND',  
+            // 'inventori_stok_opname_detail.created_at' => 'BETWEEN ? AND ?',
+        );
+        $paramValue = array();
+    
+
+        $data = self::$query->select('inventori_stok_opname_detail', array(
+            
+            'item',
+            'batch',
+            'qty_awal',
+            'qty_akhir',
+            'keterangan',
+            'created_at',
+            'updated_at'
+            ))
+            ->join('inventori_stok_opname',array(
+                'dari',
+                'sampai',
+                'pegawai',
+                'created_at',
+                'updated_at'
+                )
+            )
+            ->join('pegawai',array(
+                'nama as nama_pegawai',
+                )
+            )
+            ->join('master_inv',array(
+                'nama',
+                'kategori',
+                )
+            )
+            ->join('inventori_batch',array(
+                'uid as uid_batch',
+                'batch',
+                'po',
+                'expired_date'
+            ))
+            ->on(
+                array(
+                    array('inventori_stok_opname.uid', '=', 'inventori_stok_opname_detail.opname'),
+                    array('inventori_stok_opname.pegawai', '=', 'pegawai.uid'),
+                    array('inventori_stok_opname_detail.item', '=', 'master_inv.uid'),
+                    array('inventori_stok_opname_detail.batch', '=', 'inventori_batch.uid'),
+                
+                )
+            )
+            // ->offset(1)
+            // ->limit(10)
+            ->where($paramData,$paramValue)
+            ->execute();
+
+       
+
+            $pegawai = new Pegawai(self::$pdo);
+            $pasien = new Pasien(self::$pdo);
+            $ruangan = new Ruangan(self::$pdo);
+            $Penjamin = new Penjamin(self::$pdo);
+            $Inventori = new Inventori(self::$pdo);
+            $data['response_draw'] = $parameter['draw'];
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+                $data['response_data'][$key]['dari'] = date('Y', strtotime($value['dari']));
+                $data['response_data'][$key]['sampai'] = date('Y', strtotime($value['sampai']));
+                $data['response_data'][$key]['item_detail'] = $Inventori->get_item_detail($value['item'])['response_data'][0];
+
+                $autonum++;
+            }
+
+           
+            return $data;
+    }
+
+    public function report_farmasi_retur($parameter){
+        if (isset($parameter['search']['value']) && !empty($parameter['search']['value'])) {
+            $paramData = array(
+                'inventori_return_detail.deleted_at' => 'IS NULL',
+                'AND',
+                'master_inv.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\'',
+                'AND',
+                'inventori_return_detail.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array($parameter['from'], $parameter['to']);
+            
+        } else {
+            $paramData = array(
+                'inventori_return_detail.deleted_at' => 'IS NULL',
+                'AND',  
+                'inventori_return_detail.created_at' => 'BETWEEN ? AND ?',
+            );
+            $paramValue = array($parameter['from'], $parameter['to']);
+            
+        }
+
+
+        if ($parameter['length'] < 0) {
+
+            $data = self::$query->select('inventori_return_detail', array(
+                
+                'barang',
+                'batch',
+                'qty',
+                'created_at',
+                'updated_at'
+              ))
+                ->join('inventori_return',array(
+                    'kode',
+                    'pegawai',
+                    'supplier',
+                    'created_at',
+                    'updated_at'
+                    )
+                )
+                ->join('pegawai',array(
+                    'nama as nama_pegawai',
+                    )
+                )
+                ->join('master_inv',array(
+                    'nama',
+                    'kategori',
+                    )
+                )
+                ->join('inventori_batch',array(
+                    'uid as uid_batch',
+                    'batch',
+                    'po',
+                    'expired_date'
+                ))
+                ->join('master_supplier',array(
+                    'nama as nama_supplier',
+                ))
+                ->on(
+                    array(
+                        array('inventori_return_detail.inventori_return', '=', 'inventori_return.uid'),
+                        array('inventori_return.pegawai', '=', 'pegawai.uid'),
+                        array('inventori_return_detail.barang', '=', 'master_inv.uid'),
+                        array('inventori_return_detail.batch', '=', 'inventori_batch.uid'),
+                        array('inventori_return.supplier', '=', 'master_supplier.uid'),
+                    )
+                )
+                ->where($paramData,$paramValue)
+                ->execute();
+
+           
+        } else {
+            $data = self::$query->select('inventori_return_detail', array(
+                
+                'barang',
+                'batch',
+                'qty',
+                'created_at',
+                'updated_at'
+              ))
+                ->join('inventori_return',array(
+                    'kode',
+                    'pegawai',
+                    'supplier',
+                    'created_at',
+                    'updated_at'
+                    )
+                )
+                ->join('pegawai',array(
+                    'nama as nama_pegawai',
+                    )
+                )
+                ->join('master_inv',array(
+                    'nama',
+                    'kategori',
+                    )
+                )
+                ->join('inventori_batch',array(
+                    'uid as uid_batch',
+                    'batch',
+                    'po',
+                    'expired_date'
+                ))
+                ->join('master_supplier',array(
+                    'nama as nama_supplier',
+                ))
+                ->on(
+                    array(
+                        array('inventori_return_detail.inventori_return', '=', 'inventori_return.uid'),
+                        array('inventori_return.pegawai', '=', 'pegawai.uid'),
+                        array('inventori_return_detail.barang', '=', 'master_inv.uid'),
+                        array('inventori_return_detail.batch', '=', 'inventori_batch.uid'),
+                        array('inventori_return.supplier', '=', 'master_supplier.uid'),
+                 
+                    )
+                )
+                ->where($paramData,$paramValue)
+                ->offset(intval($parameter['start']))
+                ->limit(intval($parameter['length']))
+                ->execute();
+        }
+
+            $pegawai = new Pegawai(self::$pdo);
+            $pasien = new Pasien(self::$pdo);
+            $ruangan = new Ruangan(self::$pdo);
+            $Penjamin = new Penjamin(self::$pdo);
+            $Inventori = new Inventori(self::$pdo);
+            $data['response_draw'] = $parameter['draw'];
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+                $data['response_data'][$key]['item_detail'] = $Inventori->get_item_detail($value['barang'])['response_data'][0];
+
+                $autonum++;
+            }
+
+            $itemTotal = self::$query->select('inventori_return_detail', array(
+                
+                        'barang',
+                        'batch',
+                        'qty',
+                        'created_at',
+                        'updated_at'
+                    ))
+                        ->join('inventori_return',array(
+                            'kode',
+                            'pegawai',
+                            'supplier',
+                            'created_at',
+                            'updated_at'
+                            )
+                        )
+                        ->join('pegawai',array(
+                            'nama as nama_pegawai',
+                            )
+                        )
+                        ->join('master_inv',array(
+                            'nama',
+                            'kategori',
+                            )
+                        )
+                        ->join('master_supplier',array(
+                            'nama as nama_supplier',
+                        ))
+                        ->on(
+                            array(
+                                array('inventori_return_detail.inventori_return', '=', 'inventori_return.uid'),
+                                array('inventori_return.pegawai', '=', 'pegawai.uid'),
+                                array('inventori_return_detail.barang', '=', 'master_inv.uid'),
+                                array('inventori_return.supplier', '=', 'master_supplier.uid'),
+                 
+                            )
+                        )
+                        ->where($paramData,$paramValue)
+                        ->execute();
+
+            $data['recordsTotal'] = count($itemTotal['response_data']);
+            $data['recordsFiltered'] = count($itemTotal['response_data']);
+            $data['length'] = intval($parameter['length']);
+            $data['start'] = intval($parameter['start']);
+            return $data;
+    }
+
+    public function print_report_farmasi_retur($parameter){
+       
+        $paramData = array(
+            'inventori_return_detail.deleted_at' => 'IS NULL',
+            'AND',  
+            'inventori_return_detail.created_at' => 'BETWEEN ? AND ?',
+        );
+        $paramValue = array($parameter['from'], $parameter['to']);
+
+        
+        $data = self::$query->select('inventori_return_detail', array(
+            
+            'barang',
+            'batch',
+            'qty',
+            'created_at',
+            'updated_at'
+            ))
+            ->join('inventori_return',array(
+                'kode',
+                'pegawai',
+                'supplier',
+                'created_at',
+                'updated_at'
+                )
+            )
+            ->join('pegawai',array(
+                'nama as nama_pegawai',
+                )
+            )
+            ->join('master_inv',array(
+                'nama',
+                'kategori',
+                )
+            )
+            ->join('inventori_batch',array(
+                'uid as uid_batch',
+                'batch',
+                'po',
+                'expired_date'
+            ))
+            ->join('master_supplier',array(
+                'nama as nama_supplier',
+            ))
+            ->on(
+                array(
+                    array('inventori_return_detail.inventori_return', '=', 'inventori_return.uid'),
+                    array('inventori_return.pegawai', '=', 'pegawai.uid'),
+                    array('inventori_return_detail.barang', '=', 'master_inv.uid'),
+                    array('inventori_return_detail.batch', '=', 'inventori_batch.uid'),
+                    array('inventori_return.supplier', '=', 'master_supplier.uid'),
+                
+                )
+            )
+            ->where($paramData,$paramValue)
+            ->execute();
+        
+
+            $pegawai = new Pegawai(self::$pdo);
+            $pasien = new Pasien(self::$pdo);
+            $ruangan = new Ruangan(self::$pdo);
+            $Penjamin = new Penjamin(self::$pdo);
+            $Inventori = new Inventori(self::$pdo);
+            $data['response_draw'] = $parameter['draw'];
+            $autonum = intval($parameter['start']) + 1;
+            foreach ($data['response_data'] as $key => $value) {
+                $data['response_data'][$key]['autonum'] = $autonum;
+                $data['response_data'][$key]['item_detail'] = $Inventori->get_item_detail($value['barang'])['response_data'][0];
+
+                $autonum++;
+            }
+
+            
             return $data;
     }
 
