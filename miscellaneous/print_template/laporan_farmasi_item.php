@@ -176,6 +176,7 @@
             <th style="width: 10px;">No</th>
             <th>Nama Obat/BHP</th>
             <th>Satuan</th>
+            <th>Kategori</th>
             <th>Generik</th>
             <th>Antibiotik</th>
             <th>Narkotika</th>
@@ -191,6 +192,7 @@
                     <td><?php echo $itemValue['autonum']; ?></td>
                     <td><?php echo $itemValue['nama']; ?></td>
                     <td><?php echo $itemValue['nama_satuan']; ?></td>
+                    <td><?php echo 'OBAT'; ?></td>
                     <td><?php echo $itemValue['kategori']['generik']; ?></td>
                     <td><?php echo $itemValue['kategori']['antibiotik']; ?></td>
                     <td><?php echo $itemValue['kategori']['narkotika']; ?></td>
