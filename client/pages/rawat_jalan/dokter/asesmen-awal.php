@@ -1,5 +1,12 @@
+
 <?php
-if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === __UIDFISIOTERAPI__) {
+$allowedPoli = [];
+$poliList = $_SESSION['poli']['response_data'];
+foreach($poliList as $key => $value) {
+	array_push($allowedPoli, $value['poli']['response_data'][0]['uid']);
+}
+
+if(in_array(__UIDFISIOTERAPI__, $allowedPoli) || in_array(__UIDREHABMEDIK__, $allowedPoli)) {
     ?>
     <div class="row">
         <div class="col-lg">
@@ -269,7 +276,7 @@ if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === 
 	</div>
 </div>
 <?php
-if($_SESSION['poli']['response_data'][0]['poli']['response_data'][0]['uid'] === __UIDFISIOTERAPI__) {
+if(in_array(__UIDFISIOTERAPI__, $allowedPoli)) {
 ?>
 <div class="row">
     <div class="col-lg">

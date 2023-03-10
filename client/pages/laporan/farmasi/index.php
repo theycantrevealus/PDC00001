@@ -1,5 +1,5 @@
 <?php
-    $judul_laporan = 'Laporan Kunjungan Rawat Jalan';
+    $judul_laporan = 'Laporan Farmasi';
 ?>
 <div class="mdk-header-layout__content">
     <div class="mdk-drawer-layout js-mdk-drawer-layout" data-push data-responsive-width="992px">
@@ -42,12 +42,13 @@
                                 <table class="table border-bottom table-bordered mb-5" id="tabel-laporan">
                                     <thead class="thead-dark">
                                     <tr>
-                                        <th>Tanggal Masuk</th>
-                                        <th>Tanggal Keluar</th>
-                                        <th>Nama Pasien</th>
-                                        <th>Alamat</th>
-                                        <th>Perusahaan Penjamin</th>
-                                        <th>Rekam Medis</th>
+                                        <th>Waktu</th>
+                                        <th>No. Invoice</th>
+                                        <th>Pasien</th>
+                                        <th>Poliklinik</th>
+                                        <th>Nama Obat</th>
+                                        <th>Qty Obat</th>
+                                        <th>Penjamin</th>
                                     </tr>
                                     </thead>
                                     <tbody>

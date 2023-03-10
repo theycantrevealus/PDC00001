@@ -1,7 +1,7 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/printThis/printThis.js"></script>
 <script type="text/javascript">
     $(function () {
-        var totalData = [];
+
         function getDateRange(target) {
             var rangeLaporan = $(target).val().split(" to ");
             if(rangeLaporan.length > 1) {
@@ -11,90 +11,163 @@
             }
         }
 
-        $("#range_laporan").change(function() {
+        function refresh_penjamin(target, selected = "") {
+            var penjaminData = [];
+            $.ajax({
+                async: false,
+                url:__HOSTAPI__ + "/Penjamin/penjamin",
+                beforeSend: function(request) {
+                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                },
+                type:"GET",
+                success:function(response) {
+                    var data = response.response_package.response_data;
+                    penjaminData = data;
+                    $(target).find("option").remove();
+                    for(var key in data) {
+                        $(target).append("<option " + ((data[key].uid == selected) ? "selected=\"selected\"" : "") + " value=\"" + data[key].uid + "\">" + data[key].nama + "</option>");
+                    }
+                }
+            });
+            return penjaminData;
+        }
+
+        refresh_penjamin("#txt_penjamin");
+
+        $("#txt_penjamin").select2().on("select2:select", function(e) {
+            var data = e.params.data;
+            var uid = data.id;
+
             tableLaporan.ajax.reload();
-            console.log(totalData);
         });
 
-        
+        $("#range_laporan").change(function() {
+            tableLaporan.ajax.reload();
+        });
+
+        var totalData = [];
 
         var tableLaporan = $("#tabel-laporan").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            lengthMenu: [[10, 50, -1], [10, 50, "All"]],
+            lengthMenu: [[5, 10, 15, -1], [5, 10, 15, "All"]],
             serverMethod: "POST",
             "ajax":{
                 async:false,
                 url: __HOSTAPI__ + "/Laporan",
                 type: "POST",
                 data: function(d) {
-                    d.request = "kunjungan_rawat_jalan";
+                    d.request = "radiologi";
                     d.from = getDateRange("#range_laporan")[0];
                     d.to = getDateRange("#range_laporan")[1];
+                    d.mode = "history";
+                    d.status = 'D';
+                    // d.penjamin = $("#txt_penjamin").val()
                 },
                 headers:{
                     Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
                 },
                 dataSrc:function(response) {
+
                     console.log(response);
+
                     var returnedData = [];
-                    var returnedData = response.response_package.response_data;
+                    var rawData = response.response_package.response_data;
+                    if(response.response_package == undefined) {
+                        rawData = [];
+                    }
+
+                    for(var keyData in rawData) {
+                        returnedData.push(rawData[keyData]);
+                    }
+
+
 
                     response.draw = parseInt(response.response_package.response_draw);
                     response.recordsTotal = response.response_package.recordsTotal;
                     response.recordsFiltered = response.response_package.recordsFiltered;
                     totalData = returnedData;
                     return returnedData;
-
                 }
             },
             autoWidth: false,
             language: {
                 search: "",
-                searchPlaceholder: "Cari Nomor Invoice"
+                searchPlaceholder: "Cari Nama Pasien"
             },
             "columns" : [
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_masuk;
+                        return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.waktu_keluar;
+                        return "<span id=\"tanggal_labor_" + row.uid + "\">" + row["waktu_order"] + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return ((row.pasien.panggilan_name !== null && row.pasien.panggilan_name !== undefined) ? row.pasien.panggilan_name.nama : "") + " " + row.pasien.nama;
+                        return "<span id=\"kode_" + row.uid + "\">" + row["no_order"] + "</span>";
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.alamat;
+                        return row["no_rm"];
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.penjamin.nama;
+                        return row["pasien"];
                     }
                 },
                 {
                     "data" : null, render: function(data, type, row, meta) {
-                        return row.pasien.no_rm;
+                        return row["departemen"];
                     }
-                }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["dokter"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["nama_tindakan"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["nama_mitra"];
+                    }
+                },
+                {
+                    "data" : null, render: function(data, type, row, meta) {
+                        return row["nama_penjamin"];
+                    }
+                },
+                // {
+                //     "data" : null, render: function(data, type, row, meta) {
+                //         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                //             "<a href=\"" + __HOSTNAME__ + "/laboratorium/view/" + row['uid'] + "/\" class=\"btn btn-info btn-sm\">" +
+                //             "<i class=\"fa fa-eye\"></i> Detail" +
+                //             "</a>" +
+                //             "<button class=\"btn btn-purple btn-sm btnCetak\" id=\"lab_" + row.uid + "\">" +
+                //             "<i class=\"fa fa-print\"></i> Cetak" +
+                //             "</button>" +
+                //             "</div>";
+                //     }
+                // }
             ]
         });
-
 
 
         $("#btnCetak").click(function () {
             $.ajax({
                 async: false,
-                url: __HOST__ + "miscellaneous/print_template/laporan_kunjungan_rawat_jalan.php",
+                url: __HOST__ + "miscellaneous/print_template/laporan_radiologi.php",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
@@ -105,7 +178,7 @@
                     __PC_CUSTOMER_ADDRESS__: __PC_CUSTOMER_ADDRESS__,
                     __PC_CUSTOMER_CONTACT__: __PC_CUSTOMER_CONTACT__,
                     __NAMA_SAYA__ : __MY_NAME__,
-                    __JUDUL__ : "Laporan Kunjungan Rawat Jalan",
+                    __JUDUL__ : "Laporan Radiologi",
                     __PERIODE_AWAL__ : getDateRange("#range_laporan")[0],
                     __PERIODE_AKHIR__ : getDateRange("#range_laporan")[1],
                     data: totalData

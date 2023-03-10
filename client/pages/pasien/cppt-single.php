@@ -197,6 +197,7 @@ $keteranganRacikan = '';
                                         }
                                         ?>
                                     </div>
+                                    <?php if($_POST['departemen_id'] === $_POST['uid_igd']){ ?>
                                     <div class="col-lg-12">
                                         <div class="row">
                                             <div class="col-md-7">
@@ -895,6 +896,7 @@ $keteranganRacikan = '';
                                             </div>
                                         </div>
                                     </div>
+                                    <?php } ?>
                                 </div>
                             </div>
                             <div class="tab-pane show fade" id="tindakan_<?php echo $_POST['group_tanggal_name']; ?>_<?php echo $_POST['waktu_masuk_name']; ?>">

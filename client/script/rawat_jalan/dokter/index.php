@@ -42,6 +42,7 @@
           Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
         },
         dataSrc: function(response) {
+          console.log(response);
           var data = response.response_package.response_data;
           console.log(data);
           var poliList = [];

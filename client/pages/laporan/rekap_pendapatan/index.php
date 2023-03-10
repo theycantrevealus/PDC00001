@@ -1,5 +1,5 @@
 <?php
-    $judul_laporan = 'Laporan Kunjungan Rawat Jalan';
+$judul_laporan = 'Rekapitulasi Pendapatan';
 ?>
 <div class="mdk-header-layout__content">
     <div class="mdk-drawer-layout js-mdk-drawer-layout" data-push data-responsive-width="992px">
@@ -21,33 +21,44 @@
 
             <div class="container-fluid page__container">
                 <div class="card">
-                    <div class="card-header card-header-large bg-white d-flex align-items-center">
+                    <div class="card-header card-header-large bg-white">
                         <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> <?php echo $judul_laporan; ?></h5>
-                        <table class="form-mode">
-                            <tr>
-                                <td>Tanggal</td>
-                                <td class="wrap_content">:</td>
-                                <td>
-                                    <input id="range_laporan" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
-                                </td>
-                            </tr>
-                        </table>
-                        <button class="btn btn-primary" id="btnCetak"><i class="fa fa-print"></i> Cetak</button>
+                    </div>
+                    <div class="card-header bg-white">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <table class="form-mode table">
+                                    <tr>
+                                        <td>Periode</td>
+                                        <td class="wrap_content">:</td>
+                                        <td>
+                                            <select class="form-control" id="periode-laporan"></select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary" id="btnCetak">
+                                    <span>
+                                        <i class="fa fa-print"></i> Cetak
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="badge badge-danger"></div>
 
                         <div class="px-3">
                             <div class="table-responsive">
-                                <table class="table border-bottom table-bordered mb-5" id="tabel-laporan">
+                                <table class="table border-bottom table-bordered mb-5 largeDataType" id="tabel-laporan">
                                     <thead class="thead-dark">
                                     <tr>
-                                        <th>Tanggal Masuk</th>
-                                        <th>Tanggal Keluar</th>
-                                        <th>Nama Pasien</th>
-                                        <th>Alamat</th>
-                                        <th>Perusahaan Penjamin</th>
-                                        <th>Rekam Medis</th>
+                                        <th class="wrap_content">No</th>
+                                        <th>Jenis Pelayanan</th>
+                                        <th>Ref Sub Pelayanan</th>
+                                        <th class="wrap_content"></th>
+                                        <th></th>
                                     </tr>
                                     </thead>
                                     <tbody>

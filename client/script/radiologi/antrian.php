@@ -347,7 +347,7 @@
           var extChecker = checkExt[checkExt.length - 1];
           if (extChecker === 'pdf') {
             status_file = checkFile(file.name);
-          } else if (extChecker === 'jpg' || extChecker === 'jpeg' || extChecker == 'png') {
+          } else if (extChecker === 'jpg' || extChecker === 'jpeg' || extChecker == 'png' || extChecker === 'JPG' || extChecker === 'JPEG' || extChecker === 'PNG') {
             // Image Loader
             status_file = true;
           }
