@@ -324,6 +324,8 @@ class Tindakan extends Utility {
                     $targettedKelas = __UID_KELAS_GENERAL_RAD__;
                 } else if($value['kelompok'] === 'LAB') {
                     $targettedKelas = __UID_KELAS_GENERAL_LAB__;
+                } else {
+                    $targettedKelas = __UID_KELAS_GENERAL_RI__;
                 }
 
                 $checkHarga = self::$query->select('master_tindakan_kelas_harga', array(
@@ -783,7 +785,9 @@ class Tindakan extends Utility {
                     'AND',
                     'master_tindakan_kelas_harga.kelas' => '= ?',
                     'AND',
-                    'master_tindakan_kelas_harga.penjamin' => '= ?'
+                    'master_tindakan_kelas_harga.penjamin' => '= ?',
+                    'AND',
+                    'master_tindakan.nama' => 'ILIKE ' . '\'%' . $parameter['search']['value'] . '%\''
                 );
 
                 $paramValue = array(
@@ -816,6 +820,10 @@ class Tindakan extends Utility {
                     'created_at',
                     'updated_at'
                 ))
+                    ->join('master_tindakan', array('nama as nama_tindakan', 'uid as tindakan'))
+                    ->on(array(
+                        array('master_tindakan_kelas_harga.tindakan', '=', 'master_tindakan.uid')
+                    ))
                     ->where($paramData, $paramValue)
                     ->order(array(
                         'master_tindakan_kelas_harga.created_at' => 'ASC'
@@ -832,6 +840,10 @@ class Tindakan extends Utility {
                     'created_at',
                     'updated_at'
                 ))
+                    ->join('master_tindakan', array('nama as nama_tindakan', 'uid as tindakan'))
+                    ->on(array(
+                        array('master_tindakan_kelas_harga.tindakan', '=', 'master_tindakan.uid')
+                    ))
                     ->where($paramData, $paramValue)
                     ->offset(intval($parameter['start']))
                     ->limit(intval($parameter['length']))
@@ -874,11 +886,12 @@ class Tindakan extends Utility {
 
 
                     $TKValue['harga'] = floatval($TKValue['harga']);
-                    if(count($Tindakan['response_data']) > 0) {
-                        array_push($returnData, $TKValue);
-                    } else {
-                        array_push($returnData, $TKValue);
-                    }
+//                    if(count($Tindakan['response_data']) > 0) {
+//                        array_push($returnData, $TKValue);
+//                    } else {
+//                        array_push($returnData, $TKValue);
+//                    }
+                    array_push($returnData, $TKValue);
 
                     $autonum++;
                 }
