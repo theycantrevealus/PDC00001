@@ -27,7 +27,7 @@ class BPJS extends Utility {
 	static $encodedSignature;
 	static $ch;
 	static $headers;
-	
+
 	protected static function getConn(){
 		return self::$pdo;
 	}
@@ -53,7 +53,7 @@ class BPJS extends Utility {
 			'X-cons-id: ' . self::$data_api . '',
 			'X-timestamp: ' . self::$tStamp . '' ,
 			'X-signature: ' . self::$encodedSignature . '',
-			'Content-Type:application/json',     
+			'Content-Type:application/json',
 		);
 
 		curl_setopt(self::$ch, CURLOPT_HTTPHEADER, self::$headers);
@@ -76,6 +76,10 @@ class BPJS extends Utility {
             case 'SPRI':
                 return self::hapus_spri($parameter);
                 break;
+
+            case 'CLAIM':
+                return self::hapus_claim($parameter);
+
             default:
                 return $parameter;
                 break;
@@ -170,6 +174,8 @@ class BPJS extends Utility {
                         'draw' => 1
                     );
                     return self::get_referensi_cara_keluar($parameter);
+
+
 				default:
 					return 'Unknown request';
 			}
@@ -182,7 +188,7 @@ class BPJS extends Utility {
 		try {
 			switch($parameter['request']) {
 				case 'cek_peserta':
-					return self::cek_peserta($parameter);
+					return self::cek_peserta2($parameter);
 					break;
                 case 'sep_pengajuan':
                     return self::sep_pengajuan($parameter);
@@ -229,13 +235,31 @@ class BPJS extends Utility {
                     return self::tambah_claim($parameter);
                     break;
 
+                case 'edit_claim':
+                    return self::edit_claim($parameter);
+                    break;
+
+                case 'get_claim':
+                    return self::get_claim($parameter);
+                    break;
 
                 case 'cari_rujukan':
                     return self::cari_rujukan($parameter);
-                    break;
 
                 case 'prb_baru':
                     return self::prb_baru($parameter);
+
+                case 'prb_update':
+                    return self::prb_update($parameter);
+
+                case 'prb_delete':
+                    return self::prb_hapus($parameter);
+
+                case 'get_srb_by_nomor':
+                    return self::get_srb_by_nomor($parameter);
+
+                case 'get_srb_by_tanggal':
+                    return self::get_srb_by_tanggal($parameter);
                     break;
 
                 case 'rencana_kontrol_baru':
@@ -249,13 +273,23 @@ class BPJS extends Utility {
                 case 'spri_edit':
                     return self::spri_edit($parameter);
                     break;
-                    
+
 
                 case 'get_history_spri_local':
                     return self::get_history_spri_local($parameter);
                     break;
 
+                case 'get_history_claim':
+                    return self::get_history_claim($parameter);
+                    break;
 
+                case 'get_history_pelayanan':
+                    return self::get_history_pelayanan($parameter);
+                    break;
+
+                case 'get_monitor_jasa_raharja':
+                    return self::get_monitoring_jasa_raharja($parameter);
+                    break;
 
                 case 'get_referensi_diagnosa':
                     return self::get_referensi_diagnosa($parameter);
@@ -339,10 +373,10 @@ class BPJS extends Utility {
 	private static function get_referensi_diagnosa($parameter) {
         $cari = (isset($parameter['search']['value'])) ? $parameter['search']['value'] : $parameter['cari'];
         $content = self::getUrl2('/' . ((__BPJS_MODE__ === 2) ? __BPJS_SERVICE_NAME_LIVE__ :__BPJS_SERVICE_NAME_DEV__) . '/referensi/diagnosa/' . $cari);
-        
-        
+
+
         if(intval($content['metaData']['code']) === 200) {
-            
+
             $data = $content['data']['diagnosa'];
             $autonum = 1;
             foreach ($data as $key => $value) {
@@ -1176,7 +1210,7 @@ class BPJS extends Utility {
     private function get_prb_generic() {
         if(!empty($_GET['search'])) {
             $content = self::getUrl2('/' . __BPJS_SERVICE_NAME__ . '/referensi/obatprb/' . $_GET['search']);
-            return $content;    
+            return $content;
         }
     }
 
@@ -1411,8 +1445,9 @@ class BPJS extends Utility {
     }
 
     private function get_history_sep($parameter) {
-        $content = self::getUrl2('/' . __BPJS_SERVICE_NAME__ . '/Monitoring/Kunjungan/Tanggal/' . $parameter['tanggal'] . '/JnsPelayanan/' . $parameter['jenis']);
-        return $content;
+        return self::getUrl2('/' . __BPJS_SERVICE_NAME__
+            . '/Monitoring/Kunjungan/Tanggal/' . $parameter['tanggal']
+            . '/JnsPelayanan/' . $parameter['jenis']);
     }
 
     private function get_history_spri($parameter) {
@@ -1420,9 +1455,25 @@ class BPJS extends Utility {
         return $content;
     }
 
+    private function get_history_claim($parameter) {
+        return self::getUrl2('/' . __BPJS_SERVICE_NAME__
+            . '/Monitoring/Klaim/Tanggal/' . $parameter['tanggal']
+            . '/JnsPelayanan/' . $parameter['jenis']
+            . '/Status/' . $parameter['status']);
+    }
+
     private function get_history_pelayanan($parameter) {
-        $content = self::launchUrl('/' . __BPJS_SERVICE_NAME__ . '/Monitoring/HistoriPelayanan/NoKartu/' . $parameter['kartu'] . '/tglAwal/' . $parameter['dari'] . '/tglAkhir/' . $parameter['sampai']);
-        return $content;
+        return self::getUrl2('/' . __BPJS_SERVICE_NAME__
+            . '/Monitoring/HistoriPelayanan/NoKartu/' . $parameter['kartu']
+            . '/tglMulai/' . $parameter['dari']
+            . '/tglAkhir/' . $parameter['sampai']);
+    }
+
+    private function get_monitoring_jasa_raharja($parameter) {
+        return self::getUrl2('/' . __BPJS_SERVICE_NAME__
+            . '/Monitoring/JasaRaharja/JnsPelayanan/' . $parameter['jenis']
+            . '/tglMulai/' . $parameter['dari']
+            . '/tglAkhir/' . $parameter['sampai']);
     }
 
     private function get_kontrol_dup ($parameter) {
@@ -1447,7 +1498,7 @@ class BPJS extends Utility {
                 ))
                 ->execute();
         }
-        
+
         return $data;
     }
 
@@ -1537,7 +1588,7 @@ class BPJS extends Utility {
 
                 if(intval($sync_content['metaData']['code']) === 200) {
                     $data_sync = $sync_content['data']['sep'];
-                    
+
                     foreach ($data_sync as $dKey => $dValue) {
 
                         array_push($BPJSLog, $dValue);
@@ -2286,7 +2337,7 @@ class BPJS extends Utility {
                 }
             }
 
-            
+
             $Rujukan = self::getUrl2('/' . __BPJS_SERVICE_NAME__ . '/Rujukan/RS/List/Peserta/' . $nomor_bpjs);
             if(intval($Rujukan['metaData']['code']) === 200) {
                 $data = $Rujukan['data']['rujukan'];
@@ -2516,7 +2567,7 @@ class BPJS extends Utility {
 
             if(intval($sync_content['metaData']['code']) === 200) {
                 $data_sync = $sync_content['data']['list'];
-                
+
                 foreach ($data_sync as $dKey => $dValue) {
 
                     array_push($BPJSLog, $dValue);
@@ -2537,8 +2588,8 @@ class BPJS extends Utility {
                         ->execute()['response_data'][0];
 
                     $PasienDetail = $Pasien->get_pasien_detail('pasien', $SEP['pasien'])['response_data'][0];
-                    
-                    
+
+
 
                     if(count($check['response_data']) > 0) {
 
@@ -2726,13 +2777,13 @@ class BPJS extends Utility {
                 )
             );
         }
-        
+
         if(intval($parameter['jenis_layan']) == 1) {
             $proceed = self::putUrl('/' . __BPJS_SERVICE_NAME__ . '/RencanaKontrol/UpdateSPRI', $parameterBuilder);
         } else {
             $proceed = self::putUrl('/' . __BPJS_SERVICE_NAME__ . '/RencanaKontrol/update', $parameterBuilder);
         }
-        
+
         $uid = parent::gen_uuid();
         if(intval($proceed['metaData']['code']) === 200) {
             $rk_log = self::$query->update('bpjs_spri', array(
@@ -2790,8 +2841,8 @@ class BPJS extends Utility {
         } else {
             $proceed = self::postUrl('/' . __BPJS_SERVICE_NAME__ . '/RencanaKontrol/insert', $parameterBuilder);
         }
-        
-        
+
+
         $uid = parent::gen_uuid();
         if(intval($proceed['metaData']['code']) === 200) {
             $rk_log = self::$query->insert('bpjs_spri', array(
@@ -2888,7 +2939,7 @@ class BPJS extends Utility {
             )
         );
         $proceed = self::postUrl('/' . __BPJS_SERVICE_NAME__ . '/PRB/insert', $parameterBuilder);
-        $uid = parent::gen_uuid();
+
         if(intval($proceed['content']['metaData']['code']) === 200) {
             $uid = parent::gen_uuid();
             $prb_log = self::$query->insert('bpjs_prb', array(
@@ -2942,6 +2993,173 @@ class BPJS extends Utility {
         );
     }
 
+    private function prb_update($parameter) {
+
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $parameterBuilder = array(
+            'request' => array(
+                't_prb' => array(
+                    'noSep' => $parameter['sep'],
+                    'noKartu' => $parameter['kartu'],
+                    'alamat' => $parameter['alamat'],
+                    'email' => $parameter['email'],
+                    'programPRB' => $parameter['prb'],
+                    'kodeDPJP' => $parameter['dpjp'],
+                    'keterangan' => $parameter['keterangan'],
+                    'saran' => $parameter['saran'],
+                    'user' => $UserData['data']->nama,
+                    'obat' => $parameter['obat']
+                )
+            )
+        );
+        $proceed = self::putUrl('/' . __BPJS_SERVICE_NAME__ . '/PRB/Update', $parameterBuilder);
+        if(intval($proceed['content']['metaData']['code']) === 200) {
+            $prb_log = self::$query->update('bpjs_prb', array(
+                'sep' => $parameter['sep'],
+                'pasien_no_kartu' => $proceed['data']['peserta']['noKartu'],
+                'pasien_alamat' => $proceed['data']['peserta']['alamat'],
+                'pasien_email' => $proceed['data']['peserta']['email'],
+                'pasien_kelamin' => $proceed['data']['peserta']['kelamin'],
+                'pasien_telp' => $proceed['data']['peserta']['noTelepon'],
+                'pasien_tgl_lahir' => $proceed['data']['peserta']['tglLahir'],
+                'pasien_asal_faskes_kode' => $proceed['data']['peserta']['asalFaskes']['kode'],
+                'pasien_asal_faskes_nama' => $proceed['data']['peserta']['asalFaskes']['nama'],
+                'program_prb' => $proceed['data']['programPRB'],
+                'dpjp_kode' => $proceed['data']['DPJP']['kode'],
+                'dpjp_nama' => $proceed['data']['DPJP']['nama'],
+                'keterangan' => $proceed['data']['keterangan'],
+                'saran' => $proceed['data']['saran'],
+                'user' => $UserData['data']->nama,
+                'no_srb' => $proceed['data']['noSRB'],
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'bpjs_prb.no_srb' => '= ?',
+                    'AND',
+                    'bpjs_prb.uid' => '= ?'
+                ), array(
+                    $parameter['srb'],
+                    $parameter['uid']
+                ))
+                ->execute();
+
+            $prb_log['detail_log'] = array();
+            $obatList = $parameter['obatInt'];
+            foreach($obatList as $obKey => $obValue) {
+                self::$query->update('bpjs_prb_obat', array(
+                        'deleted_at' => parent::format_date(),
+                    ))
+                    ->where(array(
+                        'bpjs_prb_obat.prb' => '= ?'
+                    ), array(
+                        $parameter['uid']
+                    ))
+                    ->execute();
+
+                $listObat = self::$query->insert('bpjs_prb_obat', array(
+                        'prb' => $parameter['uid'],
+                        'kd_obat' => $obValue['kdObat'],
+                        'nama_obat' => $obValue['nmObat'],
+                        'jml_obat' => $obValue['jmlObat'],
+                        'signa1' => $obValue['signa1'],
+                        'signa2' => $obValue['signa2'],
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                    ->execute();
+
+                array_push($prb_log['detail_log'], $listObat);
+            }
+        }
+        return array(
+            'bpjs' => $proceed,
+            'log' => $prb_log,
+            'parameter' => $parameter
+        );
+    }
+
+    private function prb_hapus($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $parameterBuilder = array('request' => array(
+            't_prb' => array(
+                'noSrb' => $parameter['srb'],
+                'noSep' => $parameter['sep'],
+                'user' => $parameter['user']
+            )
+        ));
+
+        $deleteAct = self::deleteUrl2('/' . __BPJS_SERVICE_NAME__ . '/PRB/Delete', $parameterBuilder);
+        if(intval($deleteAct['value']['metaData']['code']) === 200 || intval($deleteAct['value']['metaData']['code']) === 201) {
+            $deletePrb = self::$query->delete('bpjs_prb')
+                ->where(array(
+                    'bpjs_prb.no_prb' => '= ?'
+                ), array(
+                    $parameter[6]
+                ))
+                ->execute();
+
+            $log = parent::log(array(
+                    'type'=>'activity',
+                    'column'=>array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value'=>array(
+                        $parameter[6],
+                        $UserData['data']->uid,
+                        'bpjs_prb',
+                        'D',
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class'=>__CLASS__
+                )
+            );
+        }
+
+        return array(
+            'bpjs' => $deleteAct,
+            'delete_act' => $deletePrb
+        );
+    }
+
+    private function get_srb_by_nomor($parameter) {
+        $content = self::getUrl2(
+            '/' . __BPJS_SERVICE_NAME__
+            . '/prb/' . $parameter['srb']
+            . '/nosep/' . $parameter['sep']);
+
+        return $content;
+    }
+
+    private function get_srb_by_tanggal($parameter) {
+        $content = self::getUrl2(
+            '/' . __BPJS_SERVICE_NAME__
+            . '/prb/tglMulai/' . $parameter['awal']
+            . '/tglAkhir/' . $parameter['akhir']);
+
+        return $content;
+    }
+
+
+    private function get_claim($parameter) {
+        $content = self::getUrl2(
+            '/' . __BPJS_SERVICE_NAME__
+            . '/LPK/TglMasuk/' . $parameter['tgl_masuk']
+            . '/JnsPelayanan/' . $parameter['jenis_pelayanan']);
+
+        return $content;
+    }
+
     private function tambah_claim($parameter) {
         $Authorization = new Authorization();
         $UserData = $Authorization->readBearerToken($parameter['access_token']);
@@ -2957,11 +3175,11 @@ class BPJS extends Utility {
                         'poli' => $parameter['poli']
                     ),
                     'perawatan' => array(
-                        'ruangRawat' => /*$parameter['perawatan_ruang_rawat']*/'',
-                        'kelasRawat' => /*$parameter['perawatan_kelas_rawat']*/'',
-                        'spesialistik' => /*$parameter['perawatan_spesialistik']*/'',
-                        'caraKeluar' => /*$parameter['perawatan_cara_keluar']*/'',
-                        'kondisiPulang' => /*$parameter['perawatan_kondisi_pulang']*/''
+                        'ruangRawat' => $parameter['perawatan_ruang_rawat'],
+                        'kelasRawat' => $parameter['perawatan_kelas_rawat'],
+                        'spesialistik' => $parameter['perawatan_spesialistik'],
+                        'caraKeluar' => $parameter['perawatan_cara_keluar'],
+                        'kondisiPulang' => $parameter['perawatan_kondisi_pulang']
                     ),
                     'diagnosa' => $parameter['diagnosa_kode'],
                     'procedure' => $parameter['procedure'],
@@ -3013,6 +3231,137 @@ class BPJS extends Utility {
         return array(
             'bpjs' => $proceed,
             'log' => $lpk_log
+        );
+    }
+
+    private function edit_claim($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+
+        $parameterBuilder = array(
+            'request' => array(
+                't_lpk' => array(
+                    'noSep' => $parameter['sep'],
+                    'tglMasuk' => $parameter['tgl_masuk'],
+                    'tglKeluar' => $parameter['tgl_keluar'],
+                    'jaminan' => $parameter['jaminan'],
+                    'poli' => array(
+                        'poli' => $parameter['poli']
+                    ),
+                    'perawatan' => array(
+                        'ruangRawat' => /*$parameter['perawatan_ruang_rawat']*/'',
+                        'kelasRawat' => /*$parameter['perawatan_kelas_rawat']*/'',
+                        'spesialistik' => /*$parameter['perawatan_spesialistik']*/'',
+                        'caraKeluar' => /*$parameter['perawatan_cara_keluar']*/'',
+                        'kondisiPulang' => /*$parameter['perawatan_kondisi_pulang']*/''
+                    ),
+                    'diagnosa' => $parameter['diagnosa_kode'],
+                    'procedure' => $parameter['procedure'],
+                    'rencanaTL' => array(
+                        'tindakLanjut' => $parameter['rencana_tl_tindak_lanjut'],
+                        'dirujukKe' => array(
+                            'kodePPK' => $parameter['rencana_tl_dirujuk_ke']
+                        ),
+                        'kontrolKembali' => array(
+                            'tglKontrol' => $parameter['rencana_tl_kontrol_kembali_tanggal'],
+                            'poli' => $parameter['rencana_tl_kontrol_kembali_poli']
+                        )
+                    ),
+                    'DPJP' => $parameter['dpjp'],
+                    'user' => $UserData['data']->nama
+                )
+            )
+        );
+
+        $proceed = self::putUrl('/' . __BPJS_SERVICE_NAME__ . '/LPK/update', $parameterBuilder);
+        $uid = parent::gen_uuid();
+        if(intval($proceed['content']['metaData']['code']) === 200) {
+            $lpk_log = self::$query->update('bpjs_claim', array(
+                'tglMasuk' => $parameter['tgl_masuk'],
+                'tglKeluar' => $parameter['tgl_keluar'],
+                'jaminan' => $parameter['jaminan'],
+                'poli' => $parameter['poli'],
+                'ruangRawat' => $parameter['perawatan_ruang_rawat'],
+                'kelasRawat' => $parameter['perawatan_kelas_rawat'],
+                'spesialistik' => $parameter['perawatan_spesialistik'],
+                'caraKeluar' => $parameter['perawatan_cara_keluar'],
+                'kondisiPulang' => $parameter['perawatan_kondisi_pulang'],
+                'diagnosa' => strval(json_encode($parameter['diagnosa_kode'])),
+                'procedure' => strval(json_encode($parameter['procedure'])),
+                'tindakLanjut' => $parameter['rencana_tl_tindak_lanjut'],
+                'dirujukKe_kodePPK' => $parameter['rencana_tl_dirujuk_ke'],
+                'kontrolKembali_tanggal' => $parameter['rencana_tl_kontrol_kembali_tanggal'],
+                'kontrolKembali_poli' => $parameter['rencana_tl_kontrol_kembali_poli'],
+                'dpjp' => $parameter['dpjp'],
+                'user' => $UserData['data']->nama,
+                'pegawai' => $UserData['data']->uid,
+                'updated_at' => parent::format_date()
+            ))
+                ->where(array(
+                    'bpjs_claim.deleted_at' => 'IS NULL',
+                    'AND',
+                    'bpjs_claim.uid' => '= ?'
+                ), array(
+                    $parameter['uid']
+                ))
+                ->execute();
+        }
+
+        return array(
+            'bpjs' => $proceed,
+            'log' => $lpk_log
+        );
+    }
+
+    private function hapus_claim($parameter) {
+        $Authorization = new Authorization();
+        $UserData = $Authorization->readBearerToken($parameter['access_token']);
+        $parameterBuilder = array('request' => array(
+            't_lpk' => array(
+                'noSep' => $parameter[6],
+            )
+        ));
+
+        $deleteAct = self::deleteUrl2('/' . __BPJS_SERVICE_NAME__ . '/LPK/delete', $parameterBuilder);
+        if(intval($deleteAct['value']['metaData']['code']) === 200 || intval($deleteAct['value']['metaData']['code']) === 201) {
+            //Update claim
+            $DeleteSEP = self::$query->delete('bpjs_claim')
+                ->where(array(
+                    'bpjs_claim.no_sep' => '= ?'
+                ), array(
+                    $parameter[6]
+                ))
+                ->execute();
+
+
+            $log = parent::log(array(
+                    'type'=>'activity',
+                    'column'=>array(
+                        'unique_target',
+                        'user_uid',
+                        'table_name',
+                        'action',
+                        'logged_at',
+                        'status',
+                        'login_id'
+                    ),
+                    'value'=>array(
+                        $parameter[6],
+                        $UserData['data']->uid,
+                        'bpjs_claim',
+                        'D',
+                        parent::format_date(),
+                        'N',
+                        $UserData['data']->log_id
+                    ),
+                    'class'=>__CLASS__
+                )
+            );
+        }
+
+        return array(
+            'bpjs' => $deleteAct,
+            'delete_act' => $DeleteSEP
         );
     }
 
@@ -3102,7 +3451,7 @@ class BPJS extends Utility {
                 )
             )
         );
-        
+
         $proceed = self::postUrl('/' . __BPJS_SERVICE_NAME__ . '/SEP/2.0/insert', $parameterBuilder);
         $uid = parent::gen_uuid();
         if(intval($proceed['metaData']['code']) === 200) {
@@ -3150,7 +3499,7 @@ class BPJS extends Utility {
             ))
                 ->execute();
         }
-        
+
         return array(
             'bpjs' => $proceed,
             'log' => $sep_log,
@@ -3555,7 +3904,7 @@ class BPJS extends Utility {
 			else{
 				$jlh = 0;
 			}
-			
+
 
 			$content = json_decode($content, TRUE);
 			if(intval($content['metaData']['code']) != 201) {
@@ -3576,6 +3925,24 @@ class BPJS extends Utility {
 		// $content['content']['response']['peserta']['tglCetakKartu'] = date('d F Y', strtotime($content['content']['response']['peserta']['tglCetakKartu']));
 		return $content;
 	}
+
+    private function cek_peserta2($parameter) {
+
+        $no_kartu = $parameter['no_kartu'];
+        $jenis = $parameter['jenis'];
+        $prefixUrl = "nokartu/$no_kartu";
+
+        // 1 = nomor kartu bpjs, 2 = nik
+        if ($jenis == 2) {
+            $prefixUrl = "nik/$no_kartu";
+        }
+
+        $tglSEP = strval(date("Y-m-d"));
+
+        return self::getUrl2('/' . __BPJS_SERVICE_NAME__
+            . '/Peserta/' . $prefixUrl
+            . '/tglSEP/' . $tglSEP);
+    }
 
     public function getUrl2($extended_url) {
         $url = ((__BPJS_MODE__ === 2) ? __BASE_LIVE_BPJS__ : __BASE_STAGING_BPJS__);
@@ -3607,16 +3974,17 @@ class BPJS extends Utility {
             ]
         ]);
 
-        
-        
         $response = $client->getAsync($extended_url)->then(function($resp) {
             //return json_decode($resp->getBody()->getContents(), true);
             return json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $resp->getBody()->getContents()), true);
         });
 
         $promise = \GuzzleHttp\Promise\settle($response)->wait(true);
-        
-        $dataList = self::decryptor($promise[0]['value']['response'], $keyForDecompress);
+
+        $dataList = null;
+        if ($promise[0]['value']['metaData']['code'] == "200") {
+            $dataList = self::decryptor($promise[0]['value']['response'], $keyForDecompress);
+        }
 
         return array(
             'metaData' => $promise[0]['value']['metaData'],
@@ -3708,7 +4076,7 @@ class BPJS extends Utility {
 
     public function decryptor($string, $key) {
         $enc_method = 'AES-256-CBC';
-        
+
         $key_hash = hex2bin(hash('sha256', $key));
         $iv = substr(hex2bin(hash('sha256', $key)), 0, 16);
         $output = openssl_decrypt(base64_decode($string), $enc_method, $key_hash, OPENSSL_RAW_DATA, $iv);
@@ -3721,7 +4089,7 @@ class BPJS extends Utility {
 
     public function postUrl($extended_url, $parameter) {
         //define('form_params', \GuzzleHttp\RequestOptions::FORM_PARAMS );
-        
+
         $url = ((__BPJS_MODE__ === 2) ? __BASE_LIVE_BPJS__ : __BASE_STAGING_BPJS__);
         $data_api = ((__BPJS_MODE__ === 2) ? __DATA_API_LIVE__ : __DATA_API_STAGING__);
         $secretKey_api = ((__BPJS_MODE__ === 2) ? __SECRET_KEY_LIVE_BPJS__ : __SECRET_KEY_DEV_BPJS__);
@@ -3757,8 +4125,8 @@ class BPJS extends Utility {
             ]
         ]);
 
-        
-        
+
+
         try{
             $response = $client->postAsync($extended_url)->then(function($resp) {
                 return json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $resp->getBody()->getContents()), true);
@@ -3789,7 +4157,7 @@ class BPJS extends Utility {
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             return $e->getResponse();
         }
-        
+
         //$dataList = self::decryptor($promise[0]['value']['response'], $keyForDecompress);
 
         // return array(
@@ -3797,7 +4165,7 @@ class BPJS extends Utility {
         //     'data' => $dataList
         // );
 
-        
+
 
         // $headers = array(
         //     'X-cons-id: ' . self::$data_api . ' ',
@@ -3832,7 +4200,7 @@ class BPJS extends Utility {
 
     public function deleteUrl2($extended_url, $parameter) {
         define('form_params', \GuzzleHttp\RequestOptions::FORM_PARAMS );
-        
+
         $url = ((__BPJS_MODE__ === 2) ? __BASE_LIVE_BPJS__ : __BASE_STAGING_BPJS__);
         $data_api = ((__BPJS_MODE__ === 2) ? __DATA_API_LIVE__ : __DATA_API_STAGING__);
         $secretKey_api = ((__BPJS_MODE__ === 2) ? __SECRET_KEY_LIVE_BPJS__ : __SECRET_KEY_DEV_BPJS__);
@@ -3868,8 +4236,8 @@ class BPJS extends Utility {
             ]
         ]);
 
-        
-        
+
+
         try{
             $response = $client->deleteAsync($extended_url)->then(function($resp) {
                 return json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $resp->getBody()->getContents()), true);
@@ -3976,8 +4344,8 @@ class BPJS extends Utility {
             ]
         ]);
 
-        
-        
+
+
         try{
             $response = $client->putAsync($extended_url)->then(function($resp) {
                 return json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $resp->getBody()->getContents()), true);
@@ -4009,5 +4377,5 @@ class BPJS extends Utility {
             return $e->getResponse();
         }
     }
+
 }
-?>
