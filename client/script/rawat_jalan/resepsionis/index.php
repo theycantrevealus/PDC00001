@@ -897,20 +897,23 @@
                     },
                     dropdownParent: $("#group_poli"),
                     ajax: {
-                        dataType: "json",
-                        headers:{
-                            "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                            "Content-Type" : "application/json",
-                        },
-                        url:__HOSTAPI__ + "/BPJS/get_poli",
+                        url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getpoli`,
                         type: "GET",
+                        dataType: "json",
+                        crossDomain: true,
+                        beforeSend: async function(request) {
+                            request.setRequestHeader("Accept", "application/json");
+                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("x-token", bpjs_token);
+                        },
                         data: function (term) {
                             return {
-                                search:term.term
+                                kode:term.term
                             };
                         },
-                        cache: true,
                         processResults: function (response) {
+                            console.clear();
+                            console.log(response);
                             if(response.response_package.data === null) {
                                 $("#txt_bpjs_poli_tujuan").trigger("change.select2");
                             } else {

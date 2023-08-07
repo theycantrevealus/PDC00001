@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script type="text/javascript">
+            $(function() {
+                console.log('Debug start');
+                $.ajax({
+                    url: "https://103.169.42.78/vclaim2/authentification/sync.sh",
+                    type: "GET",
+                    dataType: "json",
+                    crossDomain: true,
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Accept", "application/json");
+                        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        request.setRequestHeader("x-username", "vclaim");
+                        request.setRequestHeader("x-password", "vcl$im2022");
+                    },
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        console.log(`Error :${error}`);
+                    }
+                });
+                console.log('Debug end');
+            });
+        </script>
+    </head>
+<body>
+
+</body>
+</html>

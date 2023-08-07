@@ -92,6 +92,10 @@
 	var __RULE_PRA_INAP_ALLOW_ADMINISTRASI__ = parseFloat(<?php echo json_encode(__RULE_PRA_INAP_ALLOW_ADMINISTRASI__); ?>);
 	//Kelas
 	var __UID_KELAS_GENERAL_RJ__ = <?php echo json_encode(__UID_KELAS_GENERAL_RJ__); ?>;
+
+    var __BPJS_SERVICE_URL__ = <?php echo json_encode(__BPJS_SERVICE_URL__); ?>;
+    var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
+    var bpjs_token = '';
 </script>
 
 <?php

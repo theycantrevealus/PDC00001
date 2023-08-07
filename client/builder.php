@@ -158,6 +158,7 @@ $lastExist = '';
 	</div> -->
   <?php require 'script.php'; ?>
   <script type="text/javascript">
+
     var currentCPPTStep = 1;
     var targetModule = 0;
     var tutorList = {};
@@ -244,7 +245,9 @@ $lastExist = '';
       }
     }
 
-    $(function() {
+
+    $(async function() {
+
       $('.numberonly').keypress(function(event){
           if (((event.which != 46 || (event.which == 46 && $(this).val() == '')) || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
               event.preventDefault();
@@ -312,7 +315,6 @@ $lastExist = '';
         }
       });
 
-      //Load Module Tutorial
       $.ajax({
         async: false,
         url: __HOSTAPI__ + "/Tutorial/get_tutorial/" + targetModule,
@@ -514,7 +516,37 @@ $lastExist = '';
           notification("info", "Refresh page", 3000, "notif_update");
         });
       });
+
+        async function refreshToken() {
+            return new Promise(async (resolve, reject) => {
+                $.ajax({
+                    url: `${__BPJS_SERVICE_URL__}authentification/sync.sh`,
+                    type: "GET",
+                    dataType: "json",
+                    crossDomain: true,
+                    beforeSend: function(request) {
+                        request.setRequestHeader("Accept", "application/json");
+                        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                        request.setRequestHeader("x-username", "vclaim");
+                        request.setRequestHeader("x-password", "vcl$im2022");
+                    },
+                    success: function(response) {
+                        resolve(response.response.token);
+                    },
+                    error: function(error) {
+                        reject(error);
+                    }
+                });
+            })
+        }
+
+        bpjs_token = await refreshToken();
     });
+
+
+
+
+
 
     function getPageList(totalPages, page, maxLength) {
       if (maxLength < 5) throw "maxLength must be at least 5";
@@ -549,6 +581,7 @@ $lastExist = '';
         .concat(0, range(page - leftWidth, page + rightWidth),
           0, range(totalPages - sideWidth + 1, totalPages));
     }
+
 
     function loadCPPT(from, to, pasien, currentStep, UID = "") {
 
@@ -916,7 +949,7 @@ $lastExist = '';
 
 
 
-    var serverTarget = "ws://" + __SYNC__ + ":" + __SYNC_PORT__;
+
     //var serverTarget = "ws://127.0.0.1:3000/socket.io/?EIO=3&transport=websocket";
     var Sync;
     var tm;
