@@ -912,12 +912,11 @@
                             };
                         },
                         processResults: function (response) {
-                            console.clear();
-                            console.log(response);
-                            if(response.response_package.data === null) {
+                            if(response.metadata.code !== 200) {
                                 $("#txt_bpjs_poli_tujuan").trigger("change.select2");
                             } else {
-                                var data = response.response_package.data.poli;
+                                var data = response.response;
+                                console.log(data);
                                 return {
                                     results: $.map(data, function (item) {
                                         return {
@@ -927,6 +926,10 @@
                                     })
                                 };
                             }
+                        },
+                        error: function(error) {
+                            console.clear();
+                            console.log(error);
                         }
                     }
                 }).addClass("form-control").on("select2:select", function(e) {

@@ -4,10 +4,10 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
                     <li class="breadcrumb-item"><a href="<?php echo __HOSTNAME__; ?>/">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">BPJS Rencana Kontrol / SPRI</li>
+                    <li class="breadcrumb-item active" aria-current="page">BPJS SPRI</li>
                 </ol>
             </nav>
-            <h4 class="m-0">Permintaan Rencana Kontrol / SPRI</h4>
+            <h4 class="m-0">Permintaan SPRI</h4>
         </div>
     </div>
 </div>
@@ -19,9 +19,9 @@
             <div class="card">
                 <div class="card-header card-header-large bg-white d-flex align-items-center">
                     <h5 class="card-header__title flex m-0">
-                    Rencana Kontrol / SPRI
-                        <button class="btn btn-sm btn-info pull-right" id="btnTambahPRB">
-                            <i class="fa fa-plus"></i> Tambah Rencana Kontrol
+                        SPRI
+                        <button class="btn btn-sm btn-info pull-right" id="btnTambahSPRI">
+                            <i class="fa fa-plus"></i> Tambah SPRI
                         </button>
                     </h5>
                 </div>
@@ -40,15 +40,15 @@
                             <div class="tab-pane active show fade" id="rs_ini">
                                 <table class="table table-bordered table-striped largeDataType" id="table-spri">
                                     <thead class="thead-dark">
-                                    <tr>
-                                        <th class="wrap_content">No</th>
-                                        <th class="wrap_content">Tanggal</th>
-                                        <th class="wrap_content">Jenis Layanan</th>
-                                        <th class="wrap_content">No. RK / SPRI</th>
-                                        <th>Pasien</th>
-                                        <th>Poli Tujuan</th>
-                                        <th class="wrap_content">Aksi</th>
-                                    </tr>
+                                        <tr>
+                                            <th class="wrap_content">No</th>
+                                            <th class="wrap_content">Tanggal</th>
+                                            <th class="wrap_content">Jenis Layanan</th>
+                                            <th class="wrap_content">No. RK / SPRI</th>
+                                            <th>Pasien</th>
+                                            <th>Poli Tujuan</th>
+                                            <th class="wrap_content">Aksi</th>
+                                        </tr>
                                     </thead>
                                     <tbody></tbody>
                                 </table>
