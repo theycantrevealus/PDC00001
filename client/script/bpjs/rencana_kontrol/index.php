@@ -1,5 +1,21 @@
 <script type="text/javascript">
     $(function() {
+
+        $("#tglawal_rk").datepicker({
+            dateFormat: "DD, dd MM yy",
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
+        $("#tglakhir_rk").datepicker({
+            dateFormat: "DD, dd MM yy",
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
+        $("#txt_bpjs_rk_tglRencanaKontrol").datepicker({
+            dateFormat: "DD, dd MM yy",
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
         var selectedKartu = "";
         var selected_SPRI = "";
 
@@ -7,33 +23,38 @@
         var SPRINo = "";
         var MODE = "ADD";
 
-
-
-
-
-        var DataSPRI = $("#table-spri").DataTable({
-            processing: true,
-            serverSide: true,
-            sPaginationType: "full_numbers",
-            bPaginate: true,
-            serverMethod: "POST",
+        var DataRK = $("#table-rk").DataTable({
+            // processing: true,
+            // serverSide: true,
+            // sPaginationType: "full_numbers",
+            // bPaginate: true,
+            // serverMethod: "POST",
             "ajax": {
-                url: __HOSTAPI__ + "/BPJS",
-                type: "POST",
-                headers: {
-                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
+                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/listrencanakontrol`,
+                type: "GET",
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
-                data: function (d) {
-                    d.request = "get_history_spri_local";
-                    d.dari = getDateRange("#range_spri")[0];
-                    d.sampai = getDateRange("#range_spri")[1];
-                    d.pelayanan_jenis = 1;
-                    d.sync_bpjs = refreshData;
+                data: function(d) {
+                    var tgl_awal = new Date($("#tglakhir_rk").datepicker("getDate"));
+                    var parse_tgl_awal = tgl_awal.getFullYear() + "-" + str_pad(2, tgl_awal.getMonth() + 1) + "-" + str_pad(2, tgl_awal.getDate());
+                    var tgl_akhir = new Date($("#tglakhir_rk").datepicker("getDate"));
+                    var parse_tgl_akhir = tgl_akhir.getFullYear() + "-" + str_pad(2, tgl_akhir.getMonth() + 1) + "-" + str_pad(2, tgl_akhir.getDate());
+
+                    // d.request = "get_history_spri_local";
+                    d.tglawal = parse_tgl_awal;
+                    d.tglakhir = parse_tgl_akhir;
+                    d.filter = 2;
+                    // d.sync_bpjs = refreshData;
                 },
-                dataSrc: function (response) {
+                dataSrc: function(response) {
                     console.clear();
                     console.log(response)
-                    var data = response.response_package.response_data;
+                    var data = response.response;
                     if (data === undefined || data === null) {
                         return [];
                     } else {
@@ -44,46 +65,59 @@
             },
             autoWidth: false,
             "bInfo": false,
-            lengthMenu: [[-1], ["All"]],
-            aaSorting: [[0, "asc"]],
+            lengthMenu: [
+                [-1],
+                ["All"]
+            ],
+            aaSorting: [
+                [0, "asc"]
+            ],
             "columnDefs": [{
                 "targets": 0,
                 "className": "dt-body-left"
             }],
-            "columns": [
-                {
-                    "data": null, render: function (data, type, row, meta) {
+            "columns": [{
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
                     }
                 },
                 {
-                    "data": null, render: function (data, type, row, meta) {
-                        return row.created_at_parsed;
+                    "data": null,
+                    render: function(data, type, row, meta) {
+                        return row.noSuratKontrol;
                     }
                 },
                 {
-                    "data": null, render: function (data, type, row, meta) {
-                        return row.no_spri;
+                    "data": null,
+                    render: function(data, type, row, meta) {
+                        return row.tglTerbitKontrol;
                     }
                 },
                 {
-                    "data": null, render: function (data, type, row, meta) {
-                        return row.pasien.no_rm + " - " + row.pasien.nama;
+                    "data": null,
+                    render: function(data, type, row, meta) {
+                        return row.nama + " - " + row.noKartu;
                     }
                 },
                 {
-                    "data": null, render: function (data, type, row, meta) {
-                        return row.dpjp_nama;
+                    "data": null,
+                    render: function(data, type, row, meta) {
+                        return row.kodeDokter + " - " + row.namaDokter;
                     }
                 },
                 {
-                    "data": null, render: function (data, type, row, meta) {
+                    "data": null,
+                    render: function(data, type, row, meta) {
                         return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-                                    "<button class=\"btn btn-info btn-sm btnEditSPRI\" no-spri=\"" + row.no_spri + "\" id=\"sep_edit_" + row.uid + "\">" +
-                                    "<i class=\"fa fa-pencil-alt\"></i> Edit" +
-                                    "</button>" +
-                                    "<button class=\"btn btn-danger btnHapusSPRI\" id=\"hapus_" + row.no_spri + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
-                                    "</div>";
+                            "<button class=\"btn btn-warning btn-sm printRk\" no-sep=\"" + row.noSep + "\" id=\"rk_print_" + row.noSuratKontrol + "\">" +
+                            "<i class=\"fa fa-print\"></i> Cetak" +
+                            "</button>" +
+                            "<button class=\"btn btn-info btn-sm btnEditRK\" no-sep=\"" + row.noSep + "\" id=\"rk_edit_" + row.noSuratKontrol + "\">" +
+                            "<i class=\"fa fa-pencil-alt\"></i> Edit" +
+                            "</button>" +
+                            "<button class=\"btn btn-danger btnHapusRK\" id=\"hapus_" + row.noSuratKontrol + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
+                            "</div>";
                     }
                 }
             ]
@@ -91,17 +125,17 @@
 
         $("#btn_sync_bpjs").click(function() {
             refreshData = 'Y';
-            DataSPRI.ajax.reload(function () {
+            DataRK.ajax.reload(function() {
                 refreshData = 'N';
             });
         });
 
-        $("body").on("click", ".btnHapusSPRI", function() {
-            var SPRI = $(this).attr("id").split("_");
-            SPRI = SPRI[SPRI.length - 1];
+        $("body").on("click", ".btnHapusRK", function() {
+            var NO_SRK = $(this).attr("id").split("_");
+            NO_SRK = NO_SRK[NO_SRK.length - 1];
             Swal.fire({
-                title: "BPJS SPRI",
-                text: "Hapus SPRI " + SPRI + "?",
+                title: "BPJS Rencana Kontrol",
+                text: "Hapus NO_SRK " + NO_SRK + "?",
                 showDenyButton: true,
                 confirmButtonText: "Ya",
                 denyButtonText: "Tidak",
@@ -109,33 +143,42 @@
                 if (result.isConfirmed) {
                     $.ajax({
                         async: false,
-                        url: __HOSTAPI__ + "/BPJS/SPRI/" + SPRI,
-                        beforeSend: function (request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
+                        url: `${__BPJS_SERVICE_URL__}rc/sync.sh/deleterc`,
                         type: "DELETE",
-                        success: function (response) {
+                        crossDomain: true,
+                        beforeSend: async function(request) {
+                            request.setRequestHeader("Accept", "application/json");
+                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("x-token", bpjs_token);
+                        },
+                        data: {
+                            "t_suratkontrol": {
+                                "noSuratKontrol": NO_SRK,
+                                "user": __MY_NAME__
+                            }
+                        },
+                        success: function(response) {
                             console.clear();
                             console.log(response);
-                            if(parseInt(response.response_package.bpjs.value.metaData.code) === 200) {
+                            if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    'BPJS SPRI',
-                                    'SPRI Berhasil dihapus',
+                                    'BPJS Rencana Kontrol',
+                                    'Rencana Kontrol Berhasil dihapus',
                                     'success'
                                 ).then((result) => {
-                                    DataSPRI.ajax.reload();
+                                    DataRK.ajax.reload();
                                 });
                             } else {
                                 Swal.fire(
-                                    'BPJS SPRI',
-                                    response.response_package.bpjs.value.metaData.message,
+                                    'BPJS Rencana Kontrol',
+                                    response.metaData.message,
                                     'error'
                                 ).then((result) => {
-                                    DataSPRI.ajax.reload();
+                                    DataRK.ajax.reload();
                                 });
                             }
                         },
-                        error: function (response) {
+                        error: function(response) {
                             console.clear();
                             console.log(response);
                         }
@@ -144,312 +187,250 @@
             });
         });
 
-        $("body").on("click", ".btnEditSPRI", function() {
-            var SPRIUID = $(this).attr("id").split("_");
-            SPRIUID = SPRIUID[SPRIUID.length - 1];
+        $("body").on("click", ".btnEditRK", function() {
+            var NO_SRK = $(this).attr("id").split("_");
+            NO_SRK = NO_SRK[NO_SRK.length - 1];
             MODE = "EDIT";
 
-            
-
-            $("#modal-prb").modal("show");
-            $("#txt_bpjs_rk_nomor_kartu").focus();
+            $("#modal-rk").modal("show");
+            // $("#txt_bpjs_rk_noSep").focus();
 
             //Load Detail
             $.ajax({
                 async: false,
-                url:__HOSTAPI__ + "/BPJS/get_detail_spri/" + SPRIUID,
+                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/carisuratkontrol`,
                 type: "GET",
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                success: function(response){
-                    
-                    var data = response.response_package.response_data[0];
-
-                    $("#txt_bpjs_rk_pasien").append("<option value=\"" + data.pasien.uid + "\">" + data.pasien.no_rm + " - " + data.pasien.nama + "</option>");
-                    $("#txt_bpjs_rk_pasien").select2("data", {id: data.pasien.uid, text: data.pasien.no_rm + " - " + data.pasien.nama});
-                    $("#txt_bpjs_rk_pasien").trigger("change");
-                    
-                    $("#txt_bpjs_rk_pasien").attr({
-                        "disabled": "disabled"
-                    });
-
-                    selected_SPRI = data.no_spri;
-
-                    var restMeta = data.pasien.history_penjamin;
-                    for(var b in restMeta) {
-                        if(restMeta[b].penjamin === __UIDPENJAMINBPJS__) {
-                            var bpjsData = JSON.parse(restMeta[b].rest_meta);
-                            selectedKartu = bpjsData.data.peserta.noKartu;
-                        }
-                    }
-
-                    //$("#txt_bpjs_rk_jenis_layan_dpjp").append("<option value=\"" + data.jenis_layan + "\">" + ((data.jenis_layan == 1) ? "Rawat Inap" : "Rawat Jalan") + "</option>");
-                    $("#txt_bpjs_rk_jenis_layan_dpjp").select2("data", {id: data.jenis_layan, text: ((data.jenis_layan == 1) ? "Rawat Inap" : "Rawat Jalan")});
-                    $("#txt_bpjs_rk_jenis_layan_dpjp").trigger("change");
-
-                    loadSpesialistik("#txt_bpjs_rk_spesialistik_dpjp", data.spesialistik);
-
-                    $("#txt_bpjs_rk_poli").append("<option value=\"" + data.poli_tujuan + "\">" + data.poli_tujuan_text + "</option>");
-                    $("#txt_bpjs_rk_poli").select2("data", {id: data.poli_tujuan, text: data.poli_tujuan_text});
-                    $("#txt_bpjs_rk_poli").trigger("change");
-
-                    $("#txt_bpjs_rk_tanggal").val(data.tgl_rencana_kontrol);
-                    
-
-                    $("#txt_bpjs_rk_email").val((data.pasien.email !== undefined && data.pasien.email !== null) ? data.pasien.email : "-");
-                    $("#txt_bpjs_rk_kontak").val((data.pasien.no_telp !== undefined && data.pasien.no_telp !== null) ? data.pasien.no_telp : "-");
-                    $("#txt_bpjs_rk_jenkel").val((data.pasien.jenkel_detail.nama !== undefined && data.pasien.jenkel_detail.nama !== null) ? data.pasien.jenkel_detail.nama : "-");
-                    $("#txt_bpjs_rk_alamat").val((data.pasien.alamat !== undefined && data.pasien.alamat !== null) ? data.pasien.alamat : "-");
-
-                    load_sep(data.pasien.uid, data.no_sep);
-                    loadDPJPSpesialis("#txt_bpjs_rk_dpjp", data.dpjp_kode);
-                    $("#txt_bpjs_rk_sep").attr({
-                        "disabled": "disabled"
-                    });
-
-                },
-                error: function(response) {
-                    console.log(response);
-                }
-            });
-            
-        });
-
-
-        
-
-        $("#txt_bpjs_rk_pasien").select2({
-            minimumInputLength: 2,
-            language: {
-                noResults: function() {
-                    return "Pasien tidak ditemukan";
-                }
-            },
-            dropdownParent: $('#modal-prb'),
-            ajax: {
                 dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                    "Content-Type" : "application/json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
-                url:__HOSTAPI__ + "/Pasien/select2",
-                type: "GET",
-                data: function (term) {
+                data: function(term) {
                     return {
-                        search:term.term
+                        nosuratkontrol: NO_SRK
                     };
-                },
-                cache: true,
-                processResults: function (response) {
-                    var data = response.response_package.response_data;
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.text,
-                                id: item.uid,
-                                email: item.email,
-                                no_telp: item.no_telp,
-                                jenkel_detail: item.jenkel_detail,
-                                history_penjamin: item.history_penjamin
-                            }
-                        })
-                    };
-                }
-            }
-        }).on("select2:select", function(e) {
-            var data = e.params.data;
-            
-            var restMeta = data.history_penjamin;
-            for(var b in restMeta) {
-                if(restMeta[b].penjamin === __UIDPENJAMINBPJS__) {
-                    var bpjsData = JSON.parse(restMeta[b].rest_meta);
-                    selectedKartu = bpjsData.data.peserta.noKartu;
-                }
-            }
-
-            $("#txt_bpjs_rk_email").val((data.email !== undefined && data.email !== null) ? data.email : "-");
-            $("#txt_bpjs_rk_kontak").val((data.no_telp !== undefined && data.no_telp !== null) ? data.no_telp : "-");
-            $("#txt_bpjs_rk_jenkel").val((data.jenkel_detail.nama !== undefined && data.jenkel_detail.nama !== null) ? data.jenkel_detail.nama : "-");
-            $("#txt_bpjs_rk_alamat").val((data.alamat !== undefined && data.alamat !== null) ? data.alamat : "-");
-
-            load_sep(data.id);
-        });
-
-        $("#txt_bpjs_rk_jenis_layan_dpjp").select2({
-            dropdownParent: $('#modal-prb')
-        }).on("select2:select", function(e) {
-            loadDPJPSpesialis("#txt_bpjs_rk_dpjp");
-        });
-
-        loadSpesialistik("#txt_bpjs_rk_spesialistik_dpjp");
-        function loadSpesialistik(target, selected = "") {
-            $.ajax({
-                async: false,
-                url:__HOSTAPI__ + "/BPJS/get_spesialistik",
-                type: "GET",
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                success: function(response){
-                    var data = response.response_package.data.list;
-
-                    $(target + " option").remove();
-                    for(var a = 0; a < data.length; a++) {
-                        var selection = document.createElement("OPTION");
-
-                        $(selection).attr("value", data[a].kode).html(data[a].nama);
-                        if(data[a].kode === selected) {
-                            $(selection).attr({
-                                "selected": "selected"
-                            });
-                        }
-                        $(target).append(selection);
-                    }
-                },
-                error: function(response) {
-                    console.log(response);
-                }
-            });
-        }
-
-        function loadDPJPSpesialis(target, selected = "") {
-            $.ajax({
-                url:__HOSTAPI__ + "/BPJS/get_dpjp/?jenis=" + $("#txt_bpjs_rk_jenis_layan_dpjp option:selected").val() + "&spesialistik=" + $("#txt_bpjs_rk_spesialistik_dpjp option:selected").val() + "&tanggal=" + $("#txt_bpjs_rk_sep option:selected").attr("tanggal-sep"),
-                type: "GET",
-                async: false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
                 },
                 success: function(response) {
-                    if(parseInt(response.response_package.metaData.code) === 200) {
-                        var data = response.response_package.data.list;
-                        $(target + " option").remove();
-                        for(var a = 0; a < data.length; a++) {
-                            var selection = document.createElement("OPTION");
 
-                            if(data[a].kode === selected) {
-                                $(selection).attr({
-                                    "selected": "selected"
-                                });
-                            }
+                    var data = response.response[0];
 
-                            $(selection).attr("value", data[a].kode).html(data[a].nama);
-                            $(target).append(selection);
-                        }
-                    }
+                    $("#txt_bpjs_rk_noSep").append("<option value=\"" + data.noSep + "\">" + data.noSep + "</option>");
+                    $("#txt_bpjs_rk_noSep").select2("data", {
+                        id: data.noSep,
+                        text: data.noSep
+                    });
+                    $("#txt_bpjs_rk_noSep").trigger("change");
+                    $("#txt_bpjs_rk_noSep").attr({
+                        "disabled": "disabled"
+                    });
+
+                    $("#txt_bpjs_rk_tglRencanaKontrol").val(data.tglRencanaKontrol);
+
+                    $("#txt_bpjs_rk_poliKontrol").append("<option value=\"" + data.poliTujuan + "\">" + data.poliTujuan + " - " + data.namaPoliTujuan + "</option>");
+                    $("#txt_bpjs_rk_poliKontrol").select2("data", {
+                        id: data.poliTujuan,
+                        text: data.namaPoliTujuan
+                    });
+                    $("#txt_bpjs_rk_poliKontrol").trigger("change");
+
+                    $("#txt_bpjs_rk_kodeDokter").append("<option value=\"" + data.kodeDokter + "\">" + data.kodeDokter + " - " + data.mamaDokter + "</option>");
+                    $("#txt_bpjs_rk_kodeDokter").select2("data", {
+                        id: data.kodeDokter,
+                        text: data.mamaDokter
+                    });
+                    $("#txt_bpjs_rk_kodeDokter").trigger("change");
+
                 },
                 error: function(response) {
                     console.log(response);
                 }
             });
-        }
 
-        $("#txt_bpjs_rk_sep").select2({
-            dropdownParent: $('#modal-prb')
-        }).on("select2:select", function(e) {
-            loadDPJPSpesialis("#txt_bpjs_rk_dpjp");
         });
 
-        
-
-        $("#txt_bpjs_rk_poli").select2({
+        $("#txt_bpjs_rk_noSEP").select2({
             minimumInputLength: 2,
             "language": {
-                "noResults": function(){
-                    return "Faskes tidak ditemukan";
+                "noResults": function() {
+                    return "No.SEP tidak ditemukan";
                 }
             },
-            dropdownParent: $('#modal-prb'),
+            dropdownParent: $('#modal-rk'),
             ajax: {
-                quietMillis: 1000,
-                dataType: "json",
-                headers:{
-                    "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                    "Content-Type" : "application/json",
-                },
-                url:__HOSTAPI__ + "/BPJS/get_poli",
+                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/carisep`,
+                // url: `${__BPJS_SERVICE_URL__}rc/sync.sh/carisep?nomorsep=0032R0110723V010991`,
                 type: "GET",
-                data: function (term) {
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
+                },
+                data: function(term) {
                     return {
-                        search:term.term
+                        nomorsep: term.term
                     };
                 },
-                cache: true,
-                processResults: function (response) {
-                    var data = response.response_package.data.poli;
-                    return {
-                        results: $.map(data, function (item) {
-                            return {
-                                text: item.nama,
-                                id: item.kode
-                            }
-                        })
-                    };
+                processResults: function(response) {
+                    if (response.metadata.code !== 200) {
+                        $("#txt_bpjs_rk_noSEP").trigger("change.select2");
+                    } else {
+                        var data = response.response;
+                        console.log(data);
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    text: item.noSep,
+                                    id: item.noSep
+                                }
+                            })
+                        };
+                    }
+                },
+                error: function(error) {
+                    console.clear();
+                    console.log(error);
                 }
             }
         }).addClass("form-control").on("select2:select", function(e) {
-            //
+
         });
 
 
-        function load_sep(pasien, selected = "") {
-            $.ajax({
-                url:__HOSTAPI__ + "/BPJS/get_sep_pasien/" + pasien,
-                type: "GET",
-                async: false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                success: function(response) {
-                    var data = response.response_package.response_data;
-                    $("#txt_bpjs_rk_sep option").remove();
-                    for(var a in data) {
-                        $("#txt_bpjs_rk_sep").append("<option " + ((data[a].sep_no == selected) ? "selected=\"selected\"" : "") + " poli-asal=\"" + data[a].poli_tujuan + "\" tanggal-sep=\"" + data[a].tanggal_sep + "\" value=\"" + data[a].sep_no + "\">" + data[a].sep_no + "</option>");
-                    }
-
-                    loadDPJPSpesialis("#txt_bpjs_rk_dpjp");
-                },
-                error: function(response) {
-                    console.log(response);
+        $("#txt_bpjs_rk_poliKontrol").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function() {
+                    return "Poli tidak ditemukan";
                 }
-            });
-        }
+            },
+            dropdownParent: $('#modal-rk'),
+            ajax: {
+                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/listspesialistik/?jeniskontrol=1&nomor=` + $("#txt_bpjs_rk_noSEP").val() + `&tglrencanakontrol=` + $("#txt_bpjs_rk_tglRencanaKontrol").val(),
+                // url: `${__BPJS_SERVICE_URL__}rc/sync.sh/listspesialistik/?jeniskontrol=1&nomor=0000267050799&tglrencanakontrol=2023-07-31`,
+                type: "GET",
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
+                },
+                data: function(term) {
+                    return {
+                        kode: term.term
+                    };
+                },
+                processResults: function(response) {
+                    if (response.metadata.code !== 200) {
+                        $("#txt_bpjs_rk_poliKontrol").trigger("change.select2");
+                    } else {
+                        var data = response.response;
+                        console.log(data);
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
+                },
+                error: function(error) {
+                    console.clear();
+                    console.log(error);
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
 
-        $("#btnTambahPRB").click(function() {
-            $("#modal-prb").modal("show");
-            $("#txt_bpjs_rk_pasien").removeAttr("disabled");
-            $("#txt_bpjs_rk_sep").removeAttr("disabled");
-            $("#txt_bpjs_rk_nomor_kartu").focus();
+        });
+
+        var tglRencanaKontrol = new Date($("#txt_bpjs_rk_tglRencanaKontrol").datepicker("getDate"));
+        var parse_tglRencanaKontrol = tglRencanaKontrol.getFullYear() + "-" + str_pad(2, tglRencanaKontrol.getMonth() + 1) + "-" + str_pad(2, tglRencanaKontrol.getDate());
+
+
+        $("#txt_bpjs_rk_kodeDokter").select2({
+            dropdownParent: $('#modal-rk'),
+            ajax: {
+                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=2&kodepoli=` + $("#txt_bpjs_rk_poliKontrol").val() + `&tglrencanakontrol=` + parse_tglRencanaKontrol,
+                // url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=2&kodepoli=ANA&tglrencanakontrol=2023-07-31`,
+                type: "GET",
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
+                },
+                processResults: function(response) {
+                    if (response.metadata.code !== 200) {
+                        $("#txt_bpjs_rk_kodeDokter").trigger("change.select2");
+                    } else {
+                        var data = response.response;
+                        console.log(data);
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    text: item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
+                    }
+                },
+                error: function(error) {
+                    console.clear();
+                    console.log(error);
+                }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+
+        });
+
+        $("body").on("click", "#btnTambahRK", function() {
+            $("#modal-rk").modal("show");
+            $("#txt_bpjs_rk_noSep").focus();
             MODE = "ADD";
         });
 
         $("#txt_bpjs_rk_spesialistik_dpjp").select2({
-            dropdownParent: $('#modal-prb')
+            dropdownParent: $('#modal-rk')
         });
 
         $("#txt_bpjs_rk_dpjp").select2({
-            dropdownParent: $('#modal-prb')
+            dropdownParent: $('#modal-rk')
         });
 
-        
-        $("#btnProsesPRB").click(function() {
-            var pasien = $("#txt_bpjs_rk_pasien option:selected").val();
-            var sep = $("#txt_bpjs_rk_sep option:selected").val();
-            var kartu = selectedKartu;
-            var alamat = $("#txt_bpjs_rk_alamat").val();
-            var email = $("#txt_bpjs_rk_email").val();
-            var kodeDPJP = $("#txt_bpjs_rk_dpjp option:selected").val();
-            var jenis_layan = $("#txt_bpjs_rk_jenis_layan_dpjp option:selected").val();
-            var spesialistik = $("#txt_bpjs_rk_spesialistik_dpjp option:selected").val();
-            var spesialistik_text = $("#txt_bpjs_rk_spesialistik_dpjp option:selected").text();
-            var jenkel = $("#txt_bpjs_rk_jenkel").val();
-            var kontak = $("#txt_bpjs_rk_kontak").val();
-            var poli_tujuan = $("#txt_bpjs_rk_poli").val();
-            var poli_text = $("#txt_bpjs_rk_poli option:selected").text();
-            var poli_asal = $("#txt_bpjs_rk_sep option:selected").attr("poli-asal");
-            var tanggal = $("#txt_bpjs_rk_tanggal").val();
-            
+
+        $("#btnProsesRK").click(function() {
+            // var pasien = $("#txt_bpjs_rk_pasien option:selected").val();
+            // var sep = $("#txt_bpjs_rk_sep option:selected").val();
+            // var kartu = selectedKartu;
+            // var alamat = $("#txt_bpjs_rk_alamat").val();
+            // var email = $("#txt_bpjs_rk_email").val();
+            // var kodeDPJP = $("#txt_bpjs_rk_dpjp option:selected").val();
+            // var jenis_layan = $("#txt_bpjs_rk_jenis_layan_dpjp option:selected").val();
+            // var spesialistik = $("#txt_bpjs_rk_spesialistik_dpjp option:selected").val();
+            // var spesialistik_text = $("#txt_bpjs_rk_spesialistik_dpjp option:selected").text();
+            // var jenkel = $("#txt_bpjs_rk_jenkel").val();
+            // var kontak = $("#txt_bpjs_rk_kontak").val();
+            // var poli_tujuan = $("#txt_bpjs_rk_poli").val();
+            // var poli_text = $("#txt_bpjs_rk_poli option:selected").text();
+            // var poli_asal = $("#txt_bpjs_rk_sep option:selected").attr("poli-asal");
+            // var tanggal = $("#txt_bpjs_rk_tanggal").val();
+
+            var no_SEP = $("#txt_bpjs_rk_noSEP").val();
+
+            var tglRencanaKontrol = new Date($("#txt_bpjs_rk_tglRencanaKontrol").datepicker("getDate"));
+            var parse_tglRencanaKontrol = tglRencanaKontrol.getFullYear() + "-" + str_pad(2, tglRencanaKontrol.getMonth() + 1) + "-" + str_pad(2, tglRencanaKontrol.getDate());
+            var tanggal_kontrol = parse_tglRencanaKontrol;
+
+            var poli_kontrol = $("#txt_bpjs_rk_poliKontrol").val();
+            var kode_dokter = $("#txt_bpjs_rk_kodeDokter").val();
 
             Swal.fire({
                 title: "BPJS Rencana Kontrol",
@@ -460,44 +441,56 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url:__HOSTAPI__ + "/BPJS",
+                        url: `${__BPJS_SERVICE_URL__}rc/sync.sh/insertrcspri`,
                         type: "POST",
+                        dataType: "json",
+                        crossDomain: true,
+                        beforeSend: async function(request) {
+                            request.setRequestHeader("Accept", "application/json");
+                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("x-token", bpjs_token);
+                        },
                         data: {
-                            request: (MODE === "ADD") ? "spri_baru" : "spri_edit",
-                            no_spri: selected_SPRI,
-                            sep: sep,
-                            kartu: kartu,
-                            alamat: alamat,
-                            pasien: pasien,
-                            email: email,
-                            dpjp: kodeDPJP,
-                            jenkel: jenkel,
-                            jenis_layan: jenis_layan,
-                            spesialistik: spesialistik,
-                            spesialistik_text: spesialistik_text,
-                            telp: kontak,
-                            poli_tujuan: poli_tujuan,
-                            poli_asal: poli_asal,
-                            poli_text: poli_text,
-                            tanggal: tanggal
+                            "noSEP": no_SEP,
+                            "noKartu": no_kartu,
+                            "kodeDokter": kode_dokter,
+                            "poliKontrol": poli_kontrol,
+                            "tglRencanaKontrol": tanggal_kontrol, //format:"2021-04-13"
+                            "user": __MY_NAME__
                         },
-                        beforeSend: function(request) {
-                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                        },
+                        // data: {
+                        //     request: (MODE === "ADD") ? "spri_baru" : "spri_edit",
+                        //     no_spri: selected_SPRI,
+                        //     sep: sep,
+                        //     kartu: kartu,
+                        //     alamat: alamat,
+                        //     pasien: pasien,
+                        //     email: email,
+                        //     dpjp: kodeDPJP,
+                        //     jenkel: jenkel,
+                        //     jenis_layan: jenis_layan,
+                        //     spesialistik: spesialistik,
+                        //     spesialistik_text: spesialistik_text,
+                        //     telp: kontak,
+                        //     poli_tujuan: poli_tujuan,
+                        //     poli_asal: poli_asal,
+                        //     poli_text: poli_text,
+                        //     tanggal: tanggal
+                        // },
                         success: function(response) {
-                            if(parseInt(response.response_package.bpjs.metaData.code) === 200) {
+                            if (parseInt(response.metaData.code) === 200) {
                                 Swal.fire(
                                     "Rencana Kontrol",
                                     "Rencana Kontrol berhasil diproses",
                                     "success"
                                 ).then((result) => {
-                                    $("#modal-prb").modal("hide");
-                                    DataSPRI.ajax.reload();
+                                    $("#modal-rk").modal("hide");
+                                    DataRK.ajax.reload();
                                 });
                             } else {
                                 Swal.fire(
                                     "Gagal buat Rencana Kontrol",
-                                    response.response_package.bpjs.metaData.message,
+                                    response.metaData.message,
                                     "warning"
                                 ).then((result) => {
                                     //
@@ -512,17 +505,94 @@
             });
         });
     });
+
+    $("body").on("click", "#btnCetakRkTest", function() {
+        $("#modal-cetak-rk").modal("show");
+    });
+
+    $("body").on("click", ".printRk", function() {
+        var NO_SRK = $(this).attr("id").split("_");
+        NO_SRK = NO_SRK[NO_SRK.length - 1];
+
+        $.ajax({
+            async: false,
+            url: `${__BPJS_SERVICE_URL__}rc/sync.sh/carisuratkontrol`,
+            type: "GET",
+            dataType: "json",
+            crossDomain: true,
+            beforeSend: async function(request) {
+                request.setRequestHeader("Accept", "application/json");
+                request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                request.setRequestHeader("x-token", bpjs_token);
+            },
+            data: function(term) {
+                return {
+                    nosuratkontrol: NO_SRK
+                };
+            },
+            success: function(response) {
+                var dataRK = response.response[0];
+                $("#rk_dokter").html(dataRK.mamaDokter + "<br>" + dataRK.mamaPoliTujuan);
+                $("#rk_nomor_kartu").html(dataRK.sep.noKartu);
+                $("#rk_nama_pasien").html(dataRK.sep.nama);
+                $("#rk_tanggal_lahir").html(dataRK.sep.tglLahir);
+                $("#rk_diagnosa_awal").html(dataRK.sep.diagnosa);
+                $("#rk_tanggal_terbit").html(dataRK.tglTerbit);
+
+                var dateNow = new Date();
+                var tgl_cetak = dateNow.getDate() + "/" + dateNow.getMonth() + "/" + dateNow.getFullYear() + " " + dateNow.getHours() + " : " + dateNow.getMinutes() + " : " + dateNow.getSeconds();
+                $("#tgl_cetak").html(tgl_cetak);
+
+                $("#rk_nomor_surat").html(dataRK.noSuratkontrol);
+                $("#rk_tanggal_terbit").html(dataRK.tglTerbit);
+
+                $("#modal-cetak-rk").modal("show");
+            },
+            error: function(response) {
+                //
+            }
+        });
+    });
+
+    $("#btnCetakRK").click(function() {
+        $.ajax({
+            async: false,
+            url: __HOST__ + "miscellaneous/print_template/bpjs_rk.php",
+            beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+            },
+            type: "POST",
+            data: {
+                __PC_CUSTOMER__: __PC_CUSTOMER__,
+                html_data_kiri: $("#data_rk_cetak_kiri").html(),
+                html_data_kanan: $("#data_rk_cetak_kanan").html(),
+            },
+            success: function(response) {
+                var containerItem = document.createElement("DIV");
+                $(containerItem).html(response);
+                $(containerItem).printThis({
+                    importStyle: true,
+                    importCSS: true,
+                    base: true,
+                    pageTitle: "Cetak Rencana Kontrol",
+                    afterPrint: function() {
+                        //
+                    }
+                });
+            }
+        });
+    });
 </script>
 
 
 
 
-<div id="modal-prb" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div id="modal-rk" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modal-large-title">
-                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> Rencana Kontrol Baru <code>SPRI</code>
+                    <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> Rencana Kontrol Baru <code>Baru</code>
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -533,55 +603,28 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header card-header-large bg-white d-flex align-items-center">
-                                <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi SPRI</h5>
+                                <h5 class="card-header__title flex m-0 text-info"><i class="fa fa-hashtag"></i> Informasi Rencana Kontrol</h5>
                             </div>
                             <div class="card-body row">
-                                <div class="col-8 form-group">
+                                <!-- <div class="col-6 form-group">
                                     <label for="">Pasien</label>
                                     <select id="txt_bpjs_rk_pasien" class="form-control uppercase"></select>
-                                </div>
-                                <div class="col-4 form-group">
-                                    <label for="">SEP</label>
-                                    <select id="txt_bpjs_rk_sep" class="form-control uppercase"></select>
-                                </div>
-                                <div class="col-3 form-group">
-                                    <label for="">Email</label>
-                                    <input type="email" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rk_email" readonly />
-                                </div>
-                                <div class="col-3 form-group">
-                                    <label for="">Kontak</label>
-                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rk_kontak" readonly />
-                                </div>
-                                <div class="col-3 form-group">
-                                    <label for="">Jenis Kelamin</label>
-                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rk_jenkel" readonly />
-                                </div>
-                                <div class="col-12 form-group">
-                                    <label for="">Alamat</label>
-                                    <textarea class="form-control" id="txt_bpjs_rk_alamat" readonly></textarea>
-                                </div>
-                                <div class="col-3 form-group">
-                                    <label for="">Jenis Pelayanan</label>
-                                    <select class="form-control uppercase" id="txt_bpjs_rk_jenis_layan_dpjp">
-                                        <option value="1">Rawat Inap</option>
-                                        <option value="2">Rawat Jalan</option>
-                                    </select>
-                                </div>
-                                <div class="col-3 form-group">
-                                    <label for="">Spesialistik</label>
-                                    <select class="form-control uppercase" id="txt_bpjs_rk_spesialistik_dpjp"></select>
-                                </div>
-                                <div class="col-3 form-group">
-                                    <label for="">DPJP</label>
-                                    <select class="form-control uppercase" id="txt_bpjs_rk_dpjp"></select>
+                                </div> -->
+                                <div class="col-6 form-group">
+                                    <label for="">No. SEP</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rk_noSEP"></select>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <label for="">Poli Rencana Kontrol</label>
-                                    <select class="form-control uppercase" id="txt_bpjs_rk_poli"></select>
+                                    <label for="">Tanggal Rencana Kontrol</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rk_tglRencanaKontrol">
                                 </div>
                                 <div class="col-6 form-group">
-                                    <label for="">Tanggal Rencana Kontrol (Rajal) / Tanggal SPRI (Ranap)</label>
-                                    <input type="date" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rk_tanggal" />
+                                    <label for="">Poli/Spesialistik</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rk_poliKontrol"></select>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <label for="">Kode Dokter</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_rk_kodeDokter"></select>
                                 </div>
                             </div>
                         </div>
@@ -589,8 +632,104 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-success" id="btnProsesPRB">
+                <button class="btn btn-success" id="btnProsesRK">
                     <i class="fa fa-check"></i> Proses
+                </button>
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-cetak-rk" class="modal fade" role="dialog" aria-labelledby="modal-large-title" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" />
+                    </div>
+                    <div>
+                        <h5 class="modal-title" id="modal-large-title">
+                            <span>Surat Rencana Kontrol</span><br>
+                            <span>RSUD PETALA BUMI</span>
+                        </h5>
+                    </div>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6" id="data_rk_cetak_kiri">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>Kepada Yth.</td>
+                                <td class="wrap_content">:</td>
+                                <td id="rk_dokter">DR.dr.H Eva Decroli, SpPD K-EMD Finasim<br>ENDOKRIN-METABOLIK-DIABETES</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">Mohon Pemeriksaan dan Penanganan Lebih Lanjut:</td>
+                            </tr>
+                            <tr>
+                                <td>No. Kartu</td>
+                                <td class="wrap_content">:</td>
+                                <td id="rk_nomor_kartu">OOOBO154504O1</td>
+                            </tr>
+                            <tr>
+                                <td>Nama Pasienn</td>
+                                <td class="wrap_content">:</td>
+                                <td id="rk_nama_pasien">PIASDIL (Laki-laki)</td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. Lahir</td>
+                                <td class="wrap_content">:</td>
+                                <td id="rk_tanggal_lahir">14 Agustus 1999</td>
+                            </tr>
+                            <tr>
+                                <td>Diagnosa Awal</td>
+                                <td class="wrap_content">:</td>
+                                <td id="rk_diagnosa_awal">EI1 - Non-insulin-dependent diabetes mellitus</td>
+                            </tr>
+                            <tr>
+                                <td>Tgl. Entri</td>
+                                <td class="wrap_content">:</td>
+                                <td id="rk_tanggal_terbit">14 Agustus 2023</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">Demikian atas bantuannya diucapkan banyak terima kasih</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="pt-5" id="tgl_cetak"><small>Tgl. Cetak 14/08/2023 12.00 PM</small></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-4" id="data_rk_cetak_kanan">
+                        <table class="table form-mode">
+                            <tr>
+                                <td>No.Surat</td>
+                            </tr>
+                            <tr>
+                                <td id="rk_nomor_surat">0301R0010120K000003</td>
+                            </tr>
+                            <tr>
+                                <td id="rk_tanggal_terbit">Tgl. 14 Agustus 2023</td>
+                            </tr>
+                            <tr>
+                                <td class="pt-5">Mengetahuai</td>
+                            </tr>
+                            <tr>
+                                <td class="pt-5">_______________</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="btnCetakRK">
+                    <i class="fa fa-print"></i> Cetak
                 </button>
 
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
