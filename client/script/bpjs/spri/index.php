@@ -1,45 +1,42 @@
 <script type="text/javascript">
-    $(function() {
+    $(async function() {
         var selectedKartu = "";
         var selected_SPRI = "";
 
         var refreshData = 'N';
         var SPRINo = "";
         var MODE = "ADD";
-
-
-
-
+        var getUrl = `${__BPJS_SERVICE_URL__}rc/sync.sh/carisuratkontrol/?nosuratkontrol=0301R0010120K000003`;
+        var getParameter = {
+            nosuratkontrol: '0301R0010120K000003'
+        }
 
         var DataSPRI = $("#table-spri").DataTable({
             processing: true,
             serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
-            serverMethod: "POST",
+            serverMethod: "GET",
             "ajax": {
-                url: __HOSTAPI__ + "/BPJS",
-                type: "POST",
-                headers: {
-                    Authorization: "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>
-                },
-                data: function(d) {
-                    d.request = "get_history_spri_local";
-                    d.dari = getDateRange("#range_spri")[0];
-                    d.sampai = getDateRange("#range_spri")[1];
-                    d.pelayanan_jenis = 1;
-                    d.sync_bpjs = refreshData;
+                url: getUrl,
+                type: "GET",
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    refreshToken().then((test) => {
+                        bpjs_token = test;
+                    })
+
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
                 dataSrc: function(response) {
-                    console.clear();
-                    console.log(response)
-                    var data = response.response_package.response_data;
-                    if (data === undefined || data === null) {
+                    if(parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
-                        return data;
+                        return response.response;
                     }
-
                 }
             },
             autoWidth: false,
@@ -239,103 +236,117 @@
 
         });
 
-        $("#txt_bpjs_spri_poliKontrol").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function() {
-                    return "Poli tidak ditemukan";
-                }
-            },
-            dropdownParent: $('#modal-spri'),
-            ajax: {
-                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/listspesialistik/?jeniskontrol=1&nomor=` + $("#txt_bpjs_spri_noKartu").val() + `&tglrencanakontrol=` + $("#txt_bpjs_spri_tglRencanaKontrol").val(),
-                // url: `${__BPJS_SERVICE_URL__}rc/sync.sh/listspesialistik/?jeniskontrol=1&nomor=0000267050799&tglrencanakontrol=2023-07-31`,
+        function refreshSpesialistik() {
+            $.ajax({
+                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/listspesialistik/?jeniskontrol=${$("#txt_bpjs_spri_jenis").val()}&nomor=${$("#txt_bpjs_spri_noKartu").val()}&tglrencanakontrol=${$("#txt_bpjs_spri_tglRencanaKontrol").val()}`,
                 type: "GET",
                 dataType: "json",
                 crossDomain: true,
                 beforeSend: async function(request) {
+                    refreshToken().then((test) => {
+                        bpjs_token = test;
+                    })
+
                     request.setRequestHeader("Accept", "application/json");
                     request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     request.setRequestHeader("x-token", bpjs_token);
                 },
-                data: function(term) {
-                    return {
-                        kode: term.term
-                    };
-                },
-                processResults: function(response) {
+                success: function(response) {
                     if (response.metadata.code !== 200) {
                         $("#txt_bpjs_spri_poliKontrol").trigger("change.select2");
                     } else {
                         var data = response.response;
-                        console.log(data);
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    text: item.nama,
-                                    id: item.kode
-                                }
+                        var parsedData = []
+                        for(const a in data) {
+                            parsedData.push({
+                                id: data[a].kodePoli,
+                                text: `${data[a].kodePoli} - ${data[a].namaPoli}`
                             })
-                        };
+                        }
+                        $("#txt_bpjs_spri_poliKontrol").select2({
+                            data: parsedData
+                        });
                     }
                 },
                 error: function(error) {
                     console.clear();
                     console.log(error);
                 }
-            }
-        }).addClass("form-control").on("select2:select", function(e) {
+            });
+        }
 
-        });
-
-        $("#txt_bpjs_spri_kodeDokter").select2({
-            minimumInputLength: 2,
-            "language": {
-                "noResults": function() {
-                    return "Kode Dokter tidak ditemukan";
-                }
-            },
-            dropdownParent: $('#modal-spri'),
-            ajax: {
-                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=1&kodepoli=` + $("#txt_bpjs_spri_poliKontrol").val() + `&tglrencanakontrol=` + $("#txt_bpjs_spri_tglRencanaKontrol").val(),
-                // url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=2&kodepoli=ANA&tglrencanakontrol=2023-07-31`,
+        function refreshJadwalDokter() {
+            $.ajax({
+                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=${$("#txt_bpjs_spri_jenis").val()}&kodepoli=${$("#txt_bpjs_spri_poliKontrol").val()}&tglrencanakontrol=${$("#txt_bpjs_spri_tglRencanaKontrol").val()}`,
                 type: "GET",
                 dataType: "json",
                 crossDomain: true,
                 beforeSend: async function(request) {
+                    refreshToken().then((test) => {
+                        bpjs_token = test;
+                    })
+
                     request.setRequestHeader("Accept", "application/json");
                     request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     request.setRequestHeader("x-token", bpjs_token);
                 },
-                data: function(term) {
-                    return {
-                        kode: term.term
-                    };
-                },
-                processResults: function(response) {
+                success: function(response) {
                     if (response.metadata.code !== 200) {
                         $("#txt_bpjs_spri_kodeDokter").trigger("change.select2");
                     } else {
                         var data = response.response;
-                        console.log(data);
-                        return {
-                            results: $.map(data, function(item) {
-                                return {
-                                    text: item.nama,
-                                    id: item.kode
-                                }
+                        var parsedData = []
+                        for(const a in data) {
+                            parsedData.push({
+                                id: data[a].kodeDokter,
+                                text: `${data[a].kodeDokter} - ${data[a].namaDokter} [${data[a].jadwalPraktek}]`
                             })
-                        };
+                        }
+                        $("#txt_bpjs_spri_kodeDokter").select2({
+                            data: parsedData
+                        });
                     }
                 },
                 error: function(error) {
                     console.clear();
                     console.log(error);
                 }
+            });
+        }
+
+        $("#txt_bpjs_spri_noKartu").on("keyup", function() {
+            refreshSpesialistik();
+            refreshJadwalDokter();
+        });
+
+        $("#txt_bpjs_spri_poliKontrol").on("select2:select", function(e) {
+            refreshJadwalDokter();
+        });
+
+        $("#txt_bpjs_spri_jenis").on("keyup", function() {
+            refreshSpesialistik();
+            refreshJadwalDokter();
+        });
+
+        $("#txt_bpjs_spri_tglRencanaKontrol").on("keyup", function() {
+            refreshSpesialistik();
+            refreshJadwalDokter();
+        });
+
+        $("#txt_bpjs_spri_jenis").select2().on("select2:select", function(e) {
+            refreshSpesialistik();
+            refreshJadwalDokter();
+            if($("#txt_bpjs_spri_jenis").val() == 1) {
+                $("#switch_jenis").html("No. Kartu");
+            } else {
+                $("#switch_jenis").html("No. SEP");
             }
-        }).addClass("form-control").on("select2:select", function(e) {
 
         });
+
+        $("#txt_bpjs_spri_poliKontrol").select2().addClass("form-control");
+
+        $("#txt_bpjs_spri_kodeDokter").select2().addClass("form-control");
 
 
         $("#btnTambahSPRI").click(function() {
@@ -385,66 +396,99 @@
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: `${__BPJS_SERVICE_URL__}rc/sync.sh/insertrcspri`,
-                        type: "POST",
-                        dataType: "json",
-                        crossDomain: true,
-                        beforeSend: async function(request) {
-                            request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                            request.setRequestHeader("x-token", bpjs_token);
-                        },
-                        data: {
-                            "noKartu": no_kartu,
-                            "kodeDokter": kode_dokter,
-                            "poliKontrol": poli_kontrol,
-                            "tglRencanaKontrol": tanggal_kontrol, //format:"2021-04-13"
-                            "user": __MY_NAME__
-                        },
-                        // {
-                        //     request: (MODE === "ADD") ? "spri_baru" : "spri_edit",
-                        //     no_spri: selected_SPRI,
-                        //     sep: sep,
-                        //     kartu: kartu,
-                        //     alamat: alamat,
-                        //     pasien: pasien,
-                        //     email: email,
-                        //     dpjp: kodeDPJP,
-                        //     jenkel: jenkel,
-                        //     jenis_layan: jenis_layan,
-                        //     spesialistik: spesialistik,
-                        //     spesialistik_text: spesialistik_text,
-                        //     telp: kontak,
-                        //     poli_tujuan: poli_tujuan,
-                        //     poli_asal: poli_asal,
-                        //     poli_text: poli_text,
-                        //     tanggal: tanggal
-                        // },
-                        success: function(response) {
-                            if (parseInt(response.metaData.code) === 200) {
-                                Swal.fire(
-                                    "SPRI",
-                                    "SPRI berhasil diproses",
-                                    "success"
-                                ).then((result) => {
-                                    $("#modal-spri").modal("hide");
-                                    DataSPRI.ajax.reload();
-                                });
-                            } else {
-                                Swal.fire(
-                                    "Gagal buat SPRI",
-                                    response.metaData.message,
-                                    "warning"
-                                ).then((result) => {
-                                    //
-                                });
+                    if($("#txt_bpjs_spri_jenis").val() == 1) {
+                        $.ajax({
+                            url: `${__BPJS_SERVICE_URL__}rc/sync.sh/insertrcspri`,
+                            type: "POST",
+                            dataType: "json",
+                            crossDomain: true,
+                            beforeSend: async function(request) {
+                                refreshToken().then((test) => {
+                                    bpjs_token = test;
+                                })
+
+                                request.setRequestHeader("Accept", "application/json");
+                                request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                request.setRequestHeader("x-token", bpjs_token);
+                            },
+                            data: {
+                                "noKartu": no_kartu,
+                                "kodeDokter": kode_dokter,
+                                "poliKontrol": poli_kontrol,
+                                "tglRencanaKontrol": tanggal_kontrol, //format:"2021-04-13"
+                                "user": __MY_NAME__
+                            },
+                            success: function(response) {
+                                if (parseInt(response.metaData.code) === 200) {
+                                    Swal.fire(
+                                        "SPRI",
+                                        "SPRI berhasil diproses",
+                                        "success"
+                                    ).then((result) => {
+                                        $("#modal-spri").modal("hide");
+                                        DataSPRI.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "Gagal buat SPRI",
+                                        response.metadata.message,
+                                        "warning"
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
+                            },
+                            error: function(response) {
+                                console.log(response);
                             }
-                        },
-                        error: function(response) {
-                            console.log(response);
-                        }
-                    });
+                        });
+                    } else {
+                        $.ajax({
+                            url: `${__BPJS_SERVICE_URL__}rc/sync.sh/insertrc`,
+                            type: "POST",
+                            dataType: "json",
+                            crossDomain: true,
+                            beforeSend: async function(request) {
+                                refreshToken().then((test) => {
+                                    bpjs_token = test;
+                                })
+
+                                request.setRequestHeader("Accept", "application/json");
+                                request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                request.setRequestHeader("x-token", bpjs_token);
+                            },
+                            data: {
+                                "noSEP": no_kartu,
+                                "kodeDokter": kode_dokter,
+                                "poliKontrol": poli_kontrol,
+                                "tglRencanaKontrol": tanggal_kontrol, //format:"2021-04-13"
+                                "user": __MY_NAME__
+                            },
+                            success: function(response) {
+                                if (parseInt(response.metaData.code) === 200) {
+                                    Swal.fire(
+                                        "Rencana Kontrol",
+                                        "Rencana Kontrol berhasil diproses",
+                                        "success"
+                                    ).then((result) => {
+                                        $("#modal-spri").modal("hide");
+                                        DataSPRI.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        "Gagal buat Rencana Kontrol",
+                                        response.metadata.message,
+                                        "warning"
+                                    ).then((result) => {
+                                        //
+                                    });
+                                }
+                            },
+                            error: function(response) {
+                                console.log(response);
+                            }
+                        });
+                    }
                 }
             });
         });
@@ -478,8 +522,15 @@
                                     <select id="txt_bpjs_rk_pasien" class="form-control uppercase"></select>
                                 </div> -->
                                 <div class="col-6 form-group">
-                                    <label for="">No. Kartu</label>
-                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_spri_noKartu" readonly />
+                                    <label for="">Jenis Kontrol</label>
+                                    <select class="form-control uppercase" id="txt_bpjs_spri_jenis">
+                                        <option value="1">SPRI</option>
+                                        <option value="2">Rencana Kontrol</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <label for="" id="switch_jenis">No. Kartu</label>
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_spri_noKartu" />
                                 </div>
                                 <div class="col-6 form-group">
                                     <label for="">Tanggal Rencana Kontrol</label>

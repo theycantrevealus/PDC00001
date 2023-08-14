@@ -8,7 +8,6 @@ $lastExist = '';
 <?php require 'head.php'; ?>
 
 <body class="layout-default">
-
   <?php
   if (__PAGES__[0] == 'anjungan') {
     require 'pages/anjungan/index.php';
@@ -247,7 +246,6 @@ $lastExist = '';
 
 
     $(async function() {
-
       $('.numberonly').keypress(function(event){
           if (((event.which != 46 || (event.which == 46 && $(this).val() == '')) || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
               event.preventDefault();
@@ -516,31 +514,6 @@ $lastExist = '';
           notification("info", "Refresh page", 3000, "notif_update");
         });
       });
-
-        async function refreshToken() {
-            return new Promise(async (resolve, reject) => {
-                $.ajax({
-                    url: `${__BPJS_SERVICE_URL__}authentification/sync.sh`,
-                    type: "GET",
-                    dataType: "json",
-                    crossDomain: true,
-                    beforeSend: function(request) {
-                        request.setRequestHeader("Accept", "application/json");
-                        request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                        request.setRequestHeader("x-username", "vclaim");
-                        request.setRequestHeader("x-password", "vcl$im2022");
-                    },
-                    success: function(response) {
-                        resolve(response.response.token);
-                    },
-                    error: function(error) {
-                        reject(error);
-                    }
-                });
-            })
-        }
-
-        bpjs_token = await refreshToken();
     });
 
 
@@ -1477,7 +1450,7 @@ $lastExist = '';
     monthName[10] = "November";
     monthName[11] = "Desember";
 
-    $(function() {
+    $(async function() {
       var sideMenu1 = <?php echo json_encode($sideMenu1); ?>;
       var sideMenu2 = <?php echo json_encode($sideMenu2); ?>;
       var sideMenu3 = <?php echo json_encode($sideMenu3); ?>;

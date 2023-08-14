@@ -36,3 +36,32 @@
 <script src="<?php echo __HOSTNAME__; ?>/plugins/DataTables/datatables.rowgroup.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/swal/dist/sweetalert2.all.min.js"></script>
 <script src="<?php echo __HOSTNAME__; ?>/plugins/intro/intro.js"></script>
+<script type="text/javascript">
+    async function refreshToken() {
+        return new Promise(async (resolve, reject) => {
+            $.ajax({
+                url: `${__BPJS_SERVICE_URL__}authentification/sync.sh`,
+                type: "GET",
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-username", "vclaim");
+                    request.setRequestHeader("x-password", "vcl$im2022");
+                },
+                success: function(response) {
+                    resolve(response.response.token);
+                },
+                error: function(error) {
+                    reject(error);
+                }
+            });
+        })
+    }
+
+    refreshToken().then((test) => {
+        bpjs_token = test;
+    })
+
+</script>
