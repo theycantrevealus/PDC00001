@@ -181,6 +181,9 @@ class BPJS extends Utility {
 	public function __POST__($parameter = array()) {
 		try {
 			switch($parameter['request']) {
+                case 'test_decrypt':
+                    return self::testingCrypto('/' . __BPJS_SERVICE_NAME__ . '/referensi/poli/ICU');
+                    break;
 				case 'cek_peserta':
 					return self::cek_peserta($parameter);
 					break;
@@ -3715,8 +3718,66 @@ class BPJS extends Utility {
         return json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', self::decompress($output)), true);
     }
 
+    public function decryptor2($string, $key) {
+        $enc_method = 'AES-256-CBC';
+
+        $key_hash = hex2bin(hash('sha256', $key));
+        $iv = substr(hex2bin(hash('sha256', $key)), 0, 16);
+        $output = openssl_decrypt(base64_decode($string), $enc_method, $key_hash, OPENSSL_RAW_DATA, $iv);
+        return array(
+            'output' => $output
+//            'key' => strval($key_hash),
+//            'iv' => strval($iv)
+        );
+    }
+
     public function decompress($string) {
         return \LZCompressor\LZString::decompressFromEncodedURIComponent($string);
+    }
+
+    public function testingCrypto($extended_url) {
+        $url = ((__BPJS_MODE__ === 2) ? __BASE_LIVE_BPJS__ : __BASE_STAGING_BPJS__);
+        $data_api = ((__BPJS_MODE__ === 2) ? __DATA_API_LIVE__ : __DATA_API_STAGING__);
+        $secretKey_api = ((__BPJS_MODE__ === 2) ? __SECRET_KEY_LIVE_BPJS__ : __SECRET_KEY_DEV_BPJS__);
+
+        date_default_timezone_set('UTC');
+        $tStamp = strval(time() - strtotime('1970-01-01 00:00:00'));
+        $signature = hash_hmac('sha256', $data_api ."&". $tStamp , $secretKey_api, true);
+        $encodedSignature = base64_encode($signature);
+
+        $consid = (__BPJS_MODE__ === 2) ? __DATA_API_LIVE__ : __DATA_API_STAGING__;
+        $passwd = (__BPJS_MODE__ === 2) ? __SECRET_KEY_LIVE_BPJS__ : __SECRET_KEY_DEV_BPJS__;
+        $keyForDecompress = $consid . $passwd . $tStamp;
+
+
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => $url,
+            'curl' => [
+                CURLOPT_SSL_VERIFYPEER => 0,
+                CURLOPT_SSL_VERIFYHOST => FALSE,
+                CURLOPT_SSL_CIPHER_LIST => 'DEFAULT@SECLEVEL=1'
+            ],
+            'headers' => [
+                "X-cons-id" => $data_api,
+                "X-timestamp" => $tStamp,
+                "X-signature" => $encodedSignature,
+                "Content-Type" => "application/x-www-form-urlencoded; charset=UTF-8;",
+                "user_key" => ((__BPJS_MODE__ === 2) ? __USERKEY_LIVE_BPJS__ : __USERKEY_DEV_BPJS__)
+            ]
+        ]);
+        $response = $client->getAsync($extended_url)->then(function($resp) {
+            return json_decode(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $resp->getBody()->getContents()), true);
+        });
+
+        $promise = \GuzzleHttp\Promise\settle($response)->wait(true);
+        $dataList = self::decryptor($promise[0]['value']['response'], $keyForDecompress);
+
+        return array(
+            'metaData' => $promise[0]['value']['metaData'],
+            'data' => $dataList,
+            'decompress_key' => $keyForDecompress,
+            'methods' => self::decryptor2($promise[0]['value']['response'], $keyForDecompress)
+        );
     }
 
     public function postUrl($extended_url, $parameter) {

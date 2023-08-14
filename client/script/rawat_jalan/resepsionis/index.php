@@ -810,27 +810,28 @@
                             return "Diagnosa tidak ditemukan";
                         }
                     },
-                    dropdownParent: $("#group_diagnosa"),
+                    dropdownParent: $("#group_poli"),
                     ajax: {
-                        dataType: "json",
-                        headers:{
-                            "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                            "Content-Type" : "application/json",
-                        },
-                        url:__HOSTAPI__ + "/BPJS/get_diagnosa",
+                        url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getdiagnosa`,
                         type: "GET",
+                        dataType: "json",
+                        crossDomain: true,
+                        beforeSend: async function(request) {
+                            request.setRequestHeader("Accept", "application/json");
+                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("x-token", bpjs_token);
+                        },
                         data: function (term) {
                             return {
-                                search:term.term
+                                kode:term.term
                             };
                         },
-                        cache: true,
                         processResults: function (response) {
-                            console.log(response);
-                            if(response.response_package.data === null) {
+                            if(response.metadata.code !== 200) {
                                 $("#txt_bpjs_diagnosa_awal").trigger("change.select2");
                             } else {
-                                var data = response.response_package.data.diagnosa;
+                                var data = response.response;
+                                console.log(data);
                                 return {
                                     results: $.map(data, function (item) {
                                         return {
@@ -840,6 +841,10 @@
                                     })
                                 };
                             }
+                        },
+                        error: function(error) {
+                            console.clear();
+                            console.log(error);
                         }
                     }
                 }).addClass("form-control").on("select2:select", function(e) {
