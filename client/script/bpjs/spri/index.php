@@ -6,7 +6,7 @@
         var refreshData = 'N';
         var SPRINo = "";
         var MODE = "ADD";
-        var getUrl = `${__BPJS_SERVICE_URL__}rc/sync.sh/carisuratkontrol/?nosuratkontrol=0301R0010120K000003`;
+        var getUrl = __BPJS_SERVICE_URL__ + "rc/sync.sh/carisuratkontrol/?nosuratkontrol=0301R0010120K000003";
         var getParameter = {
             nosuratkontrol: '0301R0010120K000003'
         }
@@ -238,7 +238,7 @@
 
         function refreshSpesialistik() {
             $.ajax({
-                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/listspesialistik/?jeniskontrol=${$("#txt_bpjs_spri_jenis").val()}&nomor=${$("#txt_bpjs_spri_noKartu").val()}&tglrencanakontrol=${$("#txt_bpjs_spri_tglRencanaKontrol").val()}`,
+                url: __BPJS_SERVICE_URL__ + "rc/sync.sh/listspesialistik/?jeniskontrol=" + $("#txt_bpjs_spri_jenis").val() + "&nomor=" + $("#txt_bpjs_spri_noKartu").val() + "&tglrencanakontrol=" + $("#txt_bpjs_spri_tglRencanaKontrol").val(),
                 type: "GET",
                 dataType: "json",
                 crossDomain: true,
@@ -277,7 +277,7 @@
 
         function refreshJadwalDokter() {
             $.ajax({
-                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=${$("#txt_bpjs_spri_jenis").val()}&kodepoli=${$("#txt_bpjs_spri_poliKontrol").val()}&tglrencanakontrol=${$("#txt_bpjs_spri_tglRencanaKontrol").val()}`,
+                url: __BPJS_SERVICE_URL__ + "rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=" + $("#txt_bpjs_spri_jenis").val() + "&kodepoli=" + $("#txt_bpjs_spri_poliKontrol").val() +"&tglrencanakontrol=" + $("#txt_bpjs_spri_tglRencanaKontrol").val(),
                 type: "GET",
                 dataType: "json",
                 crossDomain: true,
@@ -398,7 +398,7 @@
                 if (result.isConfirmed) {
                     if($("#txt_bpjs_spri_jenis").val() == 1) {
                         $.ajax({
-                            url: `${__BPJS_SERVICE_URL__}rc/sync.sh/insertrcspri`,
+                            url: __BPJS_SERVICE_URL__ + "rc/sync.sh/insertrcspri",
                             type: "POST",
                             dataType: "json",
                             crossDomain: true,
@@ -444,7 +444,7 @@
                         });
                     } else {
                         $.ajax({
-                            url: `${__BPJS_SERVICE_URL__}rc/sync.sh/insertrc`,
+                            url: __BPJS_SERVICE_URL__ + "rc/sync.sh/insertrc",
                             type: "POST",
                             dataType: "json",
                             crossDomain: true,
