@@ -143,10 +143,9 @@
                 <td style="width:65%;">
                     <span class="title">
                         <h4>
-                            SURAT RENCANA KONTROL <br>
-                            RSUD PETALA BUMI PROVINSI RIAU
+                            <?php echo $_POST['title_surat']; ?>
                         </h4>
-                        <?php echo $_POST['__PC_CUSTOMER__']; ?>z
+                        <?php echo $_POST['__PC_CUSTOMER__']; ?>
                     </span>
                 </td>
                 <td style="width:2%;"></td>

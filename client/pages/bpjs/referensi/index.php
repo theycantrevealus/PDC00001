@@ -1,10 +1,10 @@
 <?php
-    $day=new DateTime('last day of this month');
-    $yesterday = new DateTime(date('Y-m-d')); // For today/now, don't pass an arg.
-    $yesterday->modify("-1 day");
+$day = new DateTime('last day of this month');
+$yesterday = new DateTime(date('Y-m-d')); // For today/now, don't pass an arg.
+$yesterday->modify("-1 day");
 
-    $tomorrow = new DateTime(date('Y-m-d'));
-    $tomorrow->modify("+1 day");
+$tomorrow = new DateTime(date('Y-m-d'));
+$tomorrow->modify("+1 day");
 ?>
 <div class="container-fluid page__heading-container">
     <div class="page__heading d-flex align-items-center">
@@ -26,98 +26,98 @@
             <div class="z-0">
                 <ul class="nav nav-tabs nav-tabs-custom" role="tablist" id="tab-referensi-bpjs">
                     <li class="nav-item">
-                        <a href="#tab-poli-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
-							<span class="nav-link__count">
-								01
-							</span>
+                        <a href="#tab-poli-1" class="nav-link active" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1">
+                            <span class="nav-link__count">
+                                01
+                            </span>
                             Diagnosa
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1" >
-							<span class="nav-link__count">
-								02
-							</span>
+                        <a href="#tab-poli-2" class="nav-link" data-toggle="tab" role="tab" aria-selected="true" aria-controls="tab-poli-1">
+                            <span class="nav-link__count">
+                                02
+                            </span>
                             Poli
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-3" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								03
-							</span>
+                            <span class="nav-link__count">
+                                03
+                            </span>
                             Faskes
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-4" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								04
-							</span>
+                            <span class="nav-link__count">
+                                04
+                            </span>
                             Dokter DPJP
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-5" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								05
-							</span>
-                            Stastistika
+                            <span class="nav-link__count">
+                                05
+                            </span>
+                            Prov. Kab. Kec.
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-6" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								06 <i class="fa fa-check-circle"></i>
-							</span>
+                            <span class="nav-link__count">
+                                06 <i class="fa fa-check-circle"></i>
+                            </span>
                             Procedure
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-7" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								07 <i class="fa fa-check-circle"></i>
-							</span>
+                            <span class="nav-link__count">
+                                07 <i class="fa fa-check-circle"></i>
+                            </span>
                             Kelas Rawat
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-8" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								08 <i class="fa fa-check-circle"></i>
-							</span>
+                            <span class="nav-link__count">
+                                08 <i class="fa fa-check-circle"></i>
+                            </span>
                             Dokter
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-9" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								09 <i class="fa fa-check-circle"></i>
-							</span>
+                            <span class="nav-link__count">
+                                09 <i class="fa fa-check-circle"></i>
+                            </span>
                             Spesialistik
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-10" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								10 <i class="fa fa-check-circle"></i>
-							</span>
+                            <span class="nav-link__count">
+                                10 <i class="fa fa-check-circle"></i>
+                            </span>
                             Ruang Rawat
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-11" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								11 <i class="fa fa-check-circle"></i>
-							</span>
+                            <span class="nav-link__count">
+                                11 <i class="fa fa-check-circle"></i>
+                            </span>
                             Cara Keluar
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#tab-poli-12" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								12 <i class="fa fa-check-circle"></i>
-							</span>
+                            <span class="nav-link__count">
+                                12 <i class="fa fa-check-circle"></i>
+                            </span>
                             Pasca Pulang
                         </a>
                     </li>
@@ -130,10 +130,24 @@
                             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Diagnosa</h5>
                         </div>
                         <div class="card-body">
+                            <div class="d-flex flex-row mb-5">
+                                <div class="col-md-5">
+                                    Kode
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="diagnosa_text_search_kode">
+                                </div>
+                                <div class="col-md-2">
+                                    <br>
+                                    <button class="btn btn-info" id="diagnosa_btn_search">
+                                        <i class="fa fa-search"></i> Cari Data
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-center" id="alert-diagnosa-container">
+                                <div class="alert alert-danger" id="alert-diagnosa"></div>
+                            </div>
                             <table class="table table-bordered largeDataType" id="bpjs_table_diagnosa">
                                 <thead class="thead-dark">
                                     <tr>
-                                        <th class="wrap_content">No</th>
                                         <th style="width: 200px;">Kode</th>
                                         <th>Nama</th>
                                     </tr>
@@ -149,13 +163,28 @@
                             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Poli</h5>
                         </div>
                         <div class="card-body">
+                            <div class="d-flex flex-row mb-5">
+                                <div class="col-md-5">
+                                    Kode
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="poli_text_search_kode">
+                                </div>
+                                <div class="col-md-2">
+                                    <br>
+                                    <button class="btn btn-info" id="poli_btn_search">
+                                        <i class="fa fa-search"></i> Cari Data
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-center" id="alert-poli-container">
+                                <div class="alert alert-danger" id="alert-poli"></div>
+                            </div>
                             <table class="table table-bordered largeDataType" id="bpjs_table_poli">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -168,28 +197,38 @@
                             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Faskes</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-4">
-                                    Jenis:
-                                    <select id="bpjs_jenis_fakses" class="form-control">
+                            <div class="d-flex flex-row mb-5">
+                                <div class="col-md-5">
+                                    Jenis Faskes
+                                    <select id="faskes_text_search_jns" class="form-control">
                                         <option value="1">Faskes Tingkat I</option>
                                         <option value="2">Faskes Tingkat II / RS</option>
                                     </select>
                                 </div>
-                                <div class="col-12">
-                                    <br />
-                                    <table class="table table-bordered largeDataType" id="bpjs_table_fakses">
-                                        <thead class="thead-dark">
-                                        <tr>
-                                            <th class="wrap_content">No</th>
-                                            <th style="width: 200px;">Kode</th>
-                                            <th>Nama</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
+                                <div class="col-md-5">
+                                    Kode
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="faskes_text_search_kode">
+                                </div>
+                                <div class="col-md-2">
+                                    <br>
+                                    <button class="btn btn-info" id="faskes_btn_search">
+                                        <i class="fa fa-search"></i> Cari Data
+                                    </button>
                                 </div>
                             </div>
+                            <div class="text-center" id="alert-fakses-container">
+                                <div class="alert alert-danger" id="alert-fakses"></div>
+                            </div>
+                            <table class="table table-bordered largeDataType" id="bpjs_table_fakses">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -199,53 +238,61 @@
                             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Dokter DPJP</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-4">
-                                    Jenis:
-                                    <select id="bpjs_jenis_fakses_dpjp" class="form-control">
-                                        <option value="1">Faskes Tingkat I</option>
-                                        <option value="2">Faskes Tingkat II / RS</option>
+                            <div class="d-flex flex-row mb-5">
+                                <div class="col-md-3">
+                                    Jenis Pelayanan
+                                    <select id="dpjp_text_search_jns" class="form-control">
+                                        <option value="1">Rawat Inap</option>
+                                        <option value="2">Rawat Jalan</option>
                                     </select>
                                 </div>
-                                <div class="col-6">
-                                    Tanggal Pelayanan:
-                                    <div style="border: solid 1px #DBDFE4 !important;">
-                                        <input id="range_dpjp" type="text" class="form-control" placeholder="Filter Tanggal" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $yesterday->format("Y-m-d"); ?> to <?php echo $tomorrow->format("Y-m-d"); ?>" />
-                                    </div>
+                                <div class="col-md-3">
+                                    Tgl.Pelayanan/SEP
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="dpjp_text_search_tgl">
                                 </div>
-                                <div class="col-12">
-                                    <br />
-                                    <table class="table table-bordered largeDataType" id="bpjs_table_dpjp">
-                                        <thead class="thead-dark">
-                                        <tr>
-                                            <th class="wrap_content">No</th>
-                                            <th style="width: 200px;">Kode</th>
-                                            <th>Nama</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
+                                <div class="col-md-3" id="group_dpjp_text_search_spesialis">
+                                    Spesialis/Subspesialis
+                                    <select id="dpjp_text_search_spesialis" class="form-control"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <br>
+                                    <button class="btn btn-info" id="dpjp_btn_search">
+                                        <i class="fa fa-search"></i> Cari Data
+                                    </button>
                                 </div>
                             </div>
+                            <div class="text-center" id="alert-dpjp-container">
+                                <div class="alert alert-danger" id="alert-dpjp"></div>
+                            </div>
+                            <table class="table table-bordered largeDataType" id="bpjs_table_dpjp">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
                 <div class="tab-pane show fade" id="tab-poli-5">
                     <div class="card">
                         <div class="card-header card-header-large bg-white d-flex align-items-center">
-                            <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Statistika</h5>
+                            <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> PROVINSI, KABUPATEN, KECAMATAN</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-4 table-responsive">
                                     <table class="table table-bordered largeDataType" id="bpjs_table_provinsi">
                                         <thead class="thead-dark">
-                                        <tr>
-                                            <th class="wrap_content">No</th>
-                                            <th class="wrap_content">Kode</th>
-                                            <th>Nama</th>
-                                            <th class="wrap_content"></th>
-                                        </tr>
+                                            <tr>
+                                                <!-- <th class="wrap_content">No</th> -->
+                                                <th class="wrap_content">Kode</th>
+                                                <th>Nama</th>
+                                                <th class="wrap_content"></th>
+                                            </tr>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
@@ -253,12 +300,12 @@
                                 <div class="col-4 table-responsive">
                                     <table class="table table-bordered largeDataType" id="bpjs_table_kabupaten">
                                         <thead class="thead-dark">
-                                        <tr>
-                                            <th class="wrap_content">No</th>
-                                            <th class="wrap_content">Kode</th>
-                                            <th>Nama</th>
-                                            <th class="wrap_content"></th>
-                                        </tr>
+                                            <tr>
+                                                <!-- <th class="wrap_content">No</th> -->
+                                                <th class="wrap_content">Kode</th>
+                                                <th>Nama</th>
+                                                <th class="wrap_content"></th>
+                                            </tr>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
@@ -266,11 +313,11 @@
                                 <div class="col-4 table-responsive">
                                     <table class="table table-bordered largeDataType" id="bpjs_table_kecamatan">
                                         <thead class="thead-dark">
-                                        <tr>
-                                            <th class="wrap_content">No</th>
-                                            <th class="wrap_content">Kode</th>
-                                            <th>Nama</th>
-                                        </tr>
+                                            <tr>
+                                                <!-- <th class="wrap_content">No</th> -->
+                                                <th class="wrap_content">Kode</th>
+                                                <th>Nama</th>
+                                            </tr>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
@@ -285,13 +332,28 @@
                             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Procedure</h5>
                         </div>
                         <div class="card-body">
+                            <div class="d-flex flex-row mb-5">
+                                <div class="col-md-5">
+                                    Kode
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="procedure_text_search_kode">
+                                </div>
+                                <div class="col-md-2">
+                                    <br>
+                                    <button class="btn btn-info" id="procedure_btn_search">
+                                        <i class="fa fa-search"></i> Cari Data
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-center" id="alert-procedure-container">
+                                <div class="alert alert-danger" id="alert-procedure"></div>
+                            </div>
                             <table class="table table-bordered largeDataType" id="bpjs_table_procedure">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -306,11 +368,11 @@
                         <div class="card-body">
                             <table class="table table-bordered largeDataType" id="bpjs_table_kelas_rawat">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -323,13 +385,28 @@
                             <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> Dokter</h5>
                         </div>
                         <div class="card-body">
+                            <div class="d-flex flex-row mb-5">
+                                <div class="col-md-5">
+                                    Nama Dokter
+                                    <input type="text" autocomplete="off" class="form-control" id="dokter_text_search_nama">
+                                </div>
+                                <div class="col-md-2">
+                                    <br>
+                                    <button class="btn btn-info" id="dokter_btn_search">
+                                        <i class="fa fa-search"></i> Cari Data
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-center" id="alert-dokter-container">
+                                <div class="alert alert-danger" id="alert-dokter"></div>
+                            </div>
                             <table class="table table-bordered largeDataType" id="bpjs_table_dokter">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -344,11 +421,11 @@
                         <div class="card-body">
                             <table class="table table-bordered largeDataType" id="bpjs_table_spesialistik">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -363,11 +440,11 @@
                         <div class="card-body">
                             <table class="table table-bordered largeDataType" id="bpjs_table_ruang_rawat">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -382,11 +459,11 @@
                         <div class="card-body">
                             <table class="table table-bordered largeDataType" id="bpjs_table_cara_keluar">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>
@@ -401,11 +478,11 @@
                         <div class="card-body">
                             <table class="table table-bordered largeDataType" id="bpjs_table_pasca_pulang">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 200px;">Kode</th>
-                                    <th>Nama</th>
-                                </tr>
+                                    <tr>
+                                        <!-- <th class="wrap_content">No</th> -->
+                                        <th style="width: 200px;">Kode</th>
+                                        <th>Nama</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>

@@ -22,38 +22,47 @@
                 </div>
                 <div class="card-body tab-content">
                     <div class="tab-pane active show fade" id="list-resep">
-                        <div class="card-group">
-                            <div class="card card-body">
+                        <div class="card">
+                            <div class="card-body">
                                 <div class="d-flex flex-row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-5">
                                         Jenis Pelayanan
-                                        <select class="form-control" id="jenis_pelayanan">
-                                            <option value="2">Rawat Jalan</option>
+                                        <select class="form-control" id="jenis_pelayanan_dt_kunjungan">
                                             <option value="1">Rawat Inap</option>
+                                            <option value="2">Rawat Jalan</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-6">
-                                        Periode
-                                        <input id="range_sep" type="text" class="form-control" placeholder="Flatpickr range example" data-toggle="flatpickr" data-flatpickr-mode="range" value="<?php echo $day->format('Y-m-1'); ?> to <?php echo $day->format('Y-m-d'); ?>" />
+                                    <div class="col-md-5">
+                                        Tanggal SEP
+                                        <input type="text" autocomplete="off" class="form-control uppercase" id="tgl_sep_dt_kunjungan">
                                     </div>
                                     <div class="col-md-2">
-                                        <br />
-                                        <button class="btn btn-info" id="btn_sync_bpjs">
-                                            <i class="fa fa-sync"></i> Sync Data BPJS
+                                        <br>
+                                        <button class="btn btn-info" id="btn_search_dt_kunjungan">
+                                            <i class="fa fa-search"></i> Cari Data
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="text-center" id="alert-sep-dt-kunjungan-container">
+                            <div class="alert alert-danger" id="alert-sep-dt-kunjungan"></div>
+                        </div>
                         <div class="card card-body">
                             <table class="table table-bordered table-striped largeDataType" id="table-sep">
                                 <thead class="thead-dark">
-                                <tr>
-                                    <th class="wrap_content">No</th>
-                                    <th style="width: 10%;">SEP</th>
-                                    <th>Pasien</th>
-                                    <th class="wrap_content">Aksi</th>
-                                </tr>
+                                    <tr>
+                                        <th>No. SEP</th>
+                                        <th>Tgl. SEP</th>
+                                        <th>Nama</th>
+                                        <th>No. Kartu</th>
+                                        <th>No. Rujukan</th>
+                                        <th>Layanan</th>
+                                        <th>Poli</th>
+                                        <th>Diagnosa</th>
+                                        <th>Tgl. Plg SEP</th>
+                                        <th class="wrap_content text-center">Aksi</th>
+                                    </tr>
                                 </thead>
                                 <tbody></tbody>
                             </table>

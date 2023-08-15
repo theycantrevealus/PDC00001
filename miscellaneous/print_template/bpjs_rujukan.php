@@ -142,11 +142,12 @@
                 </td>
                 <td style="width:65%;">
                     <span class="title">
-                        <h4>
-                            SURAT ELEGIBILITAS PESERTA
-                            <!--small style="float: right; width: 200px; background: red; height: 10px;">No. <?php echo $_POST['skdp']; ?></small-->
-                        </h4>
-                        <?php echo $_POST['__PC_CUSTOMER__']; ?>
+                        <h5>
+                            SURAT RUJUKAN <?php echo $_POST['__PC_CUSTOMER__']; ?>
+                        </h5>
+                        <center>
+                            <?php echo $_POST['jenis_surat']; ?>
+                        </center>
                     </span>
                 </td>
                 <td style="width:2%;"></td>
@@ -160,27 +161,6 @@
                     </td>
                     <td style="vertical-align: top">
                         <?php echo $_POST['html_data_kanan']; ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: top" colspan="2">
-                        <table>
-                            <tr>
-                                <td style="padding-right: 10px; min-height: 100px; vertical-align: top">
-                                    <?php echo $_POST['html_data_bawah']; ?>
-                                </td>
-                                <td>
-                                    <div style="border-bottom: solid 1px #000; height: 100px; margin: 10px;">
-                                        Pasien/Keluarga Pasien
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="border-bottom: solid 1px #000; height: 100px; margin: 10px;">
-                                        Petugas BPJS Kesehatan
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
                     </td>
                 </tr>
             </table>

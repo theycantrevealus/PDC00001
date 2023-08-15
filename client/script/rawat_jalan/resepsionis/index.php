@@ -29,13 +29,21 @@
         }).datepicker("setDate", new Date());
 
 
+        $(".kelas_rawat_naik_container").hide();
+        $("input[type=\"radio\"][name=\"radio_kelas_rawat_naik\"]").change(function() {
+            if (parseInt($(this).val()) === 1) {
+                $(".kelas_rawat_naik_container").fadeIn();
+            } else {
+                $(".kelas_rawat_naik_container").fadeOut();
+            }
+        });
 
         $(".laka_lantas_suplesi_container").hide();
         $(".laka_lantas_container").hide();
 
 
-        $("input[type=\"radio\"][name=\"txt_bpjs_laka\"]").change(function() {
-            if (parseInt($(this).val()) === 1) {
+        $("#txt_bpjs_laka").change(function() {
+            if (parseInt($("#txt_bpjs_laka option:selected").val()) !== 0) {
                 $(".laka_lantas_container").fadeIn();
             } else {
                 $(".laka_lantas_container").fadeOut();
@@ -629,20 +637,20 @@
         // $("#txt_bpjs_dpjp").select2({
         //     minimumInputLength: 2,
         //     "language": {
-        //         "noResults": function(){
+        //         "noResults": function() {
         //             return "DPJP tidak ditemukan";
         //         }
         //     },
         //     dropdownParent: $("#group_dpjp"),
         //     ajax: {
         //         dataType: "json",
-        //         headers:{
-        //             "Authorization" : "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-        //             "Content-Type" : "application/json",
+        //         headers: {
+        //             "Authorization": "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
+        //             "Content-Type": "application/json",
         //         },
-        //         url:__HOSTAPI__ + "/BPJS/get_dpjp/",
+        //         url: __HOSTAPI__ + "/BPJS/get_dpjp/",
         //         type: "GET",
-        //         data: function (term) {
+        //         data: function(term) {
         //             return {
         //                 search: term.term,
         //                 jenis: $("#txt_bpjs_jenis_pelayanan").val(),
@@ -650,7 +658,7 @@
         //             };
         //         },
         //         cache: true,
-        //         processResults: function (response) {
+        //         processResults: function(response) {
 
         //             console.clear();
 
@@ -660,12 +668,12 @@
 
         //             console.log(response.response_package.data);
 
-        //             if(response.response_package.data === null) {
+        //             if (response.response_package.data === null) {
         //                 $("#txt_bpjs_dpjp").trigger("change.select2");
         //             } else {
         //                 var data = response.response_package.data.list;
         //                 return {
-        //                     results: $.map(data, function (item) {
+        //                     results: $.map(data, function(item) {
         //                         return {
         //                             text: item.nama,
         //                             id: item.kode
@@ -739,6 +747,8 @@
                 loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
                 loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi option:selected").val());
                 loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten option:selected").val());
+
+
                 loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
 
 
@@ -771,6 +781,14 @@
 
                 $("#txt_bpjs_kelas_rawat").select2({
                     dropdownParent: $("#group_kelas_rawat")
+                });
+
+                $("#txt_bpjs_kelas_rawat_naik").select2({
+                    dropdownParent: $("#group_kelas_rawat_naik")
+                });
+
+                $("#txt_bpjs_kelas_rawat_naik_pembiayaan").select2({
+                    dropdownParent: $("#group_kelas_rawat_naik")
                 });
 
                 $("#txt_bpjs_asal_rujukan").select2({
@@ -814,15 +832,18 @@
                         dataType: "json",
                         crossDomain: true,
                         beforeSend: async function(request) {
+                            refreshToken().then((test) => {
+                                bpjs_token = test;
+                            })
+
                             request.setRequestHeader("Accept", "application/json");
                             request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: function(term) {
                             return {
-                                search: term.term,
                                 jns: $("#txt_bpjs_jenis_asal_rujukan").val(),
-                                kode: $("#txt_bpjs_asal_rujukan").val()
+                                kode: term.term
                             };
                         },
                         cache: true,
@@ -861,13 +882,17 @@
                         dataType: "json",
                         crossDomain: true,
                         beforeSend: async function(request) {
+                            refreshToken().then((test) => {
+                                bpjs_token = test;
+                            })
+
                             request.setRequestHeader("Accept", "application/json");
                             request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: function(term) {
                             return {
-                                search: term.term
+                                kode: term.term
                             };
                         },
                         cache: true,
@@ -876,11 +901,11 @@
                             if (response.metadata.code === null) {
                                 $("#txt_bpjs_diagnosa_awal").trigger("change.select2");
                             } else {
-                                var data = response.metadata.code;
+                                var data = response.response;
                                 return {
                                     results: $.map(data, function(item) {
                                         return {
-                                            text: item.nama,
+                                            text: item.kode + " - " + item.nama,
                                             id: item.kode
                                         }
                                     })
@@ -902,22 +927,28 @@
                     },
                     dropdownParent: $("#group_poli"),
                     ajax: {
+                        url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getfaskes`,
+                        type: "POST",
                         dataType: "json",
-                        headers: {
-                            "Authorization": "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-                            "Content-Type": "application/json",
+                        crossDomain: true,
+                        beforeSend: async function(request) {
+                            refreshToken().then((test) => {
+                                bpjs_token = test;
+                            })
+
+                            request.setRequestHeader("Accept", "application/json");
+                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("x-token", bpjs_token);
                         },
-                        url: __HOSTAPI__ + "/BPJS/get_faskes_select2",
-                        type: "GET",
                         data: function(term) {
                             return {
-                                jenis: $("#txt_bpjs_jenis_pelayanan option:selected").val(),
-                                search: term.term
+                                jns: $("#txt_bpjs_jenis_pelayanan option:selected").val(),
+                                kode: term.term
                             };
                         },
                         cache: true,
                         processResults: function(response) {
-                            var data = response.response_package.data.faskes;
+                            var data = response.response;
                             console.log(data);
                             return {
                                 results: $.map(data, function(item) {
@@ -1207,9 +1238,9 @@
                                 "jnsPelayanan": $("#txt_bpjs_jenis_layanan option:selected").val(),
                                 "klsRawat": {
                                     "klsRawatHak": kelas_rawat_parse,
-                                    "klsRawatNaik": "",
-                                    "pembiayaan": "",
-                                    "penanggungJawab": ""
+                                    "klsRawatNaik": $("#txt_bpjs_kelas_rawat_naik option:selected").val(),
+                                    "pembiayaan": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").val(),
+                                    "penanggungJawab": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").text()
                                 },
                                 "noMR": $("#txt_bpjs_rm").val().replace(new RegExp(/-/g), ""),
                                 "rujukan": {
@@ -1219,7 +1250,7 @@
                                     "ppkRujukan": $("#txt_bpjs_asal_rujukan").val()
                                 },
                                 "catatan": $("#txt_bpjs_catatan").val(),
-                                "diagAwal": $("#txt_bpjs_diagnosa_awal").select2('data')[0].text,
+                                "diagAwal": $("#txt_bpjs_diagnosa_awal").val(),
                                 "poli": {
                                     "tujuan": $("#txt_bpjs_poli_tujuan").val(),
                                     "eksekutif": $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val()
@@ -1231,8 +1262,8 @@
                                     "katarak": $("input[type=\"radio\"][name=\"txt_bpjs_katarak\"]:checked").val()
                                 },
                                 "jaminan": {
-                                    "lakaLantas": $("input[type=\"radio\"][name=\"txt_bpjs_laka\"]:checked").val(),
-                                    "noLP": "",
+                                    "lakaLantas": $("#txt_bpjs_laka option:selected").val(),
+                                    "noLP": $("#txt_bpjs_laka_no_lp").val(),
                                     "penjamin": {
                                         "tglKejadian": parse_tanggal_laka,
                                         "keterangan": $("#txt_bpjs_laka_keterangan").val(),
@@ -1255,7 +1286,7 @@
                                     "noSurat": $("#txt_bpjs_skdp").val(),
                                     "kodeDPJP": $("#txt_bpjs_dpjp").val(),
                                 },
-                                "dpjpLayan": "",
+                                "dpjpLayan": $("#txt_bpjs_dpjp").val(),
                                 "noTelp": $("#txt_bpjs_telepon").val(),
                                 "user": __MY_NAME__
                             }
@@ -1313,9 +1344,9 @@
                                 "jnsPelayanan": $("#txt_bpjs_jenis_layanan option:selected").val(),
                                 "klsRawat": {
                                     "klsRawatHak": kelas_rawat_parse,
-                                    "klsRawatNaik": "",
-                                    "pembiayaan": "",
-                                    "penanggungJawab": ""
+                                    "klsRawatNaik": $("#txt_bpjs_kelas_rawat_naik option:selected").val(),
+                                    "pembiayaan": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").val(),
+                                    "penanggungJawab": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").text()
                                 },
                                 "noMR": $("#txt_bpjs_rm").val().replace(new RegExp(/-/g), ""),
                                 "rujukan": {
@@ -1325,7 +1356,7 @@
                                     "ppkRujukan": ""
                                 },
                                 "catatan": $("#txt_bpjs_catatan").val(),
-                                "diagAwal": $("#txt_bpjs_diagnosa_awal").select2('data')[0].text,
+                                "diagAwal": $("#txt_bpjs_diagnosa_awal").val(),
                                 "poli": {
                                     "tujuan": $("#txt_bpjs_poli_tujuan").val(),
                                     "eksekutif": $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val()
@@ -1337,8 +1368,8 @@
                                     "katarak": $("input[type=\"radio\"][name=\"txt_bpjs_katarak\"]:checked").val()
                                 },
                                 "jaminan": {
-                                    "lakaLantas": $("input[type=\"radio\"][name=\"txt_bpjs_laka\"]:checked").val(),
-                                    "noLP": "",
+                                    "lakaLantas": $("#txt_bpjs_laka option:selected").val(),
+                                    "noLP": $("#txt_bpjs_laka_no_lp").val(),
                                     "penjamin": {
                                         "tglKejadian": parse_tanggal_laka,
                                         "keterangan": $("#txt_bpjs_laka_keterangan").val(),
@@ -1361,66 +1392,14 @@
                                     "noSurat": $("#txt_bpjs_skdp").val(),
                                     "kodeDPJP": $("#txt_bpjs_dpjp").val(),
                                 },
-                                "dpjpLayan": "",
+                                "dpjpLayan": $("#txt_bpjs_dpjp").val(),
                                 "noTelp": $("#txt_bpjs_telepon").val(),
                                 "user": __MY_NAME__
                             }
                         };
-                        // dataSetSEP = {
-                        //     request: "sep_baru",
-                        //     antrian: currentAntrianUID,
-                        //     pasien: currentAntrianPasien,
-                        //     spesialistik_kode: $("#txt_bpjs_dpjp_spesialistik").val(),
-                        //     spesialistik_nama: $("#txt_bpjs_dpjp_spesialistik option:selected").text(),
-                        //     no_kartu: $("#txt_bpjs_nomor").val(),
-                        //     ppk_pelayanan: $("#txt_bpjs_faskes").val(),
-                        //     kelas_rawat: kelas_rawat_parse,
-                        //     no_mr: $("#txt_bpjs_rm").val().replace(new RegExp(/-/g), ""),
-                        //     asal_rujukan: $("#txt_bpjs_jenis_asal_rujukan").val(),
-                        //     //ppk_rujukan: "00010001",
-                        //     ppk_rujukan: "",
-                        //     tgl_rujukan: "",
-                        //     no_rujukan: "",
-
-                        //     tujuan_kunjungan: $("#txt_bpjs_tujuan_kunjungan").val(),
-                        //     flag_procedure: $("#txt_bpjs_flag_procedure").val(),
-                        //     kode_penunjang: $("#txt_bpjs_kode_penunjang").val(),
-                        //     asesmen_pelayanan: $("#txt_bpjs_asesmen_pelayanan").val(),
-                        //     jenis_pelayanan: $("#txt_bpjs_jenis_layanan option:selected").val(),
-
-                        //     catatan: $("#txt_bpjs_catatan").val(),
-                        //     diagnosa_awal: $("#txt_bpjs_diagnosa_awal").val(),
-                        //     diagnosa_kode: $("#txt_bpjs_diagnosa_awal").select2('data')[0].text,
-                        //     poli: $("#txt_bpjs_poli_tujuan").val(),
-                        //     eksekutif: $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val(),
-                        //     cob: $("input[type=\"radio\"][name=\"txt_bpjs_cob\"]:checked").val(),
-                        //     katarak: $("input[type=\"radio\"][name=\"txt_bpjs_katarak\"]:checked").val(),
-
-                        //     fktp: $("#txt_bpjs_fktp_1 option:selected").val(),
-
-                        //     laka_lantas: $("input[type=\"radio\"][name=\"txt_bpjs_laka\"]:checked").val(),
-                        //     laka_lantas_penjamin: selectedLakaPenjamin.join(","),
-                        //     laka_lantas_tanggal_kejadian: parse_tanggal_laka,
-                        //     laka_lantas_keterangan: $("#txt_bpjs_laka_keterangan").val(),
-                        //     laka_lantas_suplesi: $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]:checked").val(),
-                        //     laka_lantas_suplesi_nomor: $("#txt_bpjs_laka_suplesi_nomor").val(),
-                        //     laka_lantas_suplesi_provinsi: $("#txt_bpjs_laka_suplesi_provinsi").val(),
-                        //     laka_lantas_suplesi_kabupaten: $("#txt_bpjs_laka_suplesi_kabupaten").val(),
-                        //     laka_lantas_suplesi_kecamatan: $("#txt_bpjs_laka_suplesi_kecamatan").val(),
-
-                        //     skdp: $("#txt_bpjs_skdp").val(),
-                        //     dpjp: $("#txt_bpjs_dpjp").val(),
-                        //     dpjp_nama: $("#txt_bpjs_dpjp option:selected").text(),
-                        //     telepon: $("#txt_bpjs_telepon").val()
-                        // };
                     }
 
                     $.ajax({
-                        // async: false,
-                        // url: __HOSTAPI__ + "/BPJS",
-                        // type: "POST",
-                        // data: dataSetSEP,
-
                         url: `${__BPJS_SERVICE_URL__}sep/sync.sh/insertsep`,
                         type: "POST",
                         data: dataSetSEP,
@@ -1434,8 +1413,8 @@
                         success: function(response) {
                             console.clear();
                             // console.log(response.response_package);
-                            console.log(response.metaData.code);
-                            if (parseInt(response.metaData.code) === 200) {
+                            console.log(response.metadata.code);
+                            if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
                                     "Pembuatan SEP Berhasil!",
                                     "SEP telah dibuat",
@@ -1451,7 +1430,7 @@
                             } else {
                                 Swal.fire(
                                     "Gagal buat SEP",
-                                    response.metaData.code.message,
+                                    response.metadata.message,
                                     "warning"
                                 ).then((result) => {
 
@@ -1769,20 +1748,26 @@
         }
 
         function loadDPJPSpesialis(target) {
+            var dateNow = new Date();
+            var tglSekarang = dateNow.getFullYear() + "-" + str_pad(2, dateNow.getMonth() + 1) + "-" + str_pad(2, dateNow.getDate());
+
             $.ajax({
-                url: __HOSTAPI__ + "/BPJS/get_dpjp/?jenis=" + $("#txt_bpjs_jenis_pelayanan").val() + "&spesialistik=" + $("#txt_bpjs_dpjp_spesialistik").val(),
+                url: __BPJS_SERVICE_URL__ + "ref/sync.sh/getdokter?jnspelayanan=" + $("#txt_bpjs_jenis_layanan option:selected").val() + "&tglpelayanan=" + tglSekarang + "&kode=" + $("#txt_bpjs_dpjp_spesialistik").val(),
                 type: "GET",
-                async: false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
                 success: function(response) {
                     console.log(response);
                     //console.clear();
-                    if (response.response_package === null || response.response_package.data === null || response.response_package.data.list === null) {
-                        //loadDPJPSpesialis(target);
+                    if (response.response === null || response.response.data === null || response.response === null) {
+                        loadDPJPSpesialis(target);
                     } else {
-                        var data = response.response_package.data.list;
+                        var data = response.response;
                         $(target + " option").remove();
                         for (var a = 0; a < data.length; a++) {
                             var selection = document.createElement("OPTION");
@@ -1800,18 +1785,21 @@
 
         function loadProvinsi(target) {
             $.ajax({
-                url: __HOSTAPI__ + "/BPJS/get_provinsi",
+                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getprov`,
                 type: "GET",
-                async: false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
                 success: function(response) {
 
-                    if (response.response_package === null || response.response_package.data === null || response.response_package.data.list === null) {
+                    if (response.response === null) {
                         loadProvinsi(target);
                     } else {
-                        var data = response.response_package.data.list;
+                        var data = response.response;
                         $(target + " option").remove();
                         for (var a = 0; a < data.length; a++) {
                             var selection = document.createElement("OPTION");
@@ -1831,18 +1819,21 @@
 
         function loadKabupaten(target, provinsi) {
             $.ajax({
-                url: __HOSTAPI__ + "/BPJS/get_kabupaten/" + provinsi,
+                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getkab?kodeprov=` + provinsi,
                 type: "GET",
-                async: false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
                 success: function(response) {
 
-                    if (response.response_package === null || response.response_package.data === null || response.response_package.data.list === null) {
+                    if (response.response === null) {
                         loadKabupaten(target, provinsi);
                     } else {
-                        var data = response.response_package.data.list;
+                        var data = response.response;
                         $(target + " option").remove();
                         for (var a = 0; a < data.length; a++) {
                             var selection = document.createElement("OPTION");
@@ -1862,18 +1853,21 @@
 
         function loadKecamatan(target, kabupaten) {
             $.ajax({
-                url: __HOSTAPI__ + "/BPJS/get_kecamatan/" + kabupaten,
+                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getkec?kodekab=` + kabupaten,
                 type: "GET",
-                async: false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
                 success: function(response) {
 
-                    if (response.response_package === null || response.response_package.data === null || response.response_package.data.list === null) {
+                    if (response.response === null) {
                         loadKecamatan(target, kabupaten);
                     } else {
-                        var data = response.response_package.data.list;
+                        var data = response.response;
                         $(target + " option").remove();
                         for (var a = 0; a < data.length; a++) {
                             var selection = document.createElement("OPTION");
@@ -1891,17 +1885,20 @@
 
         function loadSpesialistik(target) {
             $.ajax({
-                url: __HOSTAPI__ + "/BPJS/get_spesialistik",
+                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getspesialis`,
                 type: "GET",
-                async: false,
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                dataType: "json",
+                crossDomain: true,
+                beforeSend: async function(request) {
+                    request.setRequestHeader("Accept", "application/json");
+                    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    request.setRequestHeader("x-token", bpjs_token);
                 },
                 success: function(response) {
-                    if (response.response_package === null || response.response_package.data === null || response.response_package.data.list === null) {
+                    if (response.response === null) {
                         loadSpesialistik(target);
                     } else {
-                        var data = response.response_package.data.list;
+                        var data = response.response;
                         if (data === null) {
                             loadSpesialistik(target);
                         } else {
@@ -1922,36 +1919,6 @@
                 }
             });
         }
-
-        /*function loadDPJP(target, jenis, spesialistik) {
-            $.ajax({
-                async: false,
-                url: __HOSTAPI__ + "/BPJS/get_dpjp/" + jenis + "/" + spesialistik,
-                type: "GET",
-                beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-                },
-                success: function(response){
-                    //console.clear();
-                    //console.log(response);
-                    if(response.response_package.content.metaData.code === 200) {
-                        var data = response.response_package.content.response.list;
-
-                        $(target + " option").remove();
-                        $(target).select2('data', null);
-                        for(var a = 0; a < data.length; a++) {
-                            var selection = document.createElement("OPTION");
-
-                            $(selection).attr("value", data[a].kode).html(data[a].kode + " - " + data[a].nama);
-                            $(target).append(selection);
-                        }
-                    }
-                },
-                error: function(response) {
-                    console.log(response);
-                }
-            });
-        }*/
 
         function loadInformasiRujukan(data) {
             $("#txt_bpjs_diagnosa_awal").append("<option title=\"" + data.diagnosa.kode + "\" value=\"" + data.diagnosa.kode + "\">" + data.diagnosa.nama + "</option>");
@@ -2293,7 +2260,8 @@
         });
 
 
-        $("#btnCetakSEP").click(function() {
+        $("body").on("click", "#btnCetakSEP", function() {
+
             $.ajax({
                 async: false,
                 url: __HOST__ + "miscellaneous/print_template/bpjs_sep.php",
@@ -2600,32 +2568,77 @@
                                 </div>
                                 <div class="card-body row">
                                     <div class="col-6">
-                                        <div class="col-12 col-md-8 mb-4 form-group">
+                                        <div class="col-12 form-group">
                                             <label for="">Nomor Medical Rahecord (MR)</label>
                                             <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_rm" readonly>
                                         </div>
 
-                                        <div class="col-12 col-md-7 form-group">
+                                        <div class="col-12 form-group">
                                             <label for="">Tanggal SEP</label>
                                             <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tgl_sep" readonly value="<?php echo date('d F Y'); ?>">
                                         </div>
-                                        <div class="col-12 col-md-9 form-group">
+                                        <div class="col-12 form-group">
                                             <label for="">Faskes</label>
                                             <select class="form-control sep" id="txt_bpjs_faskes" disabled>
                                                 <option value="<?php echo __KODE_PPK__; ?>">RSUD PETALA BUMI - KOTA PEKAN BARU</option>
                                             </select>
                                         </div>
 
-
-                                        <div class="col-12 col-md-8 form-group">
+                                        <div class="col-12 form-group">
                                             <label for="">Jenis Pelayanan</label>
                                             <select class="form-control sep" id="txt_bpjs_jenis_layanan">
+                                                <option value="1">Rawat Inap</option>
                                                 <option value="2">Rawat Jalan</option>
                                             </select>
                                         </div>
-                                        <div class="col-12 col-md-9 mb-9 form-group" id="group_kelas_rawat">
-                                            <label for="">Kelas Rawat</label>
+                                        <div class="col-12 mb-9 form-group" id="group_kelas_rawat">
+                                            <label for="">Kelas Rawat Hak</label>
                                             <select class="form-control" id="txt_bpjs_kelas_rawat"></select>
+                                        </div>
+                                        <div class="col-12 form-group">
+                                            <label for="">Kelas Rawat Naik</label>
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="radio_kelas_rawat_naik" value="0" checked />
+                                                        <label class="form-check-label">
+                                                            Tidak
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="radio_kelas_rawat_naik" value="1" />
+                                                        <label class="form-check-label">
+                                                            Ya
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="kelas_rawat_naik_container">
+                                            <div class="col-12 mb-9 form-group" id="group_kelas_rawat_naik">
+                                                <label for="">Kelas Rawat Naik</label>
+                                                <select class="form-control" id="txt_bpjs_kelas_rawat_naik">
+                                                    <option value="" selected disabled></option>
+                                                    <option value="1">VVIP</option>
+                                                    <option value="2">VIP</option>
+                                                    <option value="3">Kelas 1</option>
+                                                    <option value="4">Kelas 2</option>
+                                                    <option value="5">Kelas 3</option>
+                                                    <option value="6">ICCU</option>
+                                                    <option value="7">Diatas Kelas 1</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 mb-9 form-group" id="group_kelas_rawat_naik">
+                                                <label for="">Pembiayaan</label>
+                                                <select class="form-control" id="txt_bpjs_kelas_rawat_naik_pembiayaan">
+                                                    <option value="" selected disabled></option>
+                                                    <option value="1">Pribadi</option>
+                                                    <option value="2">Pemberi Kerja</option>
+                                                    <option value="3">Asuransi Kesehatan Tambahan</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -2646,12 +2659,12 @@
                                     </div>
 
                                     <div class="col-6" id="panel-rujukan">
-                                        <div class="col-12 col-md-6 mb-4 form-group" id="group_nomor_rujukan">
+                                        <div class="col-12 mb-4 form-group" id="group_nomor_rujukan">
                                             <label for="">Nomor Rujukan</label>
                                             <select data-width="100%" class="form-control uppercase" id="txt_bpjs_nomor_rujukan"></select>
                                             <!--<input type="text" class="form-control uppercase" id="txt_bpjs_nomor_rujukan" />-->
                                         </div>
-                                        <div class="col-12 col-md-4 mb-4 form-group">
+                                        <div class="col-12 mb-4 form-group">
                                             <label for="">Jenis Asal Rujukan</label>
                                             <select class="form-control uppercase sep" id="txt_bpjs_jenis_asal_rujukan">
                                                 <option value="1">Puskesmas</option>
@@ -2662,7 +2675,7 @@
                                             <label for="">Asal Rujukan</label>
                                             <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_asal_rujukan"></select>
                                         </div>
-                                        <div class="col-12 col-md-5 mb-4 form-group">
+                                        <div class="col-12 mb-4 form-group">
                                             <label for="">Tanggal Rujukan</label>
                                             <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tanggal_rujukan">
                                         </div>
@@ -2721,7 +2734,7 @@
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-12 col-md-6 mb-6">
-                                            <div class="col-12 col-md-8 mb-4 form-group" id="group_poli">
+                                            <div class="col-12 form-group" id="group_poli">
                                                 <label for="">Poli Tujuan</label>
                                                 <select class="form-control" id="txt_bpjs_poli_tujuan"></select>
                                             </div>
@@ -2759,6 +2772,7 @@
                                                     <div class="col-8 form-group group_txt_bpjs_flag_procedure">
                                                         <label for="">Flag Prosedur</label>
                                                         <select class="form-control uppercase sep" id="txt_bpjs_flag_procedure">
+                                                            <option value=""></option>
                                                             <option value="0">Prosedur Tidak Berkelanjutan</option>
                                                             <option value="1">Prosedur dan Terapi Berkelanjutan</option>
                                                         </select>
@@ -2768,6 +2782,7 @@
                                             <div class="col-12 col-md-8 mb-8 form-group group_txt_bpjs_kode_penunjang">
                                                 <label for="">Kode Penunjang</label>
                                                 <select class="form-control uppercase sep" id="txt_bpjs_kode_penunjang">
+                                                    <option value=""></option>
                                                     <option value="1">Radioterapi</option>
                                                     <option value="2">Kemoterapi</option>
                                                     <option value="3">Rehabilitasi Medik</option>
@@ -2800,15 +2815,15 @@
                                                 <label for="">Catatan</label>
                                                 <textarea class="form-control" placeholder="Catatan Peserta" id="txt_bpjs_catatan" style="min-height: 200px"></textarea>
                                             </div>
-                                            <div class="col-12 col-md-6 mb-4 form-group">
+                                            <div class="col-12 mb-4 form-group">
                                                 <label for="">Nomor SKDP</label>
                                                 <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_skdp" />
                                             </div>
-                                            <div class="col-12 col-md-8 mb-8 form-group" id="group_spesialistik">
+                                            <div class="col-12 mb-8 form-group" id="group_spesialistik">
                                                 <label for="">Spesialistik DPJP</label>
                                                 <select class="form-control" id="txt_bpjs_dpjp_spesialistik"></select>
                                             </div>
-                                            <div class="col-12 col-md-9 mb-9 form-group" id="group_dpjp">
+                                            <div class="col-12 mb-9 form-group" id="group_dpjp">
                                                 <label for="">Kode DPJP</label>
                                                 <select class="form-control sep" id="txt_bpjs_dpjp"></select>
                                             </div>
@@ -2878,74 +2893,29 @@
                                                     </blockquote>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-12 form-group">
+                                            <div class="col-12 col-md-12 mb-2 form-groupn">
                                                 <label for="">Jaminan Laka Lantas</label>
-                                                <div class="row">
-                                                    <div class="col-md-3">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" name="txt_bpjs_laka" value="0" checked />
-                                                            <label class="form-check-label">
-                                                                Tidak
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" name="txt_bpjs_laka" value="1" />
-                                                            <label class="form-check-label">
-                                                                Ya
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                <select class="form-control uppercase sep" id="txt_bpjs_laka">
+                                                    <option value="0">Bukan Kecelakaan lalu lintas [BKLL]</option>
+                                                    <option value="1">KLL dan bukan kecelakaan Kerja [BKK]</option>
+                                                    <option value="2">KLL dan KK</option>
+                                                    <option value="3">KK</option>
+                                                </select>
                                             </div>
                                             <div class="laka_lantas_container">
-                                                <div class="col-12 col-md-12 form-group" id="group_diagnosa">
-                                                    <label for="">Penjamin Laka Lantas</label>
-                                                    <div class="row">
-                                                        <div class="col-md-3">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" name="txt_bpjs_laka_penjamin" value="1" />
-                                                                <label class="form-check-label">
-                                                                    Jasa Raharja
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" name="txt_bpjs_laka_penjamin" value="2" />
-                                                                <label class="form-check-label">
-                                                                    BPJS Ketenagakerjaan
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" name="txt_bpjs_laka_penjamin" value="3" />
-                                                                <label class="form-check-label">
-                                                                    TASPEN PT
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" name="txt_bpjs_laka_penjamin" value="4" />
-                                                                <label class="form-check-label">
-                                                                    ASABRI PT
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                <div class="col-12 mb-4 form-group">
+                                                    <label for="">No. LP</label>
+                                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_laka_no_lp">
                                                 </div>
-                                                <div class="col-12 col-md-5 mb-4 form-group">
+                                                <div class="col-12 mb-4 form-group">
                                                     <label for="">Tanggal Kejadian</label>
                                                     <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_laka_tanggal">
                                                 </div>
-                                                <div class="col-12 col-md-12 form-group">
+                                                <div class="col-12 form-group">
                                                     <label for="">Keterangan</label>
                                                     <textarea class="form-control" placeholder="Catatan Peserta" id="txt_bpjs_laka_keterangan" style="min-height: 200px"></textarea>
                                                 </div>
-                                                <div class="col-12 col-md-12 form-group">
+                                                <div class="col-12 form-group">
                                                     <label for="">Suplesi</label>
                                                     <div class="row">
                                                         <div class="col-md-3">
@@ -2967,19 +2937,19 @@
                                                     </div>
                                                 </div>
                                                 <div class="laka_lantas_suplesi_container">
-                                                    <div class="col-12 col-md-6 mb-4 form-group">
+                                                    <div class="col-12 mb-4 form-group">
                                                         <label for="">Nomor SEP Suplesi</label>
                                                         <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_laka_suplesi_nomor" />
                                                     </div>
-                                                    <div class="col-12 col-md-8 mb-4 form-group" id="group_provinsi">
+                                                    <div class="col-12 mb-4 form-group" id="group_provinsi">
                                                         <label for="">Provinsi Kejadian</label>
                                                         <select class="form-control" id="txt_bpjs_laka_suplesi_provinsi"></select>
                                                     </div>
-                                                    <div class="col-12 col-md-8 mb-4 form-group" id="group_kabupaten">
+                                                    <div class="col-12 mb-4 form-group" id="group_kabupaten">
                                                         <label for="">Kabupaten Kejadian</label>
                                                         <select class="form-control" id="txt_bpjs_laka_suplesi_kabupaten"></select>
                                                     </div>
-                                                    <div class="col-12 col-md-8 mb-4 form-group" id="group_kecamatan">
+                                                    <div class="col-12 mb-4 form-group" id="group_kecamatan">
                                                         <label for="">Kecamatan Kejadian</label>
                                                         <select class="form-control" id="txt_bpjs_laka_suplesi_kecamatan"></select>
                                                     </div>
