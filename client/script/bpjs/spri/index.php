@@ -324,11 +324,7 @@
 
         function refreshJadwalDokter() {
             $.ajax({
-<<<<<<< HEAD
                 url: __BPJS_SERVICE_URL__ + "rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=" + $("#txt_bpjs_spri_jenis").val() + "&kodepoli=" + $("#txt_bpjs_spri_poliKontrol").val() + "&tglrencanakontrol=" + $("#txt_bpjs_spri_tglRencanaKontrol").val(),
-=======
-                url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=${$("#txt_bpjs_spri_jenis").val()}&kodepoli=${$("#txt_bpjs_spri_poliKontrol").val()}&tglrencanakontrol=${$("#txt_bpjs_spri_tglRencanaKontrol").val()}`,
->>>>>>> e767d1a8e2282a3490d78de710f14c118d984e69
                 type: "GET",
                 dataType: "json",
                 crossDomain: true,
