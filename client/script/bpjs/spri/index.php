@@ -10,10 +10,45 @@
         var refreshData = 'N';
         var SPRINo = "";
         var MODE = "ADD";
-        var getUrl = `${__BPJS_SERVICE_URL__}rc/sync.sh/carisuratkontrol/?nosuratkontrol=0301R0010120K000003`;
-        var getParameter = {
-            nosuratkontrol: '0301R0010120K000003'
-        }
+        var getUrl = __BPJS_SERVICE_URL__ + "rc/sync.sh/carisuratkontrol?nosuratkontrol=0301R0010120K000003";
+
+        $("#btn_search_no_surat").click(function() {
+            getUrl = __BPJS_SERVICE_URL__ + "rc/sync.sh/carisuratkontrol/?nosuratkontrol=" + $("#search_no_surat").val();
+            MODE = "SEARCH";
+            DataSPRI.ajax.url(getUrl).load();
+        });
+
+        $("#tglawal_list_kontrol").datepicker({
+            dateFormat: "yy-mm-dd",
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
+        $("#tglakhir_list_kontrol").datepicker({
+            dateFormat: "yy-mm-dd",
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
+        $("#btn_search_list_kontrol").click(function() {
+            getUrl = __BPJS_SERVICE_URL__ + "rc/sync.sh/listrencanakontrol/?tglawal=" + $("#tglawal_list_kontrol").val() + "&tglakhir=" + $("#tglakhir_list_kontrol").val() + "&filter=" + $("#filter_list_kontrol option:selected").val();
+            MODE = "SEARCH";
+            DataSPRI.ajax.url(getUrl).load();
+        });
+
+        $("#search_tgl_no_kartu").datepicker({
+            changeMonth: true,
+            changeYear: true,
+            // showButtonPanel: true,
+            dateFormat: 'MM yy',
+            autoclose: true
+        }).datepicker("setDate", new Date());
+        var parse_search_tgl_no_kartu = new Date($("#search_tgl_no_kartu").datepicker("getDate"));
+        $("#btn_search_no_kartu").click(function() {
+            getUrl = __BPJS_SERVICE_URL__ + "rc/sync.sh/carisuratkontrolbykartu/?bulan=" + str_pad(2, parse_search_tgl_no_kartu.getMonth() + 1) + "&tahun=" + parse_search_tgl_no_kartu.getFullYear() + "&nokartu=" + $("#search_no_kartu").val() + "&filter=" + $("#search_filter_no_kartu option:selected").val();
+            MODE = "SEARCH";
+            DataSPRI.ajax.url(getUrl).load();
+        });
+
+        $('#alert-sprirk-container').hide();
 
         var DataSPRI = $("#table-spri").DataTable({
             processing: true,
@@ -289,7 +324,11 @@
 
         function refreshJadwalDokter() {
             $.ajax({
+<<<<<<< HEAD
+                url: __BPJS_SERVICE_URL__ + "rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=" + $("#txt_bpjs_spri_jenis").val() + "&kodepoli=" + $("#txt_bpjs_spri_poliKontrol").val() + "&tglrencanakontrol=" + $("#txt_bpjs_spri_tglRencanaKontrol").val(),
+=======
                 url: `${__BPJS_SERVICE_URL__}rc/sync.sh/jadwalpraktekdokter/?jeniskontrol=${$("#txt_bpjs_spri_jenis").val()}&kodepoli=${$("#txt_bpjs_spri_poliKontrol").val()}&tglrencanakontrol=${$("#txt_bpjs_spri_tglRencanaKontrol").val()}`,
+>>>>>>> e767d1a8e2282a3490d78de710f14c118d984e69
                 type: "GET",
                 dataType: "json",
                 crossDomain: true,
@@ -326,7 +365,7 @@
             });
         }
 
-        $("#txt_bpjs_spri_noKartu").on("keyup", function() {
+        $("#txt_bpjs_spri_noKartu").on("change", function() {
             refreshSpesialistik();
             refreshJadwalDokter();
         });
@@ -335,15 +374,20 @@
             refreshJadwalDokter();
         });
 
-        $("#txt_bpjs_spri_jenis").on("keyup", function() {
+        $("#txt_bpjs_spri_jenis").on("change", function() {
             refreshSpesialistik();
             refreshJadwalDokter();
         });
 
-        $("#txt_bpjs_spri_tglRencanaKontrol").on("keyup", function() {
+        $("#txt_bpjs_spri_tglRencanaKontrol").on("change", function() {
             refreshSpesialistik();
             refreshJadwalDokter();
         });
+
+        $("#txt_bpjs_spri_tglRencanaKontrol").datepicker({
+            dateFormat: "yy-mm-dd",
+            autoclose: true
+        }).datepicker("setDate", new Date());
 
         $("#txt_bpjs_spri_jenis").select2().on("select2:select", function(e) {
             refreshSpesialistik();
@@ -727,7 +771,7 @@
                                 </div>
                                 <div class="col-6 form-group">
                                     <label for="">Tanggal Rencana Kontrol</label>
-                                    <input type="date" autocomplete="off" class="form-control uppercase" id="txt_bpjs_spri_tglRencanaKontrol" />
+                                    <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_spri_tglRencanaKontrol" />
                                 </div>
                                 <div class="col-6 form-group">
                                     <label for="">Poli/Spesialistik</label>
