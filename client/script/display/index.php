@@ -351,6 +351,7 @@
 								playlist.push(__HOST__ + 'audio/openning.mpeg');
 								playlist.push(__HOST__ + 'audio/antrian.mp3');
 							}
+							alert(__HOST__ + 'audio/' + getHurufParse.toUpperCase() + '.mp3');
 							playlist.push(__HOST__ + 'audio/' + getHurufParse.toUpperCase() + '.mp3');
 							forRead = response.response_package.split(" ");
 							for(var z = 0; z < forRead.length; z++) {

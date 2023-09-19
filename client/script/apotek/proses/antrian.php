@@ -776,7 +776,11 @@
     }
 
     $("body").on("click", ".btn-apotek-cetak", function() {
+<<<<<<< Updated upstream
       var jenis_pasien = resepJenis;
+=======
+      var jenis_pasien = resepJenis.replaceAll('-', ' ');
+>>>>>>> Stashed changes
 
       //Load Resep Detail
       $.ajax({
