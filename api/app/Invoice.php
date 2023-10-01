@@ -2712,7 +2712,7 @@ class Invoice extends Utility
             }
         }
 
-        if ($parameter['penjamin'] == __UIDPENJAMINUMUM__) {
+        if ($parameter['penjamin'] == __UIDPENJAMINUMUM__ || $parameter['penjamin'] == __UIDPENJAMINBPJSOFFLINE__) {
             foreach ($parameter['invoice_item'] as $key => $value) {
 
                 //Check Pembayaran Kartu dan Konsultasi
@@ -2772,6 +2772,8 @@ class Invoice extends Utility
                                 $allowAntrian = false;
                                 break;
                             }
+                        } else {
+                            $allowAntrian = true;
                         }
                     }
                 }
@@ -2879,204 +2881,200 @@ class Invoice extends Utility
             ->execute();
 
 
-        if ($totalPayment > 0) {
-            //Last Payment
-            $paymentCount = self::$query->select('invoice_payment', array(
-                'uid'
-            ))
-                ->where(array(
-                    'EXTRACT(month FROM created_at)' => '= ?'
-                ), array(
-                    intval(date('m'))
-                ))
-                ->execute();
-
-            $nomor_kwitansi = 'PBP/' . date('Y/m') . '/' . str_pad(strval(count($paymentCount['response_data']) + 1), 5, '0', STR_PAD_LEFT);
-            $worker = self::$query->insert('invoice_payment', array(
-                'uid' => $newPaymentUID,
-                'invoice' => $parameter['invoice'],
-                'nomor_kwitansi' => $nomor_kwitansi,
-                'pasien' => $parameter['pasien'],
-                'pegawai' => $UserData['data']->uid,
-                'terbayar' => $totalPayment,
-                'sisa_bayar' => (floatval($InvoicePre['response_data'][0]['total_after_discount']) - $totalPayment),
-                'keterangan' => $parameter['keterangan'],
-                'metode_bayar' => $parameter['metode'],
-                'tanggal_bayar' => (isset($parameter['tanggal'])) ? $parameter['tanggal'] : date("Y-m-d"),
-                'created_at' => parent::format_date(),
-                'updated_at' => parent::format_date()
-            ))
-                ->execute();
-
-            if ($worker['response_result'] > 0) {
-                $log = parent::log(array(
-                    'type' => 'activity',
-                    'column' => array(
-                        'unique_target',
-                        'user_uid',
-                        'table_name',
-                        'action',
-                        'logged_at',
-                        'status',
-                        'login_id'
-                    ),
-                    'value' => array(
-                        $newPaymentUID,
-                        $UserData['data']->uid,
-                        'invoice_payment',
-                        'I',
-                        parent::format_date(),
-                        'N',
-                        $UserData['data']->log_id
-                    ),
-                    'class' => __CLASS__
-                ));
-
-                if ($allowAntrian) {
-                    $KunjunganData = self::$query->select('antrian_nomor', array(
-                        'dokter',
-                        'prioritas'
+        //Last Payment
+                    $paymentCount = self::$query->select('invoice_payment', array(
+                        'uid'
                     ))
                         ->where(array(
-                            'antrian_nomor.pasien' => '= ?',
-                            'AND',
-                            'antrian_nomor.kunjungan' => '= ?'
+                            'EXTRACT(month FROM created_at)' => '= ?'
                         ), array(
-                            $parameter['pasien'],
-                            $parameter['kunjungan']
+                            intval(date('m'))
                         ))
                         ->execute();
 
-                    if(count($KonsulRequest) > 0) {
-                        foreach ($KonsulRequest as $KonsulKey => $KonsulValue) {
-                            $parameter['dataObj'] = array(
-                                'departemen' => $KonsulValue, //Ubah poli dulu sesuai dengan tagihan konsul
-                                'pasien' => $parameter['pasien'],
-                                'penjamin' => $parameter['penjamin'],
-                                'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
-                                'dokter' => $KunjunganData['response_data'][0]['dokter']
-                            );
-                            $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
-                            array_push($antrian_item, $AntrianProses);
+                    $nomor_kwitansi = 'PBP/' . date('Y/m') . '/' . str_pad(strval(count($paymentCount['response_data']) + 1), 5, '0', STR_PAD_LEFT);
+                    $worker = self::$query->insert('invoice_payment', array(
+                        'uid' => $newPaymentUID,
+                        'invoice' => $parameter['invoice'],
+                        'nomor_kwitansi' => $nomor_kwitansi,
+                        'pasien' => $parameter['pasien'],
+                        'pegawai' => $UserData['data']->uid,
+                        'terbayar' => $totalPayment,
+                        'sisa_bayar' => (floatval($InvoicePre['response_data'][0]['total_after_discount']) - $totalPayment),
+                        'keterangan' => $parameter['keterangan'],
+                        'metode_bayar' => $parameter['metode'],
+                        'tanggal_bayar' => (isset($parameter['tanggal'])) ? $parameter['tanggal'] : date("Y-m-d"),
+                        'created_at' => parent::format_date(),
+                        'updated_at' => parent::format_date()
+                    ))
+                        ->execute();
+
+                    if ($worker['response_result'] > 0) {
+                        $log = parent::log(array(
+                            'type' => 'activity',
+                            'column' => array(
+                                'unique_target',
+                                'user_uid',
+                                'table_name',
+                                'action',
+                                'logged_at',
+                                'status',
+                                'login_id'
+                            ),
+                            'value' => array(
+                                $newPaymentUID,
+                                $UserData['data']->uid,
+                                'invoice_payment',
+                                'I',
+                                parent::format_date(),
+                                'N',
+                                $UserData['data']->log_id
+                            ),
+                            'class' => __CLASS__
+                        ));
+
+                        if ($allowAntrian) {
+                            $KunjunganData = self::$query->select('antrian_nomor', array(
+                                'dokter',
+                                'prioritas'
+                            ))
+                                ->where(array(
+                                    'antrian_nomor.pasien' => '= ?',
+                                    'AND',
+                                    'antrian_nomor.kunjungan' => '= ?'
+                                ), array(
+                                    $parameter['pasien'],
+                                    $parameter['kunjungan']
+                                ))
+                                ->execute();
+
+                            if(count($KonsulRequest) > 0) {
+                                foreach ($KonsulRequest as $KonsulKey => $KonsulValue) {
+                                    $parameter['dataObj'] = array(
+                                        'departemen' => $KonsulValue, //Ubah poli dulu sesuai dengan tagihan konsul
+                                        'pasien' => $parameter['pasien'],
+                                        'penjamin' => $parameter['penjamin'],
+                                        'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
+                                        'dokter' => $KunjunganData['response_data'][0]['dokter']
+                                    );
+                                    $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                                    array_push($antrian_item, $AntrianProses);
+                                }
+                            } else {
+                                //Pembayaran Kartu Non Umum Segera masukkan pada antrian poliklinik
+
+                                if($parameter['poli'] !== __POLI_IGD__) {
+
+                                    $parameter['dataObj'] = array(
+                                        'departemen' => $parameter['poli'], //Ubah poli dulu sesuai dengan tagihan konsul
+                                        'pasien' => $parameter['pasien'],
+                                        'penjamin' => $parameter['penjamin'],
+                                        'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
+                                        'dokter' => $KunjunganData['response_data'][0]['dokter']
+                                    );
+                                    $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
+                                    array_push($antrian_item, $AntrianProses);
+                                }
+                            }
                         }
+                    }
+
+                    $notifier_target = array();
+                    if($allowAntrian) {
+                        array_push($notifier_target, array(
+                            'target' => __UIDPERAWAT__,
+                            'message' => 'Antrian poli baru',
+                            'protocol' => 'antrian_poli_baru'
+                        ));
+                        $worker['response_message'] = 'Silahkan arahkan pasien menuju antrian poli';
+                    }
+                    if($goto_lab) {
+                        array_push($notifier_target, array(
+                            'target' => __UIDPETUGASLAB__,
+                            'message' => 'Permintaan pemeriksaan laboratorium',
+                            'protocol' => 'antrian_laboratorium_baru'
+                        ));
+                        $worker['response_message'] = 'Silahkan arahkan pasien menuju laboratorium';
+                    }
+                    if($goto_rad) {
+                        array_push($notifier_target, array(
+                            'target' => __UIDPETUGASRAD__,
+                            'message' => 'Permintaan pemeriksaan radiologi',
+                            'protocol' => 'antrian_radiologi_baru'
+                        ));
+                        $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi';
+                    }
+                    if($goto_rad && $goto_lab) {
+                        array_push($notifier_target, array(
+                            'target' => __UIDPETUGASLAB__,
+                            'message' => 'Permintaan pemeriksaan laboratorium',
+                            'protocol' => 'antrian_laboratorium_baru'
+                        ));
+                        array_push($notifier_target, array(
+                            'target' => __UIDPETUGASRAD__,
+                            'message' => 'Permintaan pemeriksaan radiologi',
+                            'protocol' => 'antrian_radiologi_baru'
+                        ));
+                        $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi lalu laboratorium';
+                    }
+                    if($goto_apotek) {
+                        array_push($notifier_target, array(
+                            'target' => __UIDAPOTEKER__,
+                            'message' => 'Antrian apotek baru',
+                            'protocol' => 'antrian_apotek_baru'
+                        ));
+                        $worker['response_message'] = 'Silahkan arahkan pasien menuju apotek';
                     } else {
-                        //Pembayaran Kartu Non Umum Segera masukkan pada antrian poliklinik
+                        $worker['response_message'] = '';
+                    }
 
-                        if($parameter['poli'] !== __POLI_IGD__) {
+                    // Rekap tagihan per poli
+                    $TemplateSet = self::$query->select('laporan_rekap_pendapatan_template', array('id'))->where(array('identifier' => '= ?'), array($parameter['poli']))->execute();
 
-                            $parameter['dataObj'] = array(
-                                'departemen' => $parameter['poli'], //Ubah poli dulu sesuai dengan tagihan konsul
-                                'pasien' => $parameter['pasien'],
-                                'penjamin' => $parameter['penjamin'],
-                                'prioritas' => $KunjunganData['response_data'][0]['prioritas'],
-                                'dokter' => $KunjunganData['response_data'][0]['dokter']
-                            );
-                            $AntrianProses = $Antrian->tambah_antrian('antrian', $parameter, $parameter['kunjungan']);
-                            array_push($antrian_item, $AntrianProses);
+                    if($allowMiscRecap) {
+                        $checkRekap = self::$query->select('laporan_rekap_pendapatan', array('id', 'total'))
+                            ->where(array('
+                                template_rekap' => '= ?',
+                                'AND',
+                                'tahun' => '= ?',
+                                'AND',
+                                'bulan' => '= ?'
+                            ), array(
+                                $TemplateSet['response_data'][0]['id'], date('Y'), date('m')
+                            ))->execute();
+
+                        if(count($checkRekap['response_data']) > 0) {
+                            $rekapInv = self::$query->update('laporan_rekap_pendapatan', array(
+                                'total' => floatval($checkRekap['response_data'][0]['total']) + $totalPayment
+                            ))
+                                ->where(array(
+                                    'id' => '= ?'
+                                ), array(
+                                    $checkRekap['response_data'][0]['id']
+                                ))
+                                ->execute();
+                        } else {
+                            // Get template
+
+                            if(count($TemplateSet['response_data']) > 0) {
+                                $rekapInv = self::$query->insert('laporan_rekap_pendapatan', array(
+                                    'total' => $totalPayment,
+                                    'template_rekap' => $TemplateSet['response_data'][0]['id'],
+                                    'bulan' => date('m'),
+                                    'tahun' => date('Y')
+                                ))
+                                    ->execute();
+                            }
                         }
                     }
-                }
-            }
 
-            $notifier_target = array();
-            if($allowAntrian) {
-                array_push($notifier_target, array(
-                    'target' => __UIDPERAWAT__,
-                    'message' => 'Antrian poli baru',
-                    'protocol' => 'antrian_poli_baru'
-                ));
-                $worker['response_message'] = 'Silahkan arahkan pasien menuju antrian poli';
-            }
-            if($goto_lab) {
-                array_push($notifier_target, array(
-                    'target' => __UIDPETUGASLAB__,
-                    'message' => 'Permintaan pemeriksaan laboratorium',
-                    'protocol' => 'antrian_laboratorium_baru'
-                ));
-                $worker['response_message'] = 'Silahkan arahkan pasien menuju laboratorium';
-            }
-            if($goto_rad) {
-                array_push($notifier_target, array(
-                    'target' => __UIDPETUGASRAD__,
-                    'message' => 'Permintaan pemeriksaan radiologi',
-                    'protocol' => 'antrian_radiologi_baru'
-                ));
-                $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi';
-            }
-            if($goto_rad && $goto_lab) {
-                array_push($notifier_target, array(
-                    'target' => __UIDPETUGASLAB__,
-                    'message' => 'Permintaan pemeriksaan laboratorium',
-                    'protocol' => 'antrian_laboratorium_baru'
-                ));
-                array_push($notifier_target, array(
-                    'target' => __UIDPETUGASRAD__,
-                    'message' => 'Permintaan pemeriksaan radiologi',
-                    'protocol' => 'antrian_radiologi_baru'
-                ));
-                $worker['response_message'] = 'Silahkan arahkan pasien menuju radiologi lalu laboratorium';
-            }
-            if($goto_apotek) {
-                array_push($notifier_target, array(
-                    'target' => __UIDAPOTEKER__,
-                    'message' => 'Antrian apotek baru',
-                    'protocol' => 'antrian_apotek_baru'
-                ));
-                $worker['response_message'] = 'Silahkan arahkan pasien menuju apotek';
-            } else {
-                $worker['response_message'] = '';
-            }
 
-            // Rekap tagihan per poli
-            $TemplateSet = self::$query->select('laporan_rekap_pendapatan_template', array('id'))->where(array('identifier' => '= ?'), array($parameter['poli']))->execute();
-            
-            if($allowMiscRecap) {
-                $checkRekap = self::$query->select('laporan_rekap_pendapatan', array('id', 'total'))
-                    ->where(array('
-                        template_rekap' => '= ?',
-                        'AND',
-                        'tahun' => '= ?',
-                        'AND',
-                        'bulan' => '= ?'
-                    ), array(
-                        $TemplateSet['response_data'][0]['id'], date('Y'), date('m')
-                    ))->execute();
-                    
-                if(count($checkRekap['response_data']) > 0) {
-                    $rekapInv = self::$query->update('laporan_rekap_pendapatan', array(
-                        'total' => floatval($checkRekap['response_data'][0]['total']) + $totalPayment
-                    ))
-                        ->where(array(
-                            'id' => '= ?'
-                        ), array(
-                            $checkRekap['response_data'][0]['id']
-                        ))
-                        ->execute();
-                } else {
-                    // Get template
-                    
-                    if(count($TemplateSet['response_data']) > 0) {
-                        $rekapInv = self::$query->insert('laporan_rekap_pendapatan', array(
-                            'total' => $totalPayment,
-                            'template_rekap' => $TemplateSet['response_data'][0]['id'],
-                            'bulan' => date('m'),
-                            'tahun' => date('Y')
-                        ))
-                            ->execute();
-                    }
-                }
-            }
-            
-
-            $worker['parameter_list'] = $parameter;
-            $worker['rekap'] = $rekapInv;
-            $worker['antrian_item'] = $antrian_item;
-            $worker['konsul_request'] = $KonsulRequest;
-            $worker['response_notifier'] = $notifier_target;
-            return $worker;
-        } else {
-            return $allowAntrian;
-        }
+                    $worker['parameter_list'] = $parameter;
+                    $worker['rekap'] = $rekapInv;
+                    $worker['antrian_item'] = $antrian_item;
+                    $worker['konsul_request'] = $KonsulRequest;
+                    $worker['response_notifier'] = $notifier_target;
+                    return $worker;
 
     }
 

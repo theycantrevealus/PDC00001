@@ -275,7 +275,7 @@ class Antrian extends Utility
       $PoliTindakanInfo = $PoliTindakan->get_poli_detail($parameter['dataObj']['departemen'])['response_data'][0];
       $SInvoice = new Invoice(self::$pdo);
 
-      if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
+      if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__ || $parameter['dataObj']['penjamin'] == __UIDPENJAMINBPJSOFFLINE__) { // Jika umum
 
         //Invoice Manager
         $InvoiceCheck = self::$query->select('invoice', array( //Check Invoice Master jika sudah ada
@@ -506,7 +506,7 @@ class Antrian extends Utility
         ));
 
         //Update antrian kunjungan
-        if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__) { // Jika umum
+        if ($parameter['dataObj']['penjamin'] == __UIDPENJAMINUMUM__ || $parmeter['dataObj']['penjamin'] == __UIDPENJAMINBPJSOFFLINE__) { // Jika umum / BPJS Offline
           if (count($HargaKartu['response_data']) > 0 && floatval($HargaKartu['response_data'][0]['harga']) > 0) {
             $Pasien = new Pasien(self::$pdo);
             $PasienDetail = $Pasien->get_pasien_detail('pasien', $parameter['dataObj']['currentPasien']);
@@ -677,7 +677,7 @@ class Antrian extends Utility
 
 
             if (count($InvoiceCheck['response_data']) > 0) { //Sudah Ada Invoice Master
-              $checkBiayaKartu = self::$query->select('antrian', array( //New Detail. Rekap tagihan
+                  $checkBiayaKartu = self::$query->select('antrian', array( //New Detail. Rekap tagihan
                 'uid'
               ))
                 ->where(array(
