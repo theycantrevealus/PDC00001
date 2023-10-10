@@ -23,6 +23,9 @@
                         <button class="btn btn-sm btn-info pull-right" id="btnTambahPRB">
                             <i class="fa fa-plus"></i> Tambah PRB
                         </button>
+                        <button class="btn btn-sm btn-warning pull-right mr-1" id="btnTestEdit">
+                            Test Edit
+                        </button>
                     </h5>
                 </div>
                 <div class="card-header card-header-tabs-basic nav" role="tablist">
@@ -33,45 +36,55 @@
                     <div class="card-body tab-content">
                         <div class="tab-pane active show fade" id="search_tgl_prb">
                             <div class="card-group">
-                                <div class="card card-body">
-                                    <div class="d-flex flex-row">
-                                        <div class="col-md-5">
-                                            Tanggal Awal
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="tglawal_prb">
-                                        </div>
-                                        <div class="col-md-5">
-                                            Tanggal Akhir
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="tglakhir_prb">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <br>
-                                            <button class="btn btn-info" id="btn_search_tgl_prb">
-                                                <i class="fa fa-search"></i> Cari Data
-                                            </button>
-                                        </div>
+                                <div class="card">
+                                    <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                        <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> List Tanggal PRB</h5>
                                     </div>
+                                    <div class="card-body">
+                                        <div class="d-flex flex-row">
+                                            <div class="col-md-3">
+                                                Tanggal Awal
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="tglawal_prb">
+                                            </div>
+                                            <div class="col-md-3">
+                                                Tanggal Akhir
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="tglakhir_prb">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <br>
+                                                <button class="btn btn-info" id="btn_search_tgl_prb">
+                                                    <i class="fa fa-search"></i> Cari Data
+                                                </button>
+                                            </div>
+                                        </div>
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="tab-pane show fade" id="search_no_srb">
                             <div class="card-group">
-                                <div class="card card-body">
-                                    <div class="d-flex flex-row">
-                                        <div class="col-md-5">
-                                            No. SRB
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="text_search_no_srb">
-                                        </div>
-                                        <div class="col-md-5">
-                                            No. SEP
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="text_search_no_sep">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <br>
-                                            <button class="btn btn-info" id="btn_search_no_srb">
-                                                <i class="fa fa-search"></i> Cari Data
-                                            </button>
-                                            <br>
+                                <div class="card">
+                                    <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                        <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> No. SRB</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex flex-row">
+                                            <div class="col-md-5">
+                                                No. SRB
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="text_search_no_srb">
+                                            </div>
+                                            <div class="col-md-5">
+                                                No. SEP
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="text_search_no_sep">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <br>
+                                                <button class="btn btn-info" id="btn_search_no_srb">
+                                                    <i class="fa fa-search"></i> Cari Data
+                                                </button>
+                                                <br>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -85,13 +98,13 @@
                         <table class="table table-bordered table-striped largeDataType" id="table-prb">
                             <thead class="thead-dark">
                                 <tr>
-                                    <th>Tanggal SRB</th>
-                                    <th class="wrap_content">No. SRB</th>
-                                    <th class="wrap_content">No. SEP</th>
-                                    <th>Pasien</th>
-                                    <th>PRB</th>
+                                    <th>No. SRB</th>
+                                    <th>No. SEP</th>
+                                    <th>Tgl. SRB</th>
+                                    <th>Nama - No.Kartu</th>
+                                    <th>Program PRB</th>
                                     <th>DPJP</th>
-                                    <th>Aksi</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>

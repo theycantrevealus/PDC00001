@@ -21,22 +21,30 @@
                     <h5 class="card-header__title flex m-0">
                         BPJS Lembar Pengajuan Klaim
                     </h5>
+
+                    <button class="btn btn-warning pull-right mr-1" id="btnTestEdit">
+                        Test Edit
+                    </button>
+
                     <button class="btn btn-sm btn-info pull-right" id="btnTambahLPK">
                         <i class="fa fa-plus"></i> Tambah LPK
                     </button>
                 </div>
                 <div class="card-body tab-content">
                     <div class="card">
+                        <div class="card-header card-header-large bg-white d-flex align-items-center">
+                            <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> List Data LPK</h5>
+                        </div>
                         <div class="card-body">
                             <div class="d-flex flex-row">
-                                <div class="col-md-5">
+                                <div class="col-md-3">
                                     Jenis Pelayanan
                                     <select class="form-control" id="text_search_lpk_jnslayanan">
                                         <option value="2">Rawat Jalan</option>
                                         <option value="1">Rawat Inap</option>
                                     </select>
                                 </div>
-                                <div class="col-md-5">
+                                <div class="col-md-3">
                                     Tanggal Masuk
                                     <input type="text" autocomplete="off" class="form-control uppercase" id="text_search_lpk_tglmasuk">
                                 </div>
@@ -46,6 +54,7 @@
                                         <i class="fa fa-search"></i> Cari Data
                                     </button>
                                 </div>
+
                             </div>
                         </div>
                     </div>

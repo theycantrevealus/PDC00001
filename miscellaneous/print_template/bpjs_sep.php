@@ -166,24 +166,39 @@
                     <td style="vertical-align: top" colspan="2">
                         <table>
                             <tr>
-                                <td style="padding-right: 10px; min-height: 100px; vertical-align: top">
-                                    <?php echo $_POST['html_data_bawah']; ?>
+                                <td style="padding-right: 50px; min-height: 100px; vertical-align: top;width:65%">
+                                    <div style="font-size: 5pt;">
+                                        <span>*Saya menyetujui BPJS Kesehatan untuk:</span>
+                                        <ol class="m-0">
+                                            <li>Membuka dan atau menggunakan informasi medis Pasien untuk keperluan administrasi, pembayaran asuransi atau jaminan pembiayaan kesehatan</li>
+                                            <li>Memberikan akses informasi medis atau riwayat pelayanan kepada dokter/tenaga medis pada RSUD PETALA BUMI untuk kepentingan pemeliharaan kesehatan, pengobatan, penyembuhan, dan perawatan Pasien</li>
+                                        </ol>
+                                        <span>*Saya mengetahui dan memahami:</span>
+                                        <ol class="m-0">
+                                            <li>Rumah Sakit dapat melakukan koordinasi dengan PT. Jasa Raharja / PT. Taspen / PT. ASABRI / BPJS Ketenagakerjaan atau Penjamin lainnya. jika Peserta merupakan pasien yang mengalami kecelakaan lalulintas dan / atau kecelakaan kerja</li>
+                                            <li>SEP bukan sebagai bukti penjaminan peserta</li>
+                                        </ol>
+                                    </div>
                                 </td>
                                 <td>
                                     <div style="border-bottom: solid 1px #000; height: 100px; margin: 10px;">
+                                        Persetujuan <br>
                                         Pasien/Keluarga Pasien
                                     </div>
                                 </td>
-                                <td>
+                                <!-- <td>
                                     <div style="border-bottom: solid 1px #000; height: 100px; margin: 10px;">
                                         Petugas BPJS Kesehatan
                                     </div>
-                                </td>
+                                </td> -->
                             </tr>
                         </table>
                     </td>
                 </tr>
             </table>
+            <div>
+                Cetakan <?php echo $_POST['tgl_cetak']; ?>
+            </div>
         </div>
     </div>
 </body>

@@ -153,7 +153,6 @@
 
             var SEPButton = $(this);
             SEPButton.html("Memuat Detail...").removeClass("btn-success").addClass("btn-warning");
-            // $("#modal-detail-peserta").modal("show");
 
             $.ajax({
                 url: __BPJS_SERVICE_URL__ + "peserta/sync.sh/getpesertabynokartu",
@@ -176,8 +175,6 @@
                 success: function(response) {
 
                     var dataPeserta = response.response[0];
-
-                    console.log(dataPeserta);
 
                     $("#nama_peserta").html(dataPeserta.nama);
                     $("#nik").html(dataPeserta.nik);
