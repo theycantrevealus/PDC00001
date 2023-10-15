@@ -1338,7 +1338,7 @@
                             };
                         },
                         processResults: function(response) {
-                            if (response.metadata.code !== 200) {
+                            if (response.metadata.code === null) {
                                 $("#txt_bpjs_poli_tujuan").trigger("change.select2");
                             } else {
                                 var data = response.response;
