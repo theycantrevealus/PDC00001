@@ -455,7 +455,7 @@
                 cache: true,
                 processResults: function(response) {
                     $("#txt_bpjs_prb_sep option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (response.metadata.code === null) {
                         return [];
                     } else {
                         var data = [response.response];
@@ -512,7 +512,7 @@
                 success: function(response) {
                     $('#loader-search-programprb').attr('hidden', true);
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -577,7 +577,7 @@
                 success: function(response) {
                     $('#loader-search-spesialistik').attr('hidden', true);
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -645,7 +645,7 @@
                 success: function(response) {
                     $('#loader-search-dpjp').attr('hidden', true);
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
