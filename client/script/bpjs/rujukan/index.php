@@ -878,7 +878,7 @@
                     };
                 },
                 processResults: function(response) {
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_edit_tujuan_poli").trigger("change.select2");
                     } else {
                         var data = response.response;
@@ -931,7 +931,7 @@
                 },
                 processResults: function(response) {
                     console.log(response);
-                    if (response.metadata.code === null) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_edit_diagnosa").trigger("change.select2");
                     } else {
                         var data = response.response;
@@ -1097,7 +1097,7 @@
                     };
                 },
                 processResults: function(response) {
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_tujuan_poli").trigger("change.select2");
                     } else {
                         var data = response.response;
@@ -1150,7 +1150,7 @@
                 },
                 processResults: function(response) {
                     console.log(response);
-                    if (response.metadata.code === null) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_diagnosa").trigger("change.select2");
                     } else {
                         var data = response.response;
@@ -1217,7 +1217,7 @@
                 },
                 processResults: function(response) {
                     var data = [];
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         data = [response.response];
@@ -1279,7 +1279,7 @@
                 },
                 processResults: function(response) {
                     console.log(response);
-                    if (response.metadata.code === null) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_rujuk_khusus_procedure").trigger("change.select2");
                     } else {
                         var data = response.response;
@@ -1327,7 +1327,7 @@
                 },
                 processResults: function(response) {
                     console.log(response);
-                    if (response.metadata.code === null) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_rujuk_khusus_diagnosa").trigger("change.select2");
                     } else {
                         var data = response.response;
@@ -1513,7 +1513,7 @@
                         success: function(response) {
                             console.clear();
                             console.log(response);
-                            if (parseInt(response.response.metadata.code) === 200) {
+                            if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
                                     'BPJS',
                                     'Rujukan Berhasil Diubah',
@@ -1525,7 +1525,7 @@
                             } else {
                                 Swal.fire(
                                     'BPJS',
-                                    response.response.metadata.message,
+                                    response.metadata.message,
                                     'error'
                                 ).then((result) => {
                                     RujukanList.ajax.reload();

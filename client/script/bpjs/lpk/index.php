@@ -477,7 +477,7 @@
                     };
                 },
                 processResults: function(response) {
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_lpk_no_sep option").remove();
                         return [];
                     } else {
@@ -559,7 +559,7 @@
                 },
                 success: function(response) {
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -605,7 +605,7 @@
                 },
                 success: function(response) {
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -651,7 +651,7 @@
                 },
                 success: function(response) {
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -697,7 +697,7 @@
                 },
                 success: function(response) {
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -743,7 +743,7 @@
                 },
                 success: function(response) {
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -795,7 +795,7 @@
                 },
                 processResults: function(response) {
                     $("#txt_bpjs_lpk_poli option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -843,7 +843,7 @@
                 },
                 processResults: function(response) {
                     $("#txt_bpjs_lpk_dpjp option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -891,7 +891,7 @@
                 },
                 processResults: function(response) {
                     $("#txt_bpjs_lpk_procedure option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -939,7 +939,7 @@
                 },
                 processResults: function(response) {
                     $("#txt_bpjs_lpk_diagnosa option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -992,7 +992,7 @@
                 cache: true,
                 processResults: function(response) {
                     $("#txt_bpjs_lpk_dirujukke_faskes option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
@@ -1041,7 +1041,7 @@
                 },
                 processResults: function(response) {
                     $("#txt_bpjs_lpk_poli_kontrol_kembali option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;

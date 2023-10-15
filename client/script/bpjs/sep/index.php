@@ -309,7 +309,7 @@
                                 request.setRequestHeader("x-token", bpjs_token);
                             },
                             dataSrc: function(response) {
-                                if (response.metadata.code !== 200) {
+                                if (parseInt(response.metadata.code) !== 200) {
                                     if (MODE === "SEARCH_SEPINDUK") {
                                         $('#alert-SepInduk').text(response.metadata.message);
                                         $('#alert-SepInduk-container').fadeIn();
@@ -2137,7 +2137,7 @@
                                 request.setRequestHeader("x-token", bpjs_token);
                             },
                             success: function(response) {
-                                if (response.metadata.code !== 200) {
+                                if (parseInt(response.metadata.code) !== 200) {
                                     // $(target + " option").remove();
                                     return [];
                                 } else {

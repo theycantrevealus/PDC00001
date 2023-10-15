@@ -877,13 +877,13 @@
                                 },
                                 cache: true,
                                 processResults: function(response) {
-                                    if (response.metadata.code == 202) {
+                                    if (parseInt(response.metadata.code) === 202) {
                                         Swal.fire(
                                             "No. Rujukan",
                                             response.metadata.message,
                                             "warning"
                                         );
-                                    } else if (response.metadata.code == 200) {
+                                    } else if (parseInt(response.metadata.code) === 200) {
                                         var data = [response.response];
                                         return {
                                             results: $.map(data, function() {
@@ -948,13 +948,13 @@
                                 },
                                 cache: true,
                                 processResults: function(response) {
-                                    if (response.metadata.code == 202) {
+                                    if (parseInt(response.metadata.code) === 202) {
                                         Swal.fire(
                                             "No. Rujukan",
                                             response.metadata.message,
                                             "warning"
                                         );
-                                    } else if (response.metadata.code == 200) {
+                                    } else if (parseInt(response.metadata.code) === 200) {
                                         var data = [response.response];
                                         return {
                                             results: $.map(data, function() {
@@ -1022,13 +1022,13 @@
                         },
                         cache: true,
                         processResults: function(response) {
-                            if (response.metadata.code == 202) {
+                            if (parseInt(response.metadata.code) === 202) {
                                 Swal.fire(
                                     "No. Rujukan",
                                     response.metadata.message,
                                     "warning"
                                 );
-                            } else if (response.metadata.code == 200) {
+                            } else if (parseInt(response.metadata.code) === 200) {
                                 var data = [response.response];
                                 return {
                                     results: $.map(data, function() {
@@ -1147,7 +1147,7 @@
                         },
                         cache: true,
                         processResults: function(response) {
-                            if (response.metadata.code !== 200) {
+                            if (parseInt(response.metadata.code) !== 200) {
                                 $("#txt_bpjs_asal_rujukan").trigger("change.select2");
                             } else {
                                 var data = response.response;
@@ -1197,7 +1197,7 @@
                         },
                         cache: true,
                         processResults: function(response) {
-                            if (response.metadata.code !== 200) {
+                            if (parseInt(response.metadata.code) !== 200) {
                                 $("#txt_bpjs_asal_rujukan_manualigd").trigger("change.select2");
                             } else {
                                 var data = response.response;
@@ -1247,7 +1247,7 @@
                         cache: true,
                         processResults: function(response) {
                             console.log(response);
-                            if (response.metadata.code === null) {
+                            if (parseInt(response.metadata.code) !== 200) {
                                 $("#txt_bpjs_diagnosa_awal").trigger("change.select2");
                             } else {
                                 var data = response.response;
@@ -1338,7 +1338,7 @@
                             };
                         },
                         processResults: function(response) {
-                            if (response.metadata.code === null) {
+                            if (parseInt(response.metadata.code) !== 200) {
                                 $("#txt_bpjs_poli_tujuan").trigger("change.select2");
                             } else {
                                 var data = response.response;
@@ -2060,7 +2060,7 @@
                 },
                 success: function(response) {
                     $(target + " option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_dpjp").select2({
                             "language": {
                                 "noResults": function() {

@@ -455,7 +455,7 @@
                 cache: true,
                 processResults: function(response) {
                     $("#txt_bpjs_prb_sep option").remove();
-                    if (response.metadata.code === null) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = [response.response];

@@ -397,7 +397,7 @@
                 },
                 cache: true,
                 processResults: function(response) {
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_spri_noSep option").remove();
                         return [];
                     } else {
@@ -456,7 +456,7 @@
                     };
                 },
                 processResults: function(response) {
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_spri_noKartu option").remove();
                         return [];
                     } else {
@@ -511,7 +511,7 @@
                 success: function(response) {
                     $("#txt_bpjs_spri_poliKontrol option").remove();
 
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_spri_poliKontrol").select2({
                             "language": {
                                 "noResults": function() {
@@ -559,7 +559,7 @@
                 },
                 success: function(response) {
                     $("#txt_bpjs_spri_kodeDokter option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_spri_kodeDokter").select2({
                             "language": {
                                 "noResults": function() {
@@ -1051,7 +1051,7 @@
                     };
                 },
                 processResults: function(response) {
-                    if (response.metadata.code === null) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_edit_spri_noKartu").trigger("change.select2");
                     } else {
                         var data = response.response;
@@ -1105,7 +1105,7 @@
                 success: function(response) {
                     $("#txt_bpjs_edit_spri_poliKontrol option").remove();
 
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_edit_spri_poliKontrol").select2({
                             "language": {
                                 "noResults": function() {
@@ -1153,7 +1153,7 @@
                 },
                 success: function(response) {
                     $("#txt_bpjs_edit_spri_kodeDokter option").remove();
-                    if (response.metadata.code !== 200) {
+                    if (parseInt(response.metadata.code) !== 200) {
                         $("#txt_bpjs_edit_spri_kodeDokter").select2({
                             "language": {
                                 "noResults": function() {
