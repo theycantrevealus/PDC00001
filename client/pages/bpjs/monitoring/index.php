@@ -88,23 +88,25 @@ $tomorrow->modify("+1 day");
                             <div class="text-center" id="alert-datakunjungan-container">
                                 <div class="alert alert-danger" id="alert-datakunjungan"></div>
                             </div>
-                            <table class="table table-bordered largeDataType" id="bpjs_table_datakunjungan">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. SEP</th>
-                                        <th>Tgl. SEP</th>
-                                        <th>Nama</th>
-                                        <th>No. Kartu</th>
-                                        <th>No. Rujukan</th>
-                                        <th>Layanan</th>
-                                        <th>Poli</th>
-                                        <th>Diagnosa</th>
-                                        <th>Tgl. Plg SEP</th>
-                                        <th class="wrap_content text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered largeDataType" id="bpjs_table_datakunjungan">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. SEP</th>
+                                            <th>Tgl. SEP</th>
+                                            <th>Nama</th>
+                                            <th>No. Kartu</th>
+                                            <th>No. Rujukan</th>
+                                            <th>Layanan</th>
+                                            <th>Poli</th>
+                                            <th>Diagnosa</th>
+                                            <th>Tgl. Plg SEP</th>
+                                            <th class="wrap_content text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -249,22 +251,24 @@ $tomorrow->modify("+1 day");
                             <div class="text-center" id="alert-dataklaimjasaraharja-container">
                                 <div class="alert alert-danger" id="alert-dataklaimjasaraharja"></div>
                             </div>
-                            <table class="table table-bordered largeDataType" id="bpjs_table_dataklaimjasaraharja">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No.SEP</th>
-                                        <th>Nama - No.Kartu</th>
-                                        <th>Tgl.SEP</th>
-                                        <th>Tgl.Plg SEP</th>
-                                        <th>Poli</th>
-                                        <th>Diagnosa</th>
-                                        <th>No.Register</th>
-                                        <th>Tgl. Kejadian</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered largeDataType" id="bpjs_table_dataklaimjasaraharja">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No.SEP</th>
+                                            <th>Nama - No.Kartu</th>
+                                            <th>Tgl.SEP</th>
+                                            <th>Tgl.Plg SEP</th>
+                                            <th>Poli</th>
+                                            <th>Diagnosa</th>
+                                            <th>No.Register</th>
+                                            <th>Tgl. Kejadian</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

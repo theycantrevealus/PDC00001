@@ -21,7 +21,7 @@
 
         var LpkList = $("#table-lpk").DataTable({
             processing: true,
-            serverSide: true,
+            // serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
             serverMethod: "GET",
@@ -48,8 +48,8 @@
                         return [];
                     } else {
                         $('#alert-lpk-container').fadeOut();
-                        dataEditLPK = response.response.lpk.list;
-                        return response.response.lpk.list;
+                        dataEditLPK = response.response;
+                        return response.response;
                     }
                 }
             },
@@ -81,13 +81,7 @@
                 {
                     "data": null,
                     render: function(data, type, row, meta) {
-                        return row.peserta.nama;
-                    }
-                },
-                {
-                    "data": null,
-                    render: function(data, type, row, meta) {
-                        return row.peserta.noMR;
+                        return row.peserta.nama + "[No.Mr " + row.peserta.noMR + "]";
                     }
                 },
                 {
@@ -127,7 +121,7 @@
                             "<button class=\"btn btn-info btn-sm bpjs_edit_lpk\" index=\"" + LpkList.data().count() + "\" id=\"" + row.noSep + "\">" +
                             "<i class=\"fa fa-pencil-alt\"></i> Edit" +
                             "</button>" +
-                            "<button class=\"btn btn-danger bpjs_hapus_lpk\" id=\"" + row.noSep + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
+                            "<button class=\"btn btn-danger bpjs_hapus_lpk\" id=\"" + row.noSep + "\"><i class=\"fa fa-trash\"></i> Hapus</button>" +
                             "</div>";
                     }
                 }
@@ -137,14 +131,17 @@
 
         $("body").on("click", ".bpjs_hapus_lpk", function() {
             var no_sep = $(this).attr("id");
-
+            var btn_proses = $(this);
             Swal.fire({
-                title: "Hapus LPK?",
+                title: "BPJS Hapus LPK",
+                title: "Hapus LPK No.SEP " + noSep + "?",
                 showDenyButton: true,
                 confirmButtonText: "Ya",
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses..').attr('disabled', true);
+
                     $.ajax({
                         url: __BPJS_SERVICE_URL__ + "lpk/sync.sh/deletelpk",
                         type: "DELETE",
@@ -156,7 +153,7 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
@@ -169,24 +166,30 @@
                         success: function(response) {
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    "BPJS LPK",
-                                    "Berhasil dihapus",
+                                    "BPJS Hapus LPK",
+                                    "LPK Berhasil dihapus!",
                                     "success"
                                 ).then((result) => {
                                     LpkList.ajax.reload();
+                                    btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
                                 });
                             } else {
                                 Swal.fire(
-                                    "BPJS LPK",
+                                    "BPJS Hapus LPK",
                                     response.metadata.message,
                                     "error"
-                                ).then((result) => {
-                                    //
-                                });
+                                );
+                                btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
                             }
 
                         },
                         error: function(response) {
+                            Swal.fire(
+                                "BPJS Hapus LPK",
+                                'Aksi Gagal',
+                                "error"
+                            );
+                            btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
                             console.log(response);
                         }
                     });
@@ -247,7 +250,7 @@
                 },
                 "peserta": {
                     "kelamin": "L",
-                    "nama": "123456",
+                    "nama": "Example",
                     "noKartu": "0000000001231",
                     "noMR": "123456",
                     "tglLahir": "2008-02-05"
@@ -301,12 +304,16 @@
 
             $("#txt_bpjs_lpk_jenis_layan option[value=\"" + LpkDetail.jnsPelayanan + "\"]").prop("selected", true);
             $("#txt_bpjs_lpk_jenis_layan").trigger("change");
+            $("#txt_bpjs_lpk_jenis_layan").prop("disabled", true);
 
-            loadRuangRawat("#txt_bpjs_lpk_ruang_rawat", LpkDetail.perawatan.ruangRawat.kode);
-            loadKelasRawat("#txt_bpjs_lpk_kelas_rawat", LpkDetail.perawatan.kelasRawat.kode);
-            loadSpesialistikLpk("#txt_bpjs_lpk_spesialistik", LpkDetail.perawatan.spesialistik.kode);
-            loadCaraKeluar("#txt_bpjs_lpk_cara_keluar", LpkDetail.perawatan.caraKeluar.kode);
-            loadKondisiPulang("#txt_bpjs_lpk_kondisi_pulang", LpkDetail.perawatan.kondisiPulang.kode);
+            if (LpkDetail.jnsPelayanan == 1) {
+                loadRuangRawat("#txt_bpjs_lpk_ruang_rawat", LpkDetail.perawatan.ruangRawat.kode);
+                loadKelasRawat("#txt_bpjs_lpk_kelas_rawat", LpkDetail.perawatan.kelasRawat.kode);
+                loadSpesialistikLpk("#txt_bpjs_lpk_spesialistik", LpkDetail.perawatan.spesialistik.kode);
+                loadCaraKeluar("#txt_bpjs_lpk_cara_keluar", LpkDetail.perawatan.caraKeluar.kode);
+                loadKondisiPulang("#txt_bpjs_lpk_kondisi_pulang", LpkDetail.perawatan.kondisiPulang.kode);
+            }
+
 
             $("#txt_bpjs_lpk_poli").append("<option>" + LpkDetail.poli.poli.kode + "</option>");
             $("#txt_bpjs_lpk_poli").select2("data", {
@@ -353,11 +360,12 @@
 
         $("body").on("click", ".bpjs_edit_lpk", function() {
             MODE = "EDIT";
+            var btn_proses = $(this);
+            btn_proses.html('Proses..').attr('disabled', true);
 
             var index = $(this).attr("index");
-
             var index_data = parseInt(index) - 1;
-            var dataLPK = dataEditLPK[index_data];
+            var LpkDetail = dataEditLPK[index_data];
 
             $("#title-form").text('Edit');
 
@@ -379,12 +387,16 @@
 
             $("#txt_bpjs_lpk_jenis_layan option[value=\"" + LpkDetail.jnsPelayanan + "\"]").prop("selected", true);
             $("#txt_bpjs_lpk_jenis_layan").trigger("change");
+            $("#txt_bpjs_lpk_jenis_layan").prop("disabled", true);
 
-            loadRuangRawat("#txt_bpjs_lpk_ruang_rawat", LpkDetail.perawatan.ruangRawat.kode);
-            loadKelasRawat("#txt_bpjs_lpk_kelas_rawat", LpkDetail.perawatan.kelasRawat.kode);
-            loadSpesialistikLpk("#txt_bpjs_lpk_spesialistik", LpkDetail.perawatan.spesialistik.kode);
-            loadCaraKeluar("#txt_bpjs_lpk_cara_keluar", LpkDetail.perawatan.caraKeluar.kode);
-            loadKondisiPulang("#txt_bpjs_lpk_kondisi_pulang", LpkDetail.perawatan.kondisiPulang.kode);
+            if (LpkDetail.jnsPelayanan !== 2) {
+                loadRuangRawat("#txt_bpjs_lpk_ruang_rawat", LpkDetail.perawatan.ruangRawat.kode);
+                loadKelasRawat("#txt_bpjs_lpk_kelas_rawat", LpkDetail.perawatan.kelasRawat.kode);
+                loadSpesialistikLpk("#txt_bpjs_lpk_spesialistik", LpkDetail.perawatan.spesialistik.kode);
+                loadCaraKeluar("#txt_bpjs_lpk_cara_keluar", LpkDetail.perawatan.caraKeluar.kode);
+                loadKondisiPulang("#txt_bpjs_lpk_kondisi_pulang", LpkDetail.perawatan.kondisiPulang.kode);
+            }
+
 
             $("#txt_bpjs_lpk_poli").append("<option>" + LpkDetail.poli.poli.kode + "</option>");
             $("#txt_bpjs_lpk_poli").select2("data", {
@@ -425,6 +437,7 @@
             $("#txt_bpjs_lpk_tindak_lanjut option[value=\"" + LpkDetail.rencanaTL + "\"]").prop("selected", true);
             $("#txt_bpjs_lpk_tindak_lanjut").trigger("change");
 
+            btn_proses.html('<i class=\"fa fa-pencil-alt\"></i> Edit').attr('disabled', false);
             $("#modal-lpk-bpjs").modal("show");
 
         });
@@ -433,6 +446,7 @@
         /////////ADD ZONE/////////
 
         $("#btnTambahLPK").click(function() {
+            resetForm();
             $("#title-form").text('Baru');
             $("#modal-lpk-bpjs").modal("show");
             MODE = "ADD";
@@ -504,24 +518,33 @@
             $("#txt_nokartu_lpk_new").val(data.noKartu);
             $("#txt_tgllahir_lpk_new").val(data.tglLahir);
             $("#txt_tglsep_lpk_new").val(data.tglSep);
+            $('#txt_bpjs_lpk_tgl_masuk').val(data.tglSep);
+            $('#txt_bpjs_lpk_tgl_keluar').val(data.tglSep);
 
             if (data.jnsPelayanan === "Rawat Jalan") {
                 var jns_layan = "2";
             } else {
                 var jns_layan = "1";
+
+                loadRuangRawat("#txt_bpjs_lpk_ruang_rawat");
+                loadKelasRawat("#txt_bpjs_lpk_kelas_rawat");
+                loadSpesialistikLpk("#txt_bpjs_lpk_spesialistik");
+                loadCaraKeluar("#txt_bpjs_lpk_cara_keluar");
+                loadKondisiPulang("#txt_bpjs_lpk_kondisi_pulang");
             }
             $("#txt_bpjs_lpk_jenis_layan option[value=\"" + jns_layan + "\"]").prop("selected", true);
             $("#txt_bpjs_lpk_jenis_layan").trigger("change");
+            $("#txt_bpjs_lpk_jenis_layan").prop("disabled", true);
         });
 
-        // $("#txt_bpjs_lpk_jenis_layan").select2();
-        // $("#txt_bpjs_lpk_jenis_layan").change(function() {
-        //     if (parseInt($("#txt_bpjs_lpk_jenis_layan option:selected").val()) != 2) {
-        //         $(".perawatan").fadeIn();
-        //     } else {
-        //         $(".perawatan").fadeOut();
-        //     }
-        // });
+        $("#txt_bpjs_lpk_jenis_layan").select2();
+        $("#txt_bpjs_lpk_jenis_layan").change(function() {
+            if (parseInt($("#txt_bpjs_lpk_jenis_layan option:selected").val()) != 2) {
+                $(".perawatan").fadeIn();
+            } else {
+                $(".perawatan").fadeOut();
+            }
+        });
 
         $("#txt_bpjs_lpk_tgl_masuk").datepicker({
             dateFormat: "yy-mm-dd",
@@ -533,7 +556,7 @@
             autoclose: true
         }).datepicker("setDate", new Date());
 
-        $("#txt_bpjs_lpk_jenis_layan").select2();
+        $("#txt_bpjs_lpk_jaminan").select2();
 
         $("#txt_bpjs_lpk_ruang_rawat").select2({
             "language": {
@@ -543,8 +566,6 @@
             },
             dropdownParent: $("#group_ruang_rawat")
         });
-
-        loadRuangRawat("#txt_bpjs_lpk_ruang_rawat");
 
         function loadRuangRawat(target, selected) {
             $.ajax({
@@ -590,8 +611,6 @@
             dropdownParent: $("#group_kelas_rawat")
         });
 
-        loadKelasRawat("#txt_bpjs_lpk_kelas_rawat");
-
         function loadKelasRawat(target, selected) {
             $.ajax({
                 url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getkelasrawat`,
@@ -636,7 +655,6 @@
             dropdownParent: $("#group_spesialistik")
         });
 
-        loadSpesialistikLpk("#txt_bpjs_lpk_spesialistik");
 
         function loadSpesialistikLpk(target, selected) {
             $.ajax({
@@ -682,7 +700,6 @@
             dropdownParent: $("#group_cara_keluar")
         });
 
-        loadCaraKeluar("#txt_bpjs_lpk_cara_keluar");
 
         function loadCaraKeluar(target, selected) {
             $.ajax({
@@ -728,7 +745,6 @@
             dropdownParent: $("#group_kondisi_pulang")
         });
 
-        loadKondisiPulang("#txt_bpjs_lpk_kondisi_pulang");
 
         function loadKondisiPulang(target, selected) {
             $.ajax({
@@ -1109,7 +1125,34 @@
 
         /////////END ADD ZONE/////////
 
+        function resetForm() {
+            $("#txt_bpjs_lpk_jenis_layan").prop("disabled", false);
+
+            $('#txt_bpjs_lpk_no_sep').prop('disabled', false);
+            $('#txt_bpjs_lpk_no_sep option').remove();
+            $('#txt_nama_lpk_new').val('');
+            $('#txt_nokartu_lpk_new').val('');
+            $('#txt_tgllahir_lpk_new').val('');
+            $('#txt_tglsep_lpk_new').val('');
+
+            $('#txt_bpjs_lpk_ruang_rawat option').remove();
+            $('#txt_bpjs_lpk_kelas_rawat option').remove();
+            $('#txt_bpjs_lpk_spesialistik option').remove();
+            $('#txt_bpjs_lpk_cara_keluar option').remove();
+            $('#txt_bpjs_lpk_kondisi_pulang option').remove();
+
+            $('#txt_bpjs_lpk_poli option').remove();
+            $('#txt_bpjs_lpk_dpjp option').remove();
+
+            $("#list-diagnosa tbody tr").remove();
+            $("#list-procedure tbody tr").remove();
+
+            $('#txt_bpjs_lpk_dirujukke_faskes option').remove();
+            $('#txt_bpjs_lpk_poli_kontrol_kembali option').remove();
+        }
+
         $("body").on("click", "#btnProsesLpk", function() {
+            var btn_proses = $(this);
             console.log(MODE);
             var diagnosa_list = [];
             $("#list-diagnosa tbody tr").each(function() {
@@ -1131,95 +1174,106 @@
 
             if (MODE === "ADD") {
                 Swal.fire({
-                    title: "Proses LPK BPJS?",
+                    title: "Data Sudah Benar?",
+                    text: "Proses BPJS LPK?",
                     showDenyButton: true,
                     confirmButtonText: "Ya",
                     denyButtonText: "Tidak",
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        btn_proses.html('Proses..').attr('disabled', true);
 
-                        $.ajax({
-                            url: __BPJS_SERVICE_URL__ + "lpk/sync.sh/insertlpk",
-                            type: "POST",
-                            dataType: "json",
-                            crossDomain: true,
-                            beforeSend: async function(request) {
-                                refreshToken().then((test) => {
-                                    bpjs_token = test;
-                                })
+                        if ($('#txt_bpjs_lpk_no_sep').val() !== null) {
+                            $.ajax({
+                                url: __BPJS_SERVICE_URL__ + "lpk/sync.sh/insertlpk",
+                                type: "POST",
+                                dataType: "json",
+                                crossDomain: true,
+                                beforeSend: async function(request) {
+                                    refreshToken().then((test) => {
+                                        bpjs_token = test;
+                                    })
 
-                                request.setRequestHeader("Accept", "application/json");
-                                request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                                request.setRequestHeader("x-token", bpjs_token);
-                            },
-                            "data": JSON.stringify({
-                                "request": {
-                                    "t_lpk": {
-                                        "noSep": $('#txt_bpjs_lpk_no_sep').val(),
-                                        "tglMasuk": $('#txt_bpjs_lpk_tgl_masuk').val(),
-                                        "tglKeluar": $('#txt_bpjs_lpk_tgl_keluar').val(),
-                                        "jaminan": $('#txt_bpjs_lpk_jaminan').val(),
-                                        "poli": {
-                                            "poli": $('#txt_bpjs_lpk_poli').val()
-                                        },
-                                        "perawatan": {
-                                            "ruangRawat": $('#txt_bpjs_lpk_ruang_rawat').val(),
-                                            "kelasRawat": $('#txt_bpjs_lpk_kelas_rawat').val(),
-                                            "spesialistik": $('#txt_bpjs_lpk_spesialistik').val(),
-                                            "caraKeluar": $('#txt_bpjs_lpk_cara_keluar').val(),
-                                            "kondisiPulang": $('#txt_bpjs_lpk_kondisi_pulang').val()
-                                        },
-                                        "diagnosa": diagnosa_list,
-                                        "procedure": procedure_list,
-                                        "rencanaTL": {
-                                            "tindakLanjut": $('#txt_bpjs_lpk_tindak_lanjut').val(),
-                                            "dirujukKe": {
-                                                "kodePPK": $('#txt_bpjs_lpk_dirujukke_faskes').val()
+                                    request.setRequestHeader("Accept", "application/json");
+                                    request.setRequestHeader("Content-Type", "application/json");
+                                    request.setRequestHeader("x-token", bpjs_token);
+                                },
+                                "data": JSON.stringify({
+                                    "request": {
+                                        "t_lpk": {
+                                            "noSep": $('#txt_bpjs_lpk_no_sep').val(),
+                                            "tglMasuk": $('#txt_bpjs_lpk_tgl_masuk').val(),
+                                            "tglKeluar": $('#txt_bpjs_lpk_tgl_keluar').val(),
+                                            "jaminan": $('#txt_bpjs_lpk_jaminan').val(),
+                                            "poli": {
+                                                "poli": $('#txt_bpjs_lpk_poli').val()
                                             },
-                                            "kontrolKembali": {
-                                                "tglKontrol": $('#txt_bpjs_lpk_tgl_kontrol_kembali').val(),
-                                                "poli": $('#txt_bpjs_lpk_poli_kontrol_kembali').val()
-                                            }
-                                        },
-                                        "DPJP": $('#txt_bpjs_lpk_dpjp').val(),
-                                        "user": __MY_NAME__
+                                            "perawatan": {
+                                                "ruangRawat": $('#txt_bpjs_lpk_ruang_rawat').val(),
+                                                "kelasRawat": $('#txt_bpjs_lpk_kelas_rawat').val(),
+                                                "spesialistik": $('#txt_bpjs_lpk_spesialistik').val(),
+                                                "caraKeluar": $('#txt_bpjs_lpk_cara_keluar').val(),
+                                                "kondisiPulang": $('#txt_bpjs_lpk_kondisi_pulang').val()
+                                            },
+                                            "diagnosa": diagnosa_list,
+                                            "procedure": procedure_list,
+                                            "rencanaTL": {
+                                                "tindakLanjut": $('#txt_bpjs_lpk_tindak_lanjut').val(),
+                                                "dirujukKe": {
+                                                    "kodePPK": ($('#txt_bpjs_lpk_dirujukke_faskes').val()) ? $('#txt_bpjs_lpk_dirujukke_faskes').val() : ""
+                                                },
+                                                "kontrolKembali": {
+                                                    "tglKontrol": ($('#txt_bpjs_lpk_tgl_kontrol_kembali').val()) ? $('#txt_bpjs_lpk_tgl_kontrol_kembali').val() : "",
+                                                    "poli": ($('#txt_bpjs_lpk_poli_kontrol_kembali').val()) ? $('#txt_bpjs_lpk_poli_kontrol_kembali').val() : ""
+                                                }
+                                            },
+                                            "DPJP": $('#txt_bpjs_lpk_dpjp').val(),
+                                            "user": __MY_NAME__
+                                        }
                                     }
-                                }
-                            }),
-                            success: function(response) {
-                                if (parseInt(response.metadata.code) === 200) {
+                                }),
+                                success: function(response) {
+                                    if (parseInt(response.metadata.code) === 200) {
+                                        Swal.fire(
+                                            'BPJS LPK',
+                                            'LPK Berhasil disimpan!',
+                                            'success'
+                                        ).then((result) => {
+                                            LpkList.ajax.reload();
+                                            $("#modal-lpk-bpjs").modal("hide");
+                                            btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                                        });
+                                    } else {
+                                        Swal.fire(
+                                            'BPJS LPK',
+                                            response.metadata.message,
+                                            'error'
+                                        );
+                                        btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                                    }
+                                },
+                                error: function(response) {
                                     Swal.fire(
-                                        'BPJS',
-                                        'Insert LPK Berhasil',
-                                        'success'
-                                    ).then((result) => {
-                                        LpkList.ajax.reload();
-                                        $("#modal-lpk-bpjs").modal("hide");
-                                    });
-                                } else {
-                                    Swal.fire(
-                                        'BPJS',
-                                        response.metadata.message,
+                                        'BPJS LPK',
+                                        'Aksi Gagal',
                                         'error'
-                                    ).then((result) => {
-                                        // LpkList.ajax.reload();
-                                    });
+                                    );
+                                    btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                                    console.clear();
+                                    console.log(response);
                                 }
-                            },
-                            error: function(response) {
-                                Swal.fire(
-                                    'LPK',
-                                    'Aksi Gagal',
-                                    'error'
-                                ).then((result) => {
-                                    // LpkList.ajax.reload();
-                                });
-                                console.clear();
-                                console.log(response);
-                            }
-                        });
+                            });
+                        } else {
+                            Swal.fire(
+                                'BPJS LPK',
+                                'No.SEP Tidak Boleh Kosong!',
+                                'error'
+                            );
+                            btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                        }
                     }
                 });
+
             } else if (MODE === "EDIT") {
                 Swal.fire({
                     title: "Update LPK BPJS?",
@@ -1228,6 +1282,8 @@
                     denyButtonText: "Tidak",
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        btn_proses.html('Proses..').attr('disabled', true);
+
                         $.ajax({
                             url: __BPJS_SERVICE_URL__ + "lpk/sync.sh/updatelpk",
                             type: "PUT",
@@ -1239,7 +1295,7 @@
                                 })
 
                                 request.setRequestHeader("Accept", "application/json");
-                                request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                request.setRequestHeader("Content-Type", "application/json");
                                 request.setRequestHeader("x-token", bpjs_token);
                             },
                             data: JSON.stringify({
@@ -1279,31 +1335,30 @@
                             success: function(response) {
                                 if (parseInt(response.metadata.code) === 200) {
                                     Swal.fire(
-                                        'BPJS',
+                                        'BPJS Edit LPK',
                                         'Rujukan Berhasil Diubah',
                                         'success'
                                     ).then((result) => {
                                         LpkList.ajax.reload();
                                         $("#modal-lpk-bpjs-edit").modal("hide");
+                                        btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
                                     });
                                 } else {
                                     Swal.fire(
-                                        'BPJS',
+                                        'BPJS Edit LPK',
                                         response.metadata.message,
                                         'error'
-                                    ).then((result) => {
-                                        // LpkList.ajax.reload();
-                                    });
+                                    );
+                                    btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
                                 }
                             },
                             error: function(response) {
                                 Swal.fire(
-                                    'BPJS',
+                                    'BPJS Edit LPK',
                                     'Aksi Gagal',
                                     'error'
-                                ).then((result) => {
-                                    // LpkList.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
                                 console.clear();
                                 console.log(response);
                             }

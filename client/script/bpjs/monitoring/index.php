@@ -86,23 +86,22 @@
         //Init
         DATAKUNJUNGAN = $("#bpjs_table_datakunjungan").DataTable({
             processing: true,
-            serverSide: true,
+            // serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
             serverMethod: "GET",
-            initComplete: function() {
-                $("#bpjs_table_datakunjungan_filter input").unbind().bind("keyup", function(e) {
-                    if (e.keyCode == 13) {
-                        if (this.value.length > 2 || this.value.length == 0) {
-                            DATAKUNJUNGAN.search(this.value).draw();
-                        }
-                    }
+            // initComplete: function() {
+            //     $("#bpjs_table_datakunjungan_filter input").unbind().bind("keyup", function(e) {
+            //         if (e.keyCode == 13) {
+            //             if (this.value.length > 2 || this.value.length == 0) {
+            //                 DATAKUNJUNGAN.search(this.value).draw();
+            //             }
+            //         }
 
-                    return;
-                });
-            },
+            //         return;
+            //     });
+            // },
             "ajax": {
-                // async: false,
                 url: getUrlDatakunjungan,
                 type: "GET",
                 dataType: "json",
@@ -235,23 +234,22 @@
                     clickedTab.push(2);
                     HISTORYPELAYANAN = $("#bpjs_table_datahistorypelayanan").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
-                        initComplete: function() {
-                            $("#bpjs_table_datahistorypelayanan_filter input").unbind().bind("keyup", function(e) {
-                                if (e.keyCode == 13) {
-                                    if (this.value.length > 2 || this.value.length == 0) {
-                                        HISTORYPELAYANAN.search(this.value).draw();
-                                    }
-                                }
+                        // initComplete: function() {
+                        //     $("#bpjs_table_datahistorypelayanan_filter input").unbind().bind("keyup", function(e) {
+                        //         if (e.keyCode == 13) {
+                        //             if (this.value.length > 2 || this.value.length == 0) {
+                        //                 HISTORYPELAYANAN.search(this.value).draw();
+                        //             }
+                        //         }
 
-                                return;
-                            });
-                        },
+                        //         return;
+                        //     });
+                        // },
                         "ajax": {
-                            // async: false,
                             url: getUrlDataHistoryPelayanan,
                             type: "GET",
                             dataType: "json",
@@ -373,23 +371,22 @@
                     clickedTab.push(3);
                     DATAKLAIM = $("#bpjs_table_dataklaim").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
-                        initComplete: function() {
-                            $("#bpjs_table_dataklaim_filter input").unbind().bind("keyup", function(e) {
-                                if (e.keyCode == 13) {
-                                    if (this.value.length > 2 || this.value.length == 0) {
-                                        DATAKLAIM.search(this.value).draw();
-                                    }
-                                }
+                        // initComplete: function() {
+                        //     $("#bpjs_table_dataklaim_filter input").unbind().bind("keyup", function(e) {
+                        //         if (e.keyCode == 13) {
+                        //             if (this.value.length > 2 || this.value.length == 0) {
+                        //                 DATAKLAIM.search(this.value).draw();
+                        //             }
+                        //         }
 
-                                return;
-                            });
-                        },
+                        //         return;
+                        //     });
+                        // },
                         "ajax": {
-                            // async: false,
                             url: getUrlDataklaim,
                             type: "GET",
                             dataType: "json",
@@ -503,23 +500,22 @@
                     clickedTab.push(4);
                     DATAKJASARAHARJA = $("#bpjs_table_dataklaimjasaraharja").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
-                        initComplete: function() {
-                            $("#bpjs_table_dataklaimjasaraharja_filter input").unbind().bind("keyup", function(e) {
-                                if (e.keyCode == 13) {
-                                    if (this.value.length > 2 || this.value.length == 0) {
-                                        DATAKJASARAHARJA.search(this.value).draw();
-                                    }
-                                }
+                        // initComplete: function() {
+                        //     $("#bpjs_table_dataklaimjasaraharja_filter input").unbind().bind("keyup", function(e) {
+                        //         if (e.keyCode == 13) {
+                        //             if (this.value.length > 2 || this.value.length == 0) {
+                        //                 DATAKJASARAHARJA.search(this.value).draw();
+                        //             }
+                        //         }
 
-                                return;
-                            });
-                        },
+                        //         return;
+                        //     });
+                        // },
                         "ajax": {
-                            // async: false,
                             url: getUrlDataklaimjasaraharja,
                             type: "GET",
                             dataType: "json",

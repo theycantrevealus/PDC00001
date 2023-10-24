@@ -49,20 +49,19 @@
             autoclose: true
         }).datepicker("setDate", new Date());
 
+        var getUrl = __BPJS_SERVICE_URL__ + "rujukan/sync.sh/listkeluarrujukan?tglmulai=" + $("#tglawal_listkeluarrujukan").val() + "&tglakhir=" + $("#tglakhir_listkeluarrujukan").val();
         $("#btn_search_listkeluarrujukan").click(function() {
             $('#alert-rujukanlist-container').fadeOut();
             getUrl = __BPJS_SERVICE_URL__ + "rujukan/sync.sh/listkeluarrujukan?tglmulai=" + $("#tglawal_listkeluarrujukan").val() + "&tglakhir=" + $("#tglakhir_listkeluarrujukan").val();
             MODE = "SEARCH_KELUARRUJUKAN";
             RujukanList.ajax.url(getUrl).load();
         });
+        $('#alert-rujukanlist-container').hide();
 
-        var getUrl = __BPJS_SERVICE_URL__ + "rujukan/sync.sh/listkeluarrujukan?tglmulai=2022-02-01&tglakhir=2022-03-01";
         var currentRujukan = "",
             currentRujukanText = "";
         var selectedBPJS = "",
             selectedPasien = "";
-        $('#alert-rujukanlist-container').hide();
-
 
         // LIST RUJUKAN KHUSUS
         var getUrl_rujukankhusus = __BPJS_SERVICE_URL__ + "rujukan/sync.sh/listrujukankhusus?bulan=4&tahun=2022";
@@ -77,7 +76,7 @@
         var parse_tgl_rujukankhususlist = new Date($("#tgl_rujukankhususlist").datepicker("getDate"));
         $("#btn_search_rujukankhususlist").click(function() {
             $('#alert-rujukankhusus-container').fadeOut();
-            getUrl_rujukankhusus = __BPJS_SERVICE_URL__ + "rujukan/sync.sh/listrujukankhusus?bulan=" + parse_tgl_rujukankhususlist.getMonth() + "&tahun=" + parse_tgl_rujukankhususlist.getFullYear();
+            getUrl_rujukankhusus = __BPJS_SERVICE_URL__ + "rujukan/sync.sh/listrujukankhusus?bulan=" + str_pad(2, parse_tgl_rujukankhususlist.getMonth() + 1) + "&tahun=" + parse_tgl_rujukankhususlist.getFullYear();
             MODE = "SEARCH_RUJUKANKHUSUS";
             RujukanKhususList.ajax.url(getUrl_rujukankhusus).load();
         });
@@ -815,7 +814,7 @@
                     return "Faskes tidak ditemukan";
                 }
             },
-            dropdownParent: $("#modal-rujuk-bpjs-edit"),
+            dropdownParent: $("#col_txt_bpjs_edit_tujuan_rujukan"),
             ajax: {
                 url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getfaskes`,
                 type: "POST",
@@ -861,7 +860,7 @@
                     return "Poli tidak ditemukan";
                 }
             },
-            dropdownParent: $("#modal-rujuk-bpjs-edit"),
+            dropdownParent: $("#col_txt_bpjs_edit_tujuan_poli"),
             ajax: {
                 url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getpoli`,
                 type: "GET",
@@ -909,7 +908,7 @@
                     return "Diagnosa tidak ditemukan";
                 }
             },
-            dropdownParent: $("#modal-rujuk-bpjs-edit"),
+            dropdownParent: $("#col_txt_bpjs_edit_diagnosa"),
             ajax: {
                 url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getdiagnosa`,
                 type: "POST",
@@ -938,7 +937,7 @@
                         return {
                             results: $.map(data, function(item) {
                                 return {
-                                    text: item.kode + " - " + item.nama,
+                                    text: item.nama,
                                     id: item.kode
                                 }
                             })
@@ -953,10 +952,11 @@
         $("#txt_bpjs_edit_jenis_layanan").select2();
         $("#txt_bpjs_edit_tipe_rujukan").select2();
         $("#txt_bpjs_edit_tipe_rujukan").change(function() {
-            if (parseInt($("#txt_bpjs_edit_tipe_rujukan option:selected").val()) != 2) {
+            if (parseInt($("#txt_bpjs_edit_tipe_rujukan option:selected").val()) != 1) {
                 $(".poli_edit_container").fadeIn();
             } else {
                 $(".poli_edit_container").fadeOut();
+                $("#txt_bpjs_edit_tujuan_poli option").remove();
             }
         });
 
@@ -1157,7 +1157,7 @@
                         return {
                             results: $.map(data, function(item) {
                                 return {
-                                    text: item.kode + " - " + item.nama,
+                                    text: item.nama,
                                     id: item.kode
                                 }
                             })
@@ -1173,10 +1173,11 @@
         $("#txt_bpjs_jenis_tujuan_rujukan").select2();
         $("#txt_bpjs_tipe_rujukan").select2();
         $("#txt_bpjs_tipe_rujukan").change(function() {
-            if (parseInt($("#txt_bpjs_tipe_rujukan option:selected").val()) != 2) {
+            if (parseInt($("#txt_bpjs_tipe_rujukan option:selected").val()) != 1) {
                 $(".poli_container").fadeIn();
             } else {
                 $(".poli_container").fadeOut();
+                $("#txt_bpjs_tujuan_poli option").remove();
             }
         });
 
@@ -1251,13 +1252,13 @@
 
 
         $("#txt_bpjs_rujuk_khusus_procedure").select2({
-            minimumInputLength: 2,
+            minimumInputLength: 3,
             "language": {
                 "noResults": function() {
                     return "Procedure tidak ditemukan";
                 }
             },
-            dropdownParent: $("#modal-rujukkan-khusus-bpjs"),
+            dropdownParent: $("#col_txt_bpjs_rujuk_khusus_procedure"),
             ajax: {
                 url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getprocedure`,
                 type: "POST",
@@ -1280,7 +1281,7 @@
                 processResults: function(response) {
                     console.log(response);
                     if (parseInt(response.metadata.code) !== 200) {
-                        $("#txt_bpjs_rujuk_khusus_procedure").trigger("change.select2");
+                        return [];
                     } else {
                         var data = response.response;
                         return {
@@ -1305,7 +1306,7 @@
                     return "Diagnosa tidak ditemukan";
                 }
             },
-            dropdownParent: $("#modal-rujukkan-khusus-bpjs"),
+            dropdownParent: $("#col_txt_bpjs_rujuk_khusus_diagnosa"),
             ajax: {
                 url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getdiagnosa`,
                 type: "POST",
@@ -1326,9 +1327,8 @@
                     };
                 },
                 processResults: function(response) {
-                    console.log(response);
                     if (parseInt(response.metadata.code) !== 200) {
-                        $("#txt_bpjs_rujuk_khusus_diagnosa").trigger("change.select2");
+                        return [];
                     } else {
                         var data = response.response;
                         return {
@@ -1398,159 +1398,189 @@
         });
 
         $("body").on("click", "#btnProsesRujuk", function() {
-            Swal.fire({
-                title: "Proses Rujuk BPJS?",
-                showDenyButton: true,
-                confirmButtonText: "Ya",
-                denyButtonText: "Tidak",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: __BPJS_SERVICE_URL__ + "rujukan/sync.sh/insertrujukan",
-                        type: "POST",
-                        dataType: "json",
-                        crossDomain: true,
-                        beforeSend: async function(request) {
-                            refreshToken().then((test) => {
-                                bpjs_token = test;
-                            })
+            if ($("#txt_bpjs_no_sep").val() !== null) {
+                var btn_proses = $(this);
+                Swal.fire({
+                    title: "Proses Rujuk BPJS?",
+                    showDenyButton: true,
+                    confirmButtonText: "Ya",
+                    denyButtonText: "Tidak",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        btn_proses.html('Proses...').attr('disabled', true);
+                        if ($("#txt_bpjs_tgl_rujukan").val() !== "") {
+                            $.ajax({
+                                url: __BPJS_SERVICE_URL__ + "rujukan/sync.sh/insertrujukan",
+                                type: "POST",
+                                dataType: "json",
+                                crossDomain: true,
+                                beforeSend: async function(request) {
+                                    refreshToken().then((test) => {
+                                        bpjs_token = test;
+                                    })
 
-                            request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                            request.setRequestHeader("x-token", bpjs_token);
-                        },
-                        data: JSON.stringify({
-                            "request": {
-                                "t_rujukan": {
-                                    "noSep": $("#txt_bpjs_no_sep option:selected").val(),
-                                    "tglRujukan": $("#txt_bpjs_tgl_rujukan").val(),
-                                    "tglRencanaKunjungan": $("#txt_bpjs_tgl_rencana_kunjungan").val(),
-                                    "ppkDirujuk": $("#txt_bpjs_tujuan_rujukan option:selected").val(),
-                                    "jnsPelayanan": $("#txt_bpjs_jenis_layanan option:selected").val(),
-                                    "catatan": $("#txt_bpjs_catatan").val(),
-                                    "diagRujukan": $("#txt_bpjs_diagnosa option:selected").val(),
-                                    "tipeRujukan": $("#txt_bpjs_tipe_rujukan option:selected").val(),
-                                    "poliRujukan": $("#txt_bpjs_tujuan_poli option:selected").val(),
-                                    "user": __MY_NAME__
+                                    request.setRequestHeader("Accept", "application/json");
+                                    request.setRequestHeader("Content-Type", "application/json");
+                                    request.setRequestHeader("x-token", bpjs_token);
+                                },
+                                data: JSON.stringify({
+                                    "request": {
+                                        "t_rujukan": {
+                                            "noSep": $("#txt_bpjs_no_sep").val(),
+                                            "tglRujukan": $("#txt_bpjs_tgl_rujukan").val(),
+                                            "tglRencanaKunjungan": $("#txt_bpjs_tgl_rencana_kunjungan").val(),
+                                            "ppkDirujuk": $("#txt_bpjs_tujuan_rujukan").val(),
+                                            "jnsPelayanan": $("#txt_bpjs_jenis_layanan").val(),
+                                            "catatan": $("#txt_bpjs_catatan").val(),
+                                            "diagRujukan": ($("#txt_bpjs_diagnosa").val()) ? $("#txt_bpjs_diagnosa").val() : "",
+                                            "tipeRujukan": $("#txt_bpjs_tipe_rujukan").val(),
+                                            "poliRujukan": ($("#txt_bpjs_tujuan_poli").val()) ? $("#txt_bpjs_tujuan_poli").val() : "",
+                                            "user": __MY_NAME__
+                                        }
+                                    }
+                                }),
+                                success: function(response) {
+                                    if (parseInt(response.metadata.code) === 200) {
+                                        Swal.fire(
+                                            'BPJS Rujukan',
+                                            'Rujukan Berhasil Disimpan',
+                                            'success'
+                                        ).then((result) => {
+                                            $("#modal-rujuk-bpjs").modal("hide");
+                                            btn_proses.html('<i class="fa fa-plus"></i> Tambah Rujukan Baru').attr('disabled', false);
+                                            RujukanList.ajax.reload();
+                                        });
+                                    } else {
+                                        Swal.fire(
+                                            'BPJS Rujukan',
+                                            response.metadata.message,
+                                            'error'
+                                        );
+                                        btn_proses.html('<i class="fa fa-plus"></i> Tambah Rujukan Baru').attr('disabled', false);
+                                    }
+                                },
+                                error: function(response) {
+                                    Swal.fire(
+                                        'BPJS',
+                                        'Aksi Gagal',
+                                        'error'
+                                    ).then((result) => {
+                                        RujukanList.ajax.reload();
+                                    });
+                                    console.clear();
+                                    console.log(response);
                                 }
-                            }
-                        }),
-                        success: function(response) {
-                            if (parseInt(response.metaData.code) === 200) {
-                                Swal.fire(
-                                    'BPJS',
-                                    'Rujukan Berhasil',
-                                    'success'
-                                ).then((result) => {
-                                    RujukanList.ajax.reload();
-                                    $("#modal-rujuk-bpjs").modal("hide");
-                                });
-                            } else {
-                                Swal.fire(
-                                    'BPJS',
-                                    response.metaData.message,
-                                    'error'
-                                ).then((result) => {
-                                    RujukanList.ajax.reload();
-                                });
-                            }
-                        },
-                        error: function(response) {
-                            Swal.fire(
-                                'BPJS',
-                                'Aksi Gagal',
-                                'error'
-                            ).then((result) => {
-                                RujukanList.ajax.reload();
                             });
-                            console.clear();
-                            console.log(response);
+                        } else {
+                            Swal.fire(
+                                'BPJS Rujukan',
+                                'Tanggal rujukan tidak sesuai atau tidak boleh kosong',
+                                'error'
+                            );
                         }
-                    });
-                }
-            });
+
+                    }
+                });
+            } else {
+                Swal.fire(
+                    'BPJS',
+                    'No.SEP Tidak boleh Kosong',
+                    'error'
+                );
+            }
         });
 
 
         $("body").on("click", "#btnEditRujuk", function() {
+            var btn_proses = $(this);
             Swal.fire({
-                title: "Update Rujukan BPJS?",
+                title: "BPJS Rujukan",
+                text: "Edit Rujukan No. " + $("#txt_bpjs_edit_no_rujukan").val(),
                 showDenyButton: true,
                 confirmButtonText: "Ya",
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: __BPJS_SERVICE_URL__ + "rujukan/sync.sh/updaterujukan",
-                        type: "PUT",
-                        dataType: "json",
-                        crossDomain: true,
-                        beforeSend: async function(request) {
-                            refreshToken().then((test) => {
-                                bpjs_token = test;
-                            })
+                    btn_proses.html('Proses...').attr('disabled', true);
+                    if ($("#txt_bpjs_edit_tgl_rujukan").val() !== "") {
+                        $.ajax({
+                            url: __BPJS_SERVICE_URL__ + "rujukan/sync.sh/updaterujukan",
+                            type: "PUT",
+                            dataType: "json",
+                            crossDomain: true,
+                            beforeSend: async function(request) {
+                                refreshToken().then((test) => {
+                                    bpjs_token = test;
+                                })
 
-                            request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                            request.setRequestHeader("x-token", bpjs_token);
-                        },
-                        data: JSON.stringify({
-                            "request": {
-                                "t_rujukan": {
-                                    "noRujukan": $("#txt_bpjs_edit_no_rujukan").val(),
-                                    "tglRujukan": $("#txt_bpjs_edit_tgl_rujukan").val(),
-                                    "tglRencanaKunjungan": $("#txt_bpjs_edit_tgl_rencana_kunjungan").val(),
-                                    "ppkDirujuk": $("#txt_bpjs_edit_tujuan_rujukan option:selected").val(),
-                                    "jnsPelayanan": $("#txt_bpjs_edit_jenis_layanan option:selected").val(),
-                                    "catatan": $("#txt_bpjs_edit_catatan").val(),
-                                    "diagRujukan": $("#txt_bpjs_edit_diagnosa option:selected").val(),
-                                    "tipeRujukan": $("#txt_bpjs_edit_tipe_rujukan option:selected").val(),
-                                    "poliRujukan": $("#txt_bpjs_edit_tujuan_poli option:selected").val(),
-                                    "user": __MY_NAME__
+                                request.setRequestHeader("Accept", "application/json");
+                                request.setRequestHeader("Content-Type", "application/json");
+                                request.setRequestHeader("x-token", bpjs_token);
+                            },
+                            data: JSON.stringify({
+                                "request": {
+                                    "t_rujukan": {
+                                        "noRujukan": $("#txt_bpjs_edit_no_rujukan").val(),
+                                        "tglRujukan": $("#txt_bpjs_edit_tgl_rujukan").val(),
+                                        "tglRencanaKunjungan": $("#txt_bpjs_edit_tgl_rencana_kunjungan").val(),
+                                        "ppkDirujuk": $("#txt_bpjs_edit_tujuan_rujukan").val(),
+                                        "jnsPelayanan": $("#txt_bpjs_edit_jenis_layanan").val(),
+                                        "catatan": $("#txt_bpjs_edit_catatan").val(),
+                                        "diagRujukan": ($("#txt_bpjs_edit_diagnosa").val()) ? $("#txt_bpjs_edit_diagnosa").val() : "",
+                                        "tipeRujukan": $("#txt_bpjs_edit_tipe_rujukan").val(),
+                                        "poliRujukan": ($("#txt_bpjs_edit_tujuan_poli").val()) ? $("#txt_bpjs_edit_tujuan_poli").val() : "",
+                                        "user": __MY_NAME__
+                                    }
                                 }
-                            }
-                        }),
-                        success: function(response) {
-                            console.clear();
-                            console.log(response);
-                            if (parseInt(response.metadata.code) === 200) {
+                            }),
+                            success: function(response) {
+                                console.clear();
+                                console.log(response);
+                                if (parseInt(response.metadata.code) === 200) {
+                                    Swal.fire(
+                                        'BPJS Rujukan',
+                                        'Rujukan Berhasil Diedit',
+                                        'success'
+                                    ).then((result) => {
+                                        RujukanList.ajax.reload();
+                                        $("#modal-rujuk-bpjs-edit").modal("hide");
+                                        btn_proses.html('<i class="fa fa-pencil-alt"></i> Edit Rujukan').attr('disabled', false);
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'BPJS Rujukan',
+                                        response.metadata.message,
+                                        'error'
+                                    );
+                                    btn_proses.html('<i class="fa fa-pencil-alt"></i> Edit Rujukan').attr('disabled', false);
+                                }
+                            },
+                            error: function(response) {
                                 Swal.fire(
-                                    'BPJS',
-                                    'Rujukan Berhasil Diubah',
-                                    'success'
-                                ).then((result) => {
-                                    RujukanList.ajax.reload();
-                                    $("#modal-rujuk-bpjs-edit").modal("hide");
-                                });
-                            } else {
-                                Swal.fire(
-                                    'BPJS',
-                                    response.metadata.message,
+                                    'BPJS Rujukan',
+                                    'Aksi Gagal',
                                     'error'
                                 ).then((result) => {
                                     RujukanList.ajax.reload();
                                 });
+                                console.clear();
+                                console.log(response);
                             }
-                        },
-                        error: function(response) {
-                            Swal.fire(
-                                'BPJS',
-                                'Aksi Gagal',
-                                'error'
-                            ).then((result) => {
-                                RujukanList.ajax.reload();
-                            });
-                            console.clear();
-                            console.log(response);
-                        }
-                    });
+                        });
+                    } else {
+                        Swal.fire(
+                            'BPJS Rujukan',
+                            'Tanggal rujukan tidak sesuai atau tidak boleh kosong',
+                            'error'
+                        );
+                    }
                 }
             });
         });
 
         $("body").on("click", ".bpjs_hapus_rujukan", function() {
             var no_rujukan = $(this).attr("noRujukan");
-
+            var btn_proses = $(this);
             Swal.fire({
                 title: "Rujukan Keluar RS",
                 text: "Hapus Rujukan, No. Rujukan " + no_rujukan + "?",
@@ -1559,6 +1589,7 @@
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses...').attr('disabled', true);
                     $.ajax({
                         url: __BPJS_SERVICE_URL__ + "rujukan/sync.sh/deleterujukan",
                         type: "DELETE",
@@ -1570,7 +1601,7 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
@@ -1589,18 +1620,24 @@
                                     'success'
                                 ).then((result) => {
                                     RujukanList.ajax.reload();
+                                    btn_proses.html('<i class="fa fa-ban"></i> Hapus').attr('disabled', false);
                                 });
                             } else {
                                 Swal.fire(
                                     'BPJS Rujukan Keluar RS',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    RujukanList.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class="fa fa-ban"></i> Hapus').attr('disabled', false);
                             }
                         },
                         error: function(response) {
+                            Swal.fire(
+                                'BPJS Rujukan Keluar RS',
+                                'Aksi Gagal',
+                                'error'
+                            );
+                            btn_proses.html('<i class="fa fa-ban"></i> Hapus').attr('disabled', false);
                             console.clear();
                             console.log(response);
                         }
@@ -1611,6 +1648,7 @@
 
 
         $("body").on("click", "#btnProsesRujukKhusus", function() {
+            var btn_proses = $(this);
             Swal.fire({
                 title: "Proses Rujuk Khusus BPJS?",
                 showDenyButton: true,
@@ -1618,6 +1656,7 @@
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses...').attr('disabled', true);
 
                     var diagnosa_list = [];
                     $("#list-diagnosa tbody tr").each(function() {
@@ -1647,43 +1686,42 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
-                            "noRujukan": $("#txt_bpjs_rujuk_khusus_no_rujukan").val(),
-                            "diagnosa": [diagnosa_list],
-                            "procedure": [procedure_list],
+                            "noRujukan": ($("#txt_bpjs_rujuk_khusus_no_rujukan").val()) ? $("#txt_bpjs_rujuk_khusus_no_rujukan").val() : "",
+                            "diagnosa": diagnosa_list,
+                            "procedure": procedure_list,
                             "user": __MY_NAME__
                         }),
                         success: function(response) {
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    'BPJS',
-                                    'Rujukan Berhasil',
+                                    'BPJS Rujukan Khusus',
+                                    'Rujukan Berhasil Disimpan!',
                                     'success'
                                 ).then((result) => {
                                     RujukanKhususList.ajax.reload();
                                     $("#modal-rujukkan-khusus-bpjs").modal("hide");
+                                    btn_proses.html('<i class="fa fa-plus"></i> Tambah Rujukan Khusus').attr('disabled', false);
                                 });
                             } else {
                                 Swal.fire(
-                                    'BPJS',
+                                    'BPJS Rujukan Khusus',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    RujukanKhususList.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class="fa fa-plus"></i> Tambah Rujukan Khusus').attr('disabled', false);
                             }
                         },
                         error: function(error) {
                             Swal.fire(
-                                'BPJS',
+                                'BPJS Rujukan Khusus',
                                 'Aksi Gagal',
                                 'error'
-                            ).then((result) => {
-                                RujukanKhususList.ajax.reload();
-                            });
+                            );
+                            btn_proses.html('<i class="fa fa-plus"></i> Tambah Rujukan Khusus').attr('disabled', false);
                             console.clear();
                             console.log(error);
                         }
@@ -1695,15 +1733,18 @@
         $("body").on("click", ".bpjs_hapus_rujukan_khusus", function() {
             var no_rujukan = $(this).attr("noRujukan");
             var id_rujukan = $(this).attr("id");
+            var btn_proses = $(this);
 
             Swal.fire({
                 title: "Rujukan Khusus",
-                text: "Hapus Rujukan Khusus, No. Rujukan " + no_rujukan + "?",
+                text: "Hapus Rujukan Khusus, No. " + no_rujukan + "?",
                 showDenyButton: true,
                 confirmButtonText: "Ya",
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses...').attr('disabled', true);
+
                     $.ajax({
                         url: __BPJS_SERVICE_URL__ + "rujukan/sync.sh/deleterujukankhusus",
                         type: "DELETE",
@@ -1715,7 +1756,7 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
@@ -1735,18 +1776,24 @@
                                     'success'
                                 ).then((result) => {
                                     RujukanKhususList.ajax.reload();
+                                    btn_proses.html('<i class="fa fa-ban"></i> Hapus').attr('disabled', false);
                                 });
                             } else {
                                 Swal.fire(
                                     'BPJS Rujukan Khusus',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    RujukanKhususList.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class="fa fa-ban"></i> Hapus').attr('disabled', false);
                             }
                         },
                         error: function(response) {
+                            Swal.fire(
+                                'BPJS Rujukan Khusus',
+                                'Aksi Gagal',
+                                'error'
+                            );
+                            btn_proses.html('<i class="fa fa-ban"></i> Hapus').attr('disabled', false);
                             console.clear();
                             console.log(response);
                         }
@@ -1757,7 +1804,6 @@
 
         $("body").on("click", ".bpjs_print_rujukan", function() {
             var no_rujukan = $(this).attr("id");
-            // $("#modal-cetak-rujukan").modal("show");
 
             $.ajax({
                 url: __BPJS_SERVICE_URL__ + "rujukan/sync.sh/keluarrujukanbynokartu?norujuk=" + no_rujukan,
@@ -1787,8 +1833,8 @@
                     var tgl_cetak = str_pad(2, dateNow.getDate()) + "/" + str_pad(2, dateNow.getMonth() + 1) + "/" + dateNow.getFullYear() + " " + dateNow.getHours() + ":" + dateNow.getMinutes() + ":" + dateNow.getSeconds();
                     $("#tgl_cetak").html("Tgl. Cetak " + tgl_cetak);
 
-                    $("#cetak_rujukan_berlaku_sampai").html("*) Rujukan Berlaku Sampai Dengan " + data.tglRencanaKunjungan);
-                    $("#cetak_rujukan_tgl_rencana_kunjung").html("**) Tanggal Rencana Berkunjung " + data.tglRencanaKunjungan);
+                    // $("#cetak_rujukan_berlaku_sampai").html("*) Rujukan Berlaku Sampai Dengan " + data.tglRencanaKunjungan);
+                    $("#cetak_rujukan_tgl_rencana_kunjung").html("*) Tanggal Rencana Berkunjung " + data.tglRencanaKunjungan);
 
                     $("#cetak_rujukan_nomor_rujukan").html(data.noRujukan);
                     $("#cetak_rujukan_asal_rs").html('RSUD PETALA BUMI');
@@ -1906,7 +1952,7 @@
                                 <div class="col-12 form-group">
                                     <label for="">Jenis Faskes Dirujuk</label>
                                     <select class="form-control uppercase sep" id="txt_bpjs_jenis_tujuan_rujukan">
-                                        <option value="1">Puskesmas</option>
+                                        <option value="1">Faskes Tingkat I</option>
                                         <option value="2">Rumah Sakit</option>
                                     </select>
                                 </div>
@@ -1936,7 +1982,7 @@
                                 </div>
                                 <div class="col-12 mb-9 form-group">
                                     <label for="">Catatan</label>
-                                    <textarea class="form-control" style="min-height: 200px;" id="txt_bpjs_catatan"></textarea>
+                                    <textarea class="form-control" rows="5" id="txt_bpjs_catatan"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -2022,18 +2068,18 @@
                                     <label for="">Jenis Faskes Dirujuk</label>
                                     <select class="form-control uppercase sep" id="txt_bpjs_edit_jenis_tujuan_rujukan">
                                         <option value=""></option>
-                                        <option value="1">Puskesmas</option>
+                                        <option value="1">Faskes Tingkat I</option>
                                         <option value="2">Rumah Sakit</option>
                                     </select>
                                 </div>
-                                <div class="col-12 form-group">
+                                <div class="col-12 form-group" id="col_txt_bpjs_edit_tujuan_rujukan">
                                     <label for="">Faskes Dirujuk</label>
                                     <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_edit_tujuan_rujukan"></select></select>
                                 </div>
                             </div>
 
                             <div class="col-6" id="panel-rujukan">
-                                <div class="col-12 mb-9 form-group" id="group_kelas_rawat">
+                                <div class="col-12 mb-9 form-group">
                                     <label for="">Tipe Rujukan</label>
                                     <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_edit_tipe_rujukan">
                                         <option value="0">Penuh</option>
@@ -2041,15 +2087,15 @@
                                         <option value="2">Rujuk Balik</option>
                                     </select>
                                 </div>
-                                <div class="col-12 mb-9 form-group poli_edit_container">
+                                <div class="col-12 mb-9 form-group poli_edit_container" id="col_txt_bpjs_edit_tujuan_poli">
                                     <label for="">Poli Tujuan</label>
                                     <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_edit_tujuan_poli"></select>
                                 </div>
-                                <div class="col-12 mb-9 form-group" id="group_kelas_rawat">
+                                <div class="col-12 mb-9 form-group" id="col_txt_bpjs_edit_diagnosa">
                                     <label for="">Diagnosa</label>
                                     <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_edit_diagnosa"></select>
                                 </div>
-                                <div class="col-12 mb-9 form-group" id="group_kelas_rawat">
+                                <div class="col-12 mb-9 form-group">
                                     <label for="">Catatan</label>
                                     <textarea class="form-control" style="min-height: 200px;" id="txt_bpjs_edit_catatan"></textarea>
                                 </div>
@@ -2060,7 +2106,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" id="btnEditRujuk">
-                    <i class="fa fa-plus"></i> Edit Rujukan
+                    <i class="fa fa-pencil-alt"></i> Edit Rujukan
                 </button>
                 <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
             </div>
@@ -2089,15 +2135,13 @@
                             <div class="col-6">
                                 <div class="col-12 form-group" id="col-norujukan-khusus">
                                     <label for="">No. Rujukan</label>
-                                    <!-- <input type="text" data-width="100%" class="form-control uppercase sep" id="txt_bpjs_rujuk_khusus_no_rujukan"> -->
                                     <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_rujuk_khusus_no_rujukan"></select>
                                 </div>
                                 <div class="col-12 form-group">
                                     <div class="row">
-                                        <div class="col-10 form-group" id="group_procedure">
+                                        <div class="col-10 form-group" id="col_txt_bpjs_rujuk_khusus_procedure">
                                             <label for="">Procedure</label>
                                             <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_rujuk_khusus_procedure"></select>
-                                            <!-- <select data-width="100%" class="form-control" id="txt_bpjs_lpk_procedure"></select> -->
                                         </div>
                                         <div class="col-2 form-group d-flex align-items-center mt-4">
                                             <button id="btnSimpanProcedure" type="button" class="btn btn-sm btn-primary">Tambah Procedure</button>
@@ -2120,7 +2164,7 @@
                             <div class="col-6" id="panel-rujukan">
                                 <div class="col-12 form-group">
                                     <div class="row">
-                                        <div class="col-7 form-group">
+                                        <div class="col-7 form-group" id="col_txt_bpjs_rujuk_khusus_diagnosa">
                                             <label for="">Diagnosa</label>
                                             <select data-width="100%" class="form-control uppercase sep" id="txt_bpjs_rujuk_khusus_diagnosa"></select>
                                         </div>
@@ -2221,10 +2265,10 @@
                                 <td colspan="3">Demikian atas bantuannya diucapkan banyak terima kasih.</td>
                             </tr>
                             <tr>
-                                <td colspan="3" id="cetak_rujukan_berlaku_sampai" style="padding-top: 50px;">*) Rujukan Berlaku Sampai Dengan 20 Desember 2023</td>
+                                <td colspan="3" id="cetak_rujukan_berlaku_sampai" style="padding-top: 50px;"></td>
                             </tr>
                             <tr>
-                                <td colspan="3" id="cetak_rujukan_tgl_rencana_kunjung">**) Tanggal Rencana Berkunjung 20 Desember 2023</td>
+                                <td colspan="3" id="cetak_rujukan_tgl_rencana_kunjung"></td>
                             </tr>
                         </table>
                     </div>

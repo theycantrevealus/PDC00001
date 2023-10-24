@@ -22,9 +22,9 @@
                         BPJS Lembar Pengajuan Klaim
                     </h5>
 
-                    <button class="btn btn-warning pull-right mr-1" id="btnTestEdit">
+                    <!-- <button class="btn btn-warning pull-right mr-1" id="btnTestEdit">
                         Test Edit
-                    </button>
+                    </button> -->
 
                     <button class="btn btn-sm btn-info pull-right" id="btnTambahLPK">
                         <i class="fa fa-plus"></i> Tambah LPK
@@ -63,26 +63,26 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-lpk">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. SEP</th>
-                                        <th>No. Kartu</th>
-                                        <th>Pasien</th>
-                                        <th>No. MR</th>
-                                        <th>Tgl. Masuk</th>
-                                        <th>Tgl. Keluar</th>
-                                        <th>Jns. Pelayanan</th>
-                                        <th>Poli</th>
-                                        <th>DPJP</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-lpk">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. SEP</th>
+                                            <th>No. Kartu</th>
+                                            <th>Peserta</th>
+                                            <th>Tgl. Masuk</th>
+                                            <th>Tgl. Keluar</th>
+                                            <th>Jns. Pelayanan</th>
+                                            <th>Poli</th>
+                                            <th>DPJP</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

@@ -133,23 +133,25 @@
                         <div class="alert alert-danger" id="alert-sep-dt-kunjungan"></div>
                     </div>
                     <div class="card card-body">
-                        <table class="table table-bordered table-striped largeDataType" id="table-monitoring-sep">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>No. SEP</th>
-                                    <th>Tgl. SEP</th>
-                                    <th>Nama</th>
-                                    <th>No. Kartu</th>
-                                    <th>No. Rujukan</th>
-                                    <th>Layanan</th>
-                                    <th>Poli</th>
-                                    <th>Diagnosa</th>
-                                    <th>Tgl. Plg SEP</th>
-                                    <th class="wrap_content text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped largeDataType" id="table-monitoring-sep">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>No. SEP</th>
+                                        <th>Tgl. SEP</th>
+                                        <th>Nama</th>
+                                        <th>No. Kartu</th>
+                                        <th>No. Rujukan</th>
+                                        <th>Layanan</th>
+                                        <th>Poli</th>
+                                        <th>Diagnosa</th>
+                                        <th>Tgl. Plg SEP</th>
+                                        <th class="wrap_content text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="tab-pane show fade" id="tab-poli-2">
@@ -177,22 +179,24 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-SepInduk">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. SEP</th>
-                                        <th>Tgl. SEP</th>
-                                        <th>Nama - No.Kartu</th>
-                                        <th>No. Rujukan</th>
-                                        <th>Layanan</th>
-                                        <th>Poli</th>
-                                        <th>Diagnosa</th>
-                                        <th>Tujuan Kunjungan</th>
-                                        <th class="wrap_content text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-SepInduk">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. SEP</th>
+                                            <th>Tgl. SEP</th>
+                                            <th>Nama - No.Kartu</th>
+                                            <th>No. Rujukan</th>
+                                            <th>Layanan</th>
+                                            <th>Poli</th>
+                                            <th>Diagnosa</th>
+                                            <th>Tujuan Kunjungan</th>
+                                            <th class="wrap_content text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -221,23 +225,25 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-SepInternal">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No.SEP</th>
-                                        <th>No.SEP REF</th>
-                                        <th>Tgl.SEP</th>
-                                        <th>Tgl.Rujuk Internal</th>
-                                        <th>No.Kartu Peserta</th>
-                                        <th>No.Surat</th>
-                                        <th>Poli Asal</th>
-                                        <th>Poli Tujuan</th>
-                                        <th>Diagnosa PPK</th>
-                                        <th class="wrap_content text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-SepInternal">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No.SEP</th>
+                                            <th>No.SEP REF</th>
+                                            <th>Tgl.SEP</th>
+                                            <th>Tgl.Rujuk Internal</th>
+                                            <th>No.Kartu Peserta</th>
+                                            <th>No.Surat</th>
+                                            <th>Poli Asal</th>
+                                            <th>Poli Tujuan</th>
+                                            <th>Diagnosa PPK</th>
+                                            <th class="wrap_content text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -276,19 +282,21 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-PersetujuanSep">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. Kartu</th>
-                                        <th>Nama</th>
-                                        <th>Tanggal SEP</th>
-                                        <th>Jenis Pelayanan</th>
-                                        <th>Persetujuan</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-PersetujuanSep">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. Kartu</th>
+                                            <th>Nama</th>
+                                            <th>Tanggal SEP</th>
+                                            <th>Jenis Pelayanan</th>
+                                            <th>Persetujuan</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -317,26 +325,28 @@
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <button class="btn btn-warning pull-right" id="btnUpdateTanggalPulangSep">
+                            <button class="btn btn-info pull-right" id="btnUpdateTanggalPulangSep">
                                 <i class="fa fa-plus"></i> Update Tanggal Pulang SEP
                             </button>
                         </div>
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-ListUpdateTglPlg">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No.Sep</th>
-                                        <th>No.Sep Updating</th>
-                                        <th>Nama - No.Kartu</th>
-                                        <th>Tgl.Sep</th>
-                                        <th>Tgl.Pulang</th>
-                                        <th>Status</th>
-                                        <th>PPK Tujuan</th>
-                                        <th class="wrap_content text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-ListUpdateTglPlg">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No.Sep</th>
+                                            <th>No.Sep Updating</th>
+                                            <th>Nama - No.Kartu</th>
+                                            <th>Tgl.Sep</th>
+                                            <th>Tgl.Pulang</th>
+                                            <th>Status</th>
+                                            <th>PPK Tujuan</th>
+                                            <th class="wrap_content text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -376,19 +386,21 @@
                             </div>
                             <div class="card">
                                 <div class="card-body">
-                                    <table class="table table-bordered table-striped largeDataType" id="table-SuplesiJasaRaharja">
-                                        <thead class="thead-dark">
-                                            <tr>
-                                                <th>No.Register</th>
-                                                <th>No.Sep</th>
-                                                <th>No.Sep Awal</th>
-                                                <th>No.Surat Jaminan</th>
-                                                <th>Tgl.Kejadian</th>
-                                                <th>Tgl.Sep</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped largeDataType" id="table-SuplesiJasaRaharja">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>No.Register</th>
+                                                    <th>No.Sep</th>
+                                                    <th>No.Sep Awal</th>
+                                                    <th>No.Surat Jaminan</th>
+                                                    <th>Tgl.Kejadian</th>
+                                                    <th>Tgl.Sep</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -417,19 +429,21 @@
                             </div>
                             <div class="card">
                                 <div class="card-body">
-                                    <table class="table table-bordered table-striped largeDataType" id="table-DataIndukKecelakaan">
-                                        <thead class="thead-dark">
-                                            <tr>
-                                                <th>No.Sep</th>
-                                                <th>Tgl.Kejadian</th>
-                                                <th>Kode Prov</th>
-                                                <th>Kode Kec</th>
-                                                <th>Ket.Kejadian</th>
-                                                <th>No.SEP Suplesi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody></tbody>
-                                    </table>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped largeDataType" id="table-DataIndukKecelakaan">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>No.Sep</th>
+                                                    <th>Tgl.Kejadian</th>
+                                                    <th>Kode Prov</th>
+                                                    <th>Kode Kec</th>
+                                                    <th>Ket.Kejadian</th>
+                                                    <th>No.SEP Suplesi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -460,22 +474,24 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-IntegrasiSepInacbg">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>Nama</th>
-                                        <th>No.Kartu</th>
-                                        <th>tgl.Lahir</th>
-                                        <th>No.Mr</th>
-                                        <th>JK</th>
-                                        <th>No.Rujukan</th>
-                                        <th>Kls.Rawat</th>
-                                        <th>Tgl.Pelayanan</th>
-                                        <th>Tkt.Pelayanan</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-IntegrasiSepInacbg">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Nama</th>
+                                            <th>No.Kartu</th>
+                                            <th>tgl.Lahir</th>
+                                            <th>No.Mr</th>
+                                            <th>JK</th>
+                                            <th>No.Rujukan</th>
+                                            <th>Kls.Rawat</th>
+                                            <th>Tgl.Pelayanan</th>
+                                            <th>Tkt.Pelayanan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

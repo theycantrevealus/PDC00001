@@ -67,7 +67,7 @@
         var parse_tgl_PersetujuanSep = new Date($("#tgl_PersetujuanSep").datepicker("getDate"));
         $("#btn_search_PersetujuanSep").click(function() {
             $('#alert-PersetujuanSep-container').fadeOut();
-            getUrlPersetujuanSep = __BPJS_SERVICE_URL__ + "sep/sync.sh/persetujuansep?bulan=" + parse_tgl_PersetujuanSep.getMonth() + "&tahun=" + parse_tgl_PersetujuanSep.getFullYear();
+            getUrlPersetujuanSep = __BPJS_SERVICE_URL__ + "sep/sync.sh/persetujuansep?bulan=" + str_pad(2, parse_tgl_PersetujuanSep.getMonth() + 1) + "&tahun=" + parse_tgl_PersetujuanSep.getFullYear();
             MODE = "SEARCH_PersetujuanSep";
             PersetujuanSep.ajax.url(getUrlPersetujuanSep).load();
         });
@@ -86,7 +86,8 @@
         var parse_tgl_ListUpdateTglPlg = new Date($("#tgl_ListUpdateTglPlg").datepicker("getDate"));
         $("#btn_search_ListUpdateTglPlg").click(function() {
             $('#alert-ListUpdateTglPlg-container').fadeOut();
-            getUrlListUpdateTglPlg = __BPJS_SERVICE_URL__ + "sep/sync.sh/listupdatetglplng?bulan=" + parse_tgl_ListUpdateTglPlg.getMonth() + "&tahun=" + parse_tgl_ListUpdateTglPlg.getFullYear() + "&filter=";
+
+            getUrlListUpdateTglPlg = __BPJS_SERVICE_URL__ + "sep/sync.sh/listupdatetglplng?bulan=" + str_pad(2, parse_tgl_ListUpdateTglPlg.getMonth() + 1) + "&tahun=" + parse_tgl_ListUpdateTglPlg.getFullYear() + "&filter=";
             MODE = "SEARCH_ListUpdateTglPlg";
             ListUpdateTglPlg.ajax.url(getUrlListUpdateTglPlg).load();
         });
@@ -160,7 +161,7 @@
         //INIT
         ListMonitoringSep = $("#table-monitoring-sep").DataTable({
             processing: true,
-            serverSide: true,
+            // serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
             serverMethod: "GET",
@@ -290,7 +291,7 @@
                     clickedTab.push(2);
                     SepInduk = $("#table-SepInduk").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -407,7 +408,7 @@
                     clickedTab.push(3);
                     SepInternal = $("#table-SepInternal").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -434,7 +435,7 @@
                                     return [];
                                 } else {
                                     $('#alert-SepInternal-container').fadeOut();
-                                    return response.response.list;
+                                    return response.response;
                                 }
                             }
                         },
@@ -524,7 +525,7 @@
                     clickedTab.push(4);
                     PersetujuanSep = $("#table-PersetujuanSep").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -551,7 +552,7 @@
                                     return [];
                                 } else {
                                     $('#alert-PersetujuanSep-container').fadeOut();
-                                    return response.response.list;
+                                    return response.response;
                                 }
                             }
                         },
@@ -614,7 +615,7 @@
                     clickedTab.push(5);
                     ListUpdateTglPlg = $("#table-ListUpdateTglPlg").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -641,7 +642,7 @@
                                     return [];
                                 } else {
                                     $('#alert-ListUpdateTglPlg-container').fadeOut();
-                                    return response.response.list;
+                                    return response.response;
                                 }
                             }
                         },
@@ -718,7 +719,7 @@
                     clickedTab.push(6);
                     SuplesiJasaRaharja = $("#table-SuplesiJasaRaharja").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -745,7 +746,7 @@
                                     return [];
                                 } else {
                                     $('#alert-SuplesiJasaRaharja-container').fadeOut();
-                                    return response.response.jaminan;
+                                    return response.response;
                                 }
                             }
                         },
@@ -803,7 +804,7 @@
 
                     DataIndukKecelakaan = $("#table-DataIndukKecelakaan").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -830,7 +831,7 @@
                                     return [];
                                 } else {
                                     $('#alert-DataIndukKecelakaan-container').fadeOut();
-                                    return response.response.list;
+                                    return response.response;
                                 }
                             }
                         },
@@ -905,7 +906,7 @@
                     clickedTab.push(7);
                     IntegrasiSepInacbg = $("#table-IntegrasiSepInacbg").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -932,7 +933,7 @@
                                     return [];
                                 } else {
                                     $('#alert-IntegrasiSepInacbg-container').fadeOut();
-                                    return [response.response.pesertasep];
+                                    return [response.response];
                                 }
                             }
                         },
@@ -995,7 +996,7 @@
                     clickedTab.push(8);
                     ListFingerPrint = $("#table-ListFingerPrint").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -1022,7 +1023,7 @@
                                     return [];
                                 } else {
                                     $('#alert-ListFingerPrint-container').fadeOut();
-                                    return response.response.list;
+                                    return response.response;
                                 }
                             }
                         },
@@ -1061,7 +1062,7 @@
                     clickedTab.push(9);
                     RandomQuestion = $("#table-RandomQuestion").DataTable({
                         processing: true,
-                        serverSide: true,
+                        // serverSide: true,
                         sPaginationType: "full_numbers",
                         bPaginate: true,
                         serverMethod: "GET",
@@ -1088,7 +1089,7 @@
                                     return [];
                                 } else {
                                     $('#alert-RandomQuestion-container').fadeOut();
-                                    return response.response.faskes;
+                                    return response.response;
                                 }
                             }
                         },
@@ -1670,14 +1671,17 @@
 
         $("body").on("click", ".btnHapusSEP", function() {
             var no_sep = $(this).attr("id");
+            var btn_proses = $(this);
 
             Swal.fire({
-                title: "Hapus SEP?",
+                title: "BPJS Hapus SEP?",
+                text: "Hapus SEP No.SEP " + no_sep + "?",
                 showDenyButton: true,
                 confirmButtonText: "Ya. Hapus",
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses..').attr('disabled', true);
                     $.ajax({
                         url: __BPJS_SERVICE_URL__ + "sep/sync.sh/deletesep",
                         type: "DELETE",
@@ -1689,7 +1693,7 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
@@ -1701,29 +1705,35 @@
                             }
                         }),
                         success: function(response) {
-                            console.clear();
-                            console.log(response);
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    'BPJS',
+                                    'BPJS Hapus SEP',
                                     'SEP Berhasil dihapus',
                                     'success'
                                 ).then((result) => {
                                     ListMonitoringSep.ajax.reload();
                                     SepInduk.ajax.reload();
+
+                                    btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
                                 });
                             } else {
                                 Swal.fire(
-                                    'BPJS',
+                                    'BPJS Hapus SEP',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    ListMonitoringSep.ajax.reload();
-                                    SepInduk.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
+
                             }
                         },
                         error: function(response) {
+                            Swal.fire(
+                                'BPJS Hapus SEP',
+                                'Aksi Gagal',
+                                'error'
+                            );
+                            btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
+
                             console.clear();
                             console.log(response);
                         }
@@ -1733,6 +1743,8 @@
         });
 
         $("body").on("click", ".bpjs_hapus_sepinternal", function() {
+            var btn_proses = $(this);
+
             var noSep = $(this).attr("noSep");
             var noSurat = $(this).attr("noSurat");
             var tglRujukanInternal = $(this).attr("tglRujukanInternal");
@@ -1746,6 +1758,7 @@
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses..').attr('disabled', true);
                     $.ajax({
                         url: __BPJS_SERVICE_URL__ + "sep/sync.sh/deleteinternalsep",
                         type: "DELETE",
@@ -1777,22 +1790,31 @@
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
                                     'BPJS SEP Internal',
-                                    'SEP Internal Berhasil dihapus',
+                                    'SEP Internal Berhasil dihapus!',
                                     'success'
                                 ).then((result) => {
                                     SepInternal.ajax.reload();
+                                    btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
+
                                 });
                             } else {
                                 Swal.fire(
                                     'BPJS SEP Internal',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    SepInternal.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
+
                             }
                         },
                         error: function(response) {
+                            Swal.fire(
+                                'BPJS SEP Internal',
+                                'Aksi Gagal!',
+                                'error'
+                            );
+                            btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
+
                             console.clear();
                             console.log(response);
                         }
@@ -2182,29 +2204,38 @@
 
                     if (parseInt(data.kdStatusKecelakaan) > 0) {
                         $(".laka_lantas_container").show();
+
+                        $("#txt_bpjs_laka_tanggal").datepicker({
+                            dateFormat: "yy-mm-dd",
+                            autoclose: true
+                        }).datepicker("setDate", new Date());
                     } else {
                         $(".laka_lantas_container").hide();
+
+                        $("#txt_bpjs_laka_tanggal").val('');
                     }
+
+                    var prov = "";
+                    var kab = "";
+                    var kec = "";
+
                     if (parseInt(data.kdStatusKecelakaan) > 0) {
                         $(".laka_lantas_suplesi_container").show();
+
+                        var prov = loadProvinsi("#txt_bpjs_laka_suplesi_provinsi", data.lokasiKejadian.kdProp);
+                        var kab = loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val(), data.lokasiKejadian.kdKab);
+                        var kec = loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val(), data.lokasiKejadian.kdKec);
+
                     } else {
                         $(".laka_lantas_suplesi_container").hide();
                     }
 
                     $("#txt_bpjs_laka_tanggal").val(data.lokasiKejadian.tglKejadian);
 
-                    $("#txt_bpjs_laka_tanggal").datepicker({
-                        dateFormat: "yy-mm-dd",
-                        autoclose: true
-                    }).datepicker("setDate", new Date());
 
                     $("#txt_bpjs_laka_keterangan").val(data.lokasiKejadian.ketKejadian);
                     // $("input[name=\"txt_bpjs_laka_suplesi\"][value=\"" + data.laka_lantas_suplesi + "\"]").prop("checked", true);
                     // $("#txt_bpjs_laka_suplesi_nomor").val(data.laka_lantas_suplesi_sep);
-
-                    var prov = loadProvinsi("#txt_bpjs_laka_suplesi_provinsi", data.lokasiKejadian.kdProp);
-                    var kab = loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi").val(), data.lokasiKejadian.kdKab);
-                    var kec = loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten").val(), data.lokasiKejadian.kdKec);
 
                     $("#txt_bpjs_laka_suplesi_provinsi").select2({
                         dropdownParent: $("#group_provinsi"),
@@ -2238,9 +2269,6 @@
                     SEPButton.html("<i class=\"fa fa-pencil-alt\"></i> Edit").removeClass("btn-warning").addClass("btn-info");
                     $("#modal-sep").modal("show");
 
-                    loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
-                    loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi option:selected").val());
-                    loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten option:selected").val());
 
                     $("#txt_bpjs_laka_suplesi_provinsi").select2({
                         dropdownParent: $("#group_provinsi")
@@ -2391,8 +2419,15 @@
         $("#txt_bpjs_laka").change(function() {
             if (parseInt($("#txt_bpjs_laka option:selected").val()) !== 0) {
                 $(".laka_lantas_container").fadeIn();
+
+                $("#txt_bpjs_laka_tanggal").datepicker({
+                    dateFormat: "yy-mm-dd",
+                    autoclose: true
+                }).datepicker("setDate", new Date());
             } else {
                 $(".laka_lantas_container").fadeOut();
+
+                $("#txt_bpjs_laka_tanggal").val('');
             }
         });
 
@@ -2400,12 +2435,17 @@
         $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]").change(function() {
             if (parseInt($(this).val()) === 1) {
                 $(".laka_lantas_suplesi_container").fadeIn();
+                loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
+                loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi option:selected").val());
+                loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten option:selected").val());
             } else {
                 $(".laka_lantas_suplesi_container").fadeOut();
             }
         });
 
         $("#btnProsesSEP").click(function() {
+            var btn_proses = $(this);
+
             Swal.fire({
                 title: 'Data sudah benar?',
                 showDenyButton: true,
@@ -2413,21 +2453,23 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses...').attr('disabled', true);
+
                     dataSetSEP = JSON.stringify({
                         "request": {
                             "t_sep": {
-                                "noSep": $("#txt_bpjs_no_sep").val(),
+                                "noSep": $("#txt_bpjs_nosep").val(),
                                 "klsRawat": {
-                                    "klsRawatHak": $("#txt_bpjs_kelas_rawat option:selected").val(),
-                                    "klsRawatNaik": $("#txt_bpjs_kelas_rawat_naik option:selected").val(),
-                                    "pembiayaan": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").val(),
-                                    "penanggungJawab": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").text()
+                                    "klsRawatHak": $("#txt_bpjs_kelas_rawat").val(),
+                                    "klsRawatNaik": ($("#txt_bpjs_kelas_rawat_naik").val()) ? $("#txt_bpjs_kelas_rawat_naik").val() : "",
+                                    "pembiayaan": ($("#txt_bpjs_kelas_rawat_naik_pembiayaan").val()) ? $("#txt_bpjs_kelas_rawat_naik_pembiayaan").val() : "",
+                                    "penanggungJawab": ($("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").val()) ? $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").text() : ""
                                 },
                                 "noMR": $("#txt_bpjs_rm").val(),
-                                "catatan": $("#txt_bpjs_catatan").val(),
-                                "diagAwal": $("#txt_bpjs_diagnosa_awal").val(),
+                                "catatan": ($("#txt_bpjs_catatan").val()) ? $("#txt_bpjs_catatan").val() : "",
+                                "diagAwal": ($("#txt_bpjs_diagnosa_awal").val()) ? $("#txt_bpjs_diagnosa_awal").val() : "",
                                 "poli": {
-                                    "tujuan": $("#txt_bpjs_poli_tujuan").val(),
+                                    "tujuan": ($("#txt_bpjs_poli_tujuan").val()) ? $("#txt_bpjs_poli_tujuan").val() : "",
                                     "eksekutif": $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val()
                                 },
                                 "cob": {
@@ -2446,14 +2488,14 @@
                                             "suplesi": $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]:checked").val(),
                                             "noSepSuplesi": $("#txt_bpjs_laka_suplesi_nomor").val(),
                                             "lokasiLaka": {
-                                                "kdPropinsi": $("#txt_bpjs_laka_suplesi_provinsi").val(),
-                                                "kdKabupaten": $("#txt_bpjs_laka_suplesi_kabupaten").val(),
-                                                "kdKecamatan": $("#txt_bpjs_laka_suplesi_kecamatan").val()
+                                                "kdPropinsi": ($("#txt_bpjs_laka_suplesi_provinsi").val()) ? $("#txt_bpjs_laka_suplesi_provinsi").val() : "",
+                                                "kdKabupaten": ($("#txt_bpjs_laka_suplesi_kabupaten").val()) ? $("#txt_bpjs_laka_suplesi_kabupaten").val() : "",
+                                                "kdKecamatan": ($("#txt_bpjs_laka_suplesi_kecamatan").val()) ? $("#txt_bpjs_laka_suplesi_kecamatan").val() : ""
                                             }
                                         }
                                     }
                                 },
-                                "dpjpLayan": $("#txt_bpjs_dpjp").val(),
+                                "dpjpLayan": "46",
                                 "noTelp": $("#txt_bpjs_telepon").val(),
                                 "user": __MY_NAME__
                             }
@@ -2471,41 +2513,40 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: dataSetSEP,
                         success: function(response) {
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    "Edit SEP Berhasil!",
-                                    "SEP telah diedit",
+                                    "BPJS Edit SEP",
+                                    "SEP Berhasil Diedit",
                                     "success"
                                 ).then((result) => {
                                     ListMonitoringSep.ajax.reload();
                                     SepInduk.ajax.reload();
                                     $("#modal-sep").modal("hide");
+                                    btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
                                 });
                             } else {
                                 Swal.fire(
-                                    "Gagal buat SEP",
+                                    "BPJS Edit SEP",
                                     response.metadata.message,
-                                    "warning"
-                                ).then((result) => {
-                                    ListMonitoringSep.ajax.reload();
-                                    SepInduk.ajax.reload();
-                                    $("#modal-sep").modal("hide");
-                                });
+                                    "error"
+                                );
+                                btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                             }
                         },
                         error: function(response) {
                             Swal.fire(
-                                "Edit SEP",
+                                "BPJSEdit SEP",
                                 'Aksi Gagal',
                                 "error"
-                            ).then((result) => {
-                                //
-                            });
+                            );
+                            btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                             console.log(response);
                         }
                     });
@@ -2514,13 +2555,17 @@
         });
 
         $("body").on("click", "#btnProsesPengajuanSep", function() {
+            var btn_proses = $(this);
+
             Swal.fire({
-                title: "Proses Proses Pengajuan SEP?",
+                title: "Data Sudah Benar?",
+                text: "Proses Pengajuan SEP?",
                 showDenyButton: true,
                 confirmButtonText: "Ya",
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses...').attr('disabled', true);
 
                     $.ajax({
                         url: __BPJS_SERVICE_URL__ + "sep/sync.sh/pengajuansep",
@@ -2533,7 +2578,7 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
@@ -2551,31 +2596,33 @@
                         success: function(response) {
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    'BPJS',
-                                    'Pengajuan SEP Berhasil',
+                                    'BPJS Pengajuan SEP',
+                                    'Pengajuan SEP Berhasil!',
                                     'success'
                                 ).then((result) => {
                                     PersetujuanSep.ajax.reload();
                                     $("#modal-pengajuan-sep").modal("hide");
+                                    btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                                 });
                             } else {
                                 Swal.fire(
-                                    'BPJS',
+                                    'BPJS Pengajuan SEP',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    PersetujuanSep.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                             }
                         },
                         error: function(error) {
                             Swal.fire(
-                                'BPJS',
-                                'Aksi Gagal',
+                                'BPJS Pengajuan SEP',
+                                'Aksi Gagal!',
                                 'error'
-                            ).then((result) => {
-                                //
-                            });
+                            );
+                            btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                             console.log(error);
                         }
                     });
@@ -2584,13 +2631,17 @@
         });
 
         $("body").on("click", "#btnProsesAprovalSep", function() {
+            var btn_proses = $(this);
+
             Swal.fire({
-                title: "Proses Proses Aproval Pengajuan SEP?",
+                title: "Data Sudah Benar?",
+                text: "Proses Aproval Pengajuan SEP?",
                 showDenyButton: true,
                 confirmButtonText: "Ya",
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses...').attr('disabled', true);
 
                     $.ajax({
                         url: __BPJS_SERVICE_URL__ + "sep/sync.sh/approvalsep",
@@ -2603,7 +2654,7 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
@@ -2620,31 +2671,33 @@
                         success: function(response) {
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    'BPJS',
-                                    'Aproval Pengajuan SEP Berhasil',
+                                    'Aproval Pengajuan SEP',
+                                    'Aproval Pengajuan SEP Berhasil!',
                                     'success'
                                 ).then((result) => {
                                     PersetujuanSep.ajax.reload();
                                     $("#modal-aproval-sep").modal("hide");
+                                    btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                                 });
                             } else {
                                 Swal.fire(
-                                    'BPJS',
+                                    'Aproval Pengajuan SEP',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    PersetujuanSep.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                             }
                         },
                         error: function(error) {
                             Swal.fire(
-                                'BPJS',
+                                'Aproval Pengajuan SEP',
                                 'Aksi Gagal',
                                 'error'
-                            ).then((result) => {
-                                //
-                            });
+                            );
+                            btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                             console.log(error);
                         }
                     });
@@ -2653,74 +2706,86 @@
         });
 
         $("body").on("click", "#btnProsesUpdateTglPlg", function() {
-            Swal.fire({
-                title: "Proses Update Tanggal Pulang SEP?",
-                showDenyButton: true,
-                confirmButtonText: "Ya",
-                denyButtonText: "Tidak",
-            }).then((result) => {
-                if (result.isConfirmed) {
+            var btn_proses = $(this);
+            if ($('#noSep_updatetglplg').val() !== null) {
+                Swal.fire({
+                    title: "Data Sudah Benar?",
+                    text: "Proses Update Tanggal Pulang SEP?",
+                    showDenyButton: true,
+                    confirmButtonText: "Ya",
+                    denyButtonText: "Tidak",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        btn_proses.html('Proses...').attr('disabled', true);
 
-                    $.ajax({
-                        url: __BPJS_SERVICE_URL__ + "sep/sync.sh/updatetglplng",
-                        type: "PUT",
-                        dataType: "json",
-                        crossDomain: true,
-                        beforeSend: async function(request) {
-                            refreshToken().then((test) => {
-                                bpjs_token = test;
-                            })
+                        $.ajax({
+                            url: __BPJS_SERVICE_URL__ + "sep/sync.sh/updatetglplng",
+                            type: "PUT",
+                            dataType: "json",
+                            crossDomain: true,
+                            beforeSend: async function(request) {
+                                refreshToken().then((test) => {
+                                    bpjs_token = test;
+                                })
 
-                            request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                            request.setRequestHeader("x-token", bpjs_token);
-                        },
-                        data: JSON.stringify({
-                            "request": {
-                                "t_sep": {
-                                    "noSep": $('#noSep_updatetglplg').val(),
-                                    "statusPulang": $('#statusPulang_updatetglplg').val(),
-                                    "noSuratMeninggal": $('#noSuratMeninggal_updatetglplg').val(),
-                                    "tglMeninggal": $('#tglMeninggal_updatetglplg').val(),
-                                    "tglPulang": $('#tglPulang_updatetglplg').val(),
-                                    "noLPManual": $('#noLPManual_updatetglplg').val(),
-                                    "user": __MY_NAME__
+                                request.setRequestHeader("Accept", "application/json");
+                                request.setRequestHeader("Content-Type", "application/json");
+                                request.setRequestHeader("x-token", bpjs_token);
+                            },
+                            data: JSON.stringify({
+                                "request": {
+                                    "t_sep": {
+                                        "noSep": $('#noSep_updatetglplg').val(),
+                                        "statusPulang": $('#statusPulang_updatetglplg').val(),
+                                        "noSuratMeninggal": $('#noSuratMeninggal_updatetglplg').val(),
+                                        "tglMeninggal": $('#tglMeninggal_updatetglplg').val(),
+                                        "tglPulang": $('#tglPulang_updatetglplg').val(),
+                                        "noLPManual": $('#noLPManual_updatetglplg').val(),
+                                        "user": __MY_NAME__
+                                    }
                                 }
-                            }
-                        }),
-                        success: function(response) {
-                            if (parseInt(response.metadata.code) === 200) {
+                            }),
+                            success: function(response) {
+                                if (parseInt(response.metadata.code) === 200) {
+                                    Swal.fire(
+                                        'BPJS Update Tanggal Pulang SEP',
+                                        'Update Tanggal Pulang SEP Berhasil disimpan!',
+                                        'success'
+                                    ).then((result) => {
+                                        ListUpdateTglPlg.ajax.reload();
+                                        $("#modal-update-tanggal-plg-sep").modal("hide");
+                                        btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'BPJS Update Tanggal Pulang SEP',
+                                        response.metadata.message,
+                                        'error'
+                                    );
+                                    btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
+                                }
+                            },
+                            error: function(error) {
                                 Swal.fire(
-                                    'BPJS',
-                                    'Update Tanggal Pulang SEP Berhasil',
-                                    'success'
-                                ).then((result) => {
-                                    ListUpdateTglPlg.ajax.reload();
-                                    $("#modal-aproval-sep").modal("hide");
-                                });
-                            } else {
-                                Swal.fire(
-                                    'BPJS',
-                                    response.metadata.message,
+                                    'BPJS Update Tanggal Pulang SEP',
+                                    'Aksi Gagal',
                                     'error'
-                                ).then((result) => {
-                                    ListUpdateTglPlg.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
+                                console.log(error);
                             }
-                        },
-                        error: function(error) {
-                            Swal.fire(
-                                'BPJS',
-                                'Aksi Gagal',
-                                'error'
-                            ).then((result) => {
-                                //
-                            });
-                            console.log(error);
-                        }
-                    });
-                }
-            });
+                        });
+                    }
+                });
+            } else {
+                Swal.fire(
+                    'BPJS Update Tanggal Pulang SEP',
+                    'No.SEP Tidak Boleh Kosong!',
+                    'error'
+                );
+            }
         });
     });
 </script>
@@ -2986,6 +3051,7 @@
                                             <div class="col-12 col-md-12 mb-12 form-group group_txt_bpjs_asesmen_pelayanan">
                                                 <label for="">Asesmen Pelayanan</label>
                                                 <select class="form-control uppercase sep" id="txt_bpjs_asesmen_pelayanan">
+                                                    <option value=""></option>
                                                     <option value="1">Poli Spesialis tidak tersedia pada hari sebelumnya</option>
                                                     <option value="2">Jam Poli telah berakhir pada hari sebelumnya</option>
                                                     <option value="3">Dokter Spesialis yang dimaksud tidak praktek pada hari sebelumnya</option>

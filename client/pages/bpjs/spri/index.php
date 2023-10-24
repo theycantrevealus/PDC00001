@@ -47,12 +47,6 @@
                                 <button class="btn btn-sm btn-info pull-right" id="btnTambahSPRI1">
                                     <i class="fa fa-plus"></i> Tambah SPRI / Rencana Kontrol
                                 </button>
-                                <button class="btn btn-warning pull-right mr-1" id="btnTestEdit">
-                                    Edit Test
-                                </button>
-                                <button class="btn btn-warning pull-right mr-1" id="btnCetakRkTest">
-                                    Cetak Test
-                                </button>
                             </h5>
                         </div>
                         <div class="card-body tab-content">
@@ -195,7 +189,6 @@
                                             <th>No.SEP Asal</th>
                                             <th>Poli Tuju</th>
                                             <th>Nama DPJP</th>
-                                            <th class="wrap_content text-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>

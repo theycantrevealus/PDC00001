@@ -40,7 +40,7 @@
 
         var DataPRB = $("#table-prb").DataTable({
             processing: true,
-            serverSide: true,
+            // serverSide: true,
             sPaginationType: "full_numbers",
             bPaginate: true,
             serverMethod: "GET",
@@ -67,9 +67,9 @@
                     } else {
                         $('#alert-prb-container').fadeOut();
                         if (search_by === "TGL_SRB") {
-                            return response.response.prb.list;
+                            return response.response;
                         } else if (search_by === "NO_SRB") {
-                            return [response.response.prb];
+                            return [response.response];
                         }
                     }
                 }
@@ -130,7 +130,7 @@
                             "<button class=\"btn btn-info btn-sm btnEditPRB\" no-sep=\"" + row.noSEP + "\" id=\"" + row.noSRB + "\">" +
                             "<i class=\"fa fa-pencil-alt\"></i> Edit" +
                             "</button>" +
-                            "<button class=\"btn btn-danger btnHapusPRB\" no-sep=\"" + row.noSEP + "\" id=\"" + row.noSRB + "\"><i class=\"fa fa-ban\"></i> Hapus</button>" +
+                            "<button class=\"btn btn-danger btnHapusPRB\" no-sep=\"" + row.noSEP + "\" id=\"" + row.noSRB + "\"><i class=\"fa fa-trash\"></i> Hapus</button>" +
                             "</div>";
                     }
                 }
@@ -138,16 +138,19 @@
         });
 
         $("body").on("click", ".btnHapusPRB", function() {
+            var btn_proses = $(this);
+
             var no_sep = $(this).attr("no-sep");
             var no_SRB = $(this).attr("id");
             Swal.fire({
                 title: "BPJS PRB",
-                text: "Hapus PRB " + no_SRB + "?",
+                text: "Hapus PRB No.SRB " + no_SRB + "?",
                 showDenyButton: true,
                 confirmButtonText: "Ya",
                 denyButtonText: "Tidak",
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses..').attr('disabled', true);
                     $.ajax({
                         url: `${__BPJS_SERVICE_URL__}prb/sync.sh/deleteprb`,
                         type: "DELETE",
@@ -159,7 +162,7 @@
                             })
 
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         data: JSON.stringify({
@@ -167,7 +170,7 @@
                                 "t_prb": {
                                     "noSrb": no_SRB,
                                     "noSep": no_sep,
-                                    "user": "0069R035"
+                                    "user": "0069035"
                                 }
                             }
                         }),
@@ -176,23 +179,29 @@
                             console.log(response);
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    'BPJS PRB',
+                                    'BPJS Hapus PRB',
                                     'PRB Berhasil dihapus',
                                     'success'
                                 ).then((result) => {
                                     DataPRB.ajax.reload();
+                                    btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
                                 });
                             } else {
                                 Swal.fire(
-                                    'BPJS PRB',
+                                    'BPJS Hapus PRB',
                                     response.metadata.message,
                                     'error'
-                                ).then((result) => {
-                                    // DataPRB.ajax.reload();
-                                });
+                                );
+                                btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
                             }
                         },
                         error: function(response) {
+                            Swal.fire(
+                                'BPJS Hapus PRB',
+                                'Aksi Gagal!',
+                                'error'
+                            );
+                            btn_proses.html('<i class=\"fa fa-trash\"></i> Hapus').attr('disabled', false);
                             console.clear();
                             console.log(response);
                         }
@@ -306,6 +315,9 @@
         });
 
         $("body").on("click", ".btnEditPRB", function() {
+            var btn_proses = $(this);
+            btn_proses.html('Proses..').attr('disabled', true);
+
             var no_SRB = $(this).attr("id");
             var no_sep = $(this).attr("no-sep");
             MODE = "EDIT";
@@ -377,8 +389,8 @@
                     rebaseObat();
 
                     $("#title-form").text("Edit");
+                    btn_proses.html('<i class=\"fa fa-pencil-alt\"></i> Edit').attr('disabled', false);
                     $("#modal-prb").modal("show");
-
                 },
                 error: function(response) {
                     console.log(response);
@@ -755,8 +767,9 @@
         }
 
         $("#btnProsesPRB").click(function() {
-            var obatList = [];
+            var btn_proses = $(this);
 
+            var obatList = [];
             $("#list-obat tbody tr").each(function(e) {
                 var obat = $(this).find("td:eq(0) select option:selected").val();
                 var namaObat = $(this).find("td:eq(0) select option:selected").text();
@@ -772,87 +785,98 @@
             });
 
             if (MODE === "ADD") {
-                Swal.fire({
-                    title: "BPJS PRB",
-                    text: "Buat PRB baru?",
-                    showDenyButton: true,
-                    confirmButtonText: "Ya",
-                    denyButtonText: "Tidak",
-                }).then((result) => {
-                    if (result.isConfirmed) {
+                if ($("#txt_bpjs_prb_sep").val() !== null) {
+                    Swal.fire({
+                        title: "Data Sudah Benar?",
+                        text: "Proses PRB?",
+                        showDenyButton: true,
+                        confirmButtonText: "Ya",
+                        denyButtonText: "Tidak",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            btn_proses.html('Proses..').attr('disabled', true);
 
-                        $.ajax({
-                            url: `${__BPJS_SERVICE_URL__}prb/sync.sh/insertprb`,
-                            type: "POST",
-                            dataType: "json",
-                            crossDomain: true,
-                            beforeSend: async function(request) {
-                                refreshToken().then((test) => {
-                                    bpjs_token = test;
-                                })
+                            $.ajax({
+                                url: `${__BPJS_SERVICE_URL__}prb/sync.sh/insertprb`,
+                                type: "POST",
+                                dataType: "json",
+                                crossDomain: true,
+                                beforeSend: async function(request) {
+                                    refreshToken().then((test) => {
+                                        bpjs_token = test;
+                                    })
 
-                                request.setRequestHeader("Accept", "application/json");
-                                request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                                request.setRequestHeader("x-token", bpjs_token);
-                            },
-                            data: JSON.stringify({
-                                "request": {
-                                    "t_prb": {
-                                        "noSep": $("#txt_bpjs_prb_sep").val(),
-                                        "noKartu": $("#txt_bpjs_prb_nokartu").val(),
-                                        "alamat": $("#txt_bpjs_prb_alamat").val(),
-                                        "email": $("#txt_bpjs_prb_email").val(),
-                                        "programPRB": $("#txt_bpjs_prb_program").val(),
-                                        "kodeDPJP": $("#txt_bpjs_prb_dpjp").val(),
-                                        "keterangan": $("#txt_bpjs_prb_keterangan").val(),
-                                        "saran": $("#txt_bpjs_prb_saran").val(),
-                                        "user": "0069R035",
-                                        "obat": obatList
+                                    request.setRequestHeader("Accept", "application/json");
+                                    request.setRequestHeader("Content-Type", "application/json");
+                                    request.setRequestHeader("x-token", bpjs_token);
+                                },
+                                data: JSON.stringify({
+                                    "request": {
+                                        "t_prb": {
+                                            "noSep": $("#txt_bpjs_prb_sep").val(),
+                                            "noKartu": $("#txt_bpjs_prb_nokartu").val(),
+                                            "alamat": $("#txt_bpjs_prb_alamat").val(),
+                                            "email": $("#txt_bpjs_prb_email").val(),
+                                            "programPRB": $("#txt_bpjs_prb_program").val(),
+                                            "kodeDPJP": $("#txt_bpjs_prb_dpjp").val(),
+                                            "keterangan": $("#txt_bpjs_prb_keterangan").val(),
+                                            "saran": $("#txt_bpjs_prb_saran").val(),
+                                            "user": "0069035",
+                                            "obat": obatList
+                                        }
                                     }
-                                }
-                            }),
-                            success: function(response) {
-                                if (parseInt(response.metadata.code) === 200) {
+                                }),
+                                success: function(response) {
+                                    if (parseInt(response.metadata.code) === 200) {
+                                        Swal.fire(
+                                            "BPJS PRB",
+                                            "PRB Berhasil disimpan!",
+                                            "success"
+                                        ).then((result) => {
+                                            $("#modal-prb").modal("hide");
+                                            DataPRB.ajax.reload();
+                                            btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                                        });
+                                    } else {
+                                        Swal.fire(
+                                            "BPJS PRB",
+                                            response.metadata.message,
+                                            "error"
+                                        );
+                                        btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                                    }
+                                },
+                                error: function(response) {
                                     Swal.fire(
-                                        "Pembuatan PRB Berhasil!",
-                                        "PRB telah dibuat",
-                                        "success"
-                                    ).then((result) => {
-                                        $("#modal-prb").modal("hide");
-                                        DataPRB.ajax.reload();
-                                    });
-                                } else {
-                                    Swal.fire(
-                                        "Gagal buat PRB",
-                                        response.metadata.message,
-                                        "warning"
-                                    ).then((result) => {
-                                        //
-                                    });
+                                        "BPJS PRB",
+                                        'Aksi Gagal!',
+                                        "error"
+                                    );
+                                    btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                                    console.log(response);
                                 }
-                            },
-                            error: function(response) {
-                                Swal.fire(
-                                    "PRB",
-                                    'Aksi Gagal',
-                                    "warning"
-                                ).then((result) => {
-                                    //
-                                });
-                                console.log(response);
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                } else {
+                    Swal.fire(
+                        "BPJS PRB",
+                        'No.SEP tidak boleh kosong!',
+                        "error"
+                    );
+                    btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
+                }
             } else {
                 Swal.fire({
-                    title: "BPJS PRB",
-                    text: "Buat PRB edit?",
+                    title: "Data Sudah Benar?",
+                    text: "Proses Edit PRB?",
                     showDenyButton: true,
                     confirmButtonText: "Ya",
                     denyButtonText: "Tidak",
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        btn_proses.html('Proses..').attr('disabled', true);
+
                         $.ajax({
                             url: `${__BPJS_SERVICE_URL__}prb/sync.sh/updateprb`,
                             type: "PUT",
@@ -864,7 +888,7 @@
                                 })
 
                                 request.setRequestHeader("Accept", "application/json");
-                                request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                request.setRequestHeader("Content-Type", "application/json");
                                 request.setRequestHeader("x-token", bpjs_token);
                             },
                             data: JSON.stringify({
@@ -877,7 +901,7 @@
                                         "kodeDPJP": $("#txt_bpjs_prb_dpjp").val(),
                                         "keterangan": $("#txt_bpjs_prb_keterangan").val(),
                                         "saran": $("#txt_bpjs_prb_saran").val(),
-                                        "user": "0069R035",
+                                        "user": "0069035",
                                         "obat": obatList
                                     }
                                 }
@@ -891,18 +915,24 @@
                                     ).then((result) => {
                                         $("#modal-prb").modal("hide");
                                         DataPRB.ajax.reload();
+                                        btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
                                     });
                                 } else {
                                     Swal.fire(
-                                        "Gagal edit PRB",
+                                        "BPJS PRB",
                                         response.metadata.message,
                                         "warning"
-                                    ).then((result) => {
-                                        //
-                                    });
+                                    );
+                                    btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
                                 }
                             },
                             error: function(response) {
+                                Swal.fire(
+                                    "BPJS PRB",
+                                    'Aksi Gagal!',
+                                    "warning"
+                                );
+                                btn_proses.html('<i class=\"fa fa-check\"></i> Proses').attr('disabled', false);
                                 console.log(response);
                             }
                         });

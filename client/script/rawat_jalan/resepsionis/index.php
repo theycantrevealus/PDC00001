@@ -73,8 +73,16 @@
         $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]").change(function() {
             if (parseInt($(this).val()) === 1) {
                 $(".laka_lantas_suplesi_container").fadeIn();
+
+                loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
+                loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi option:selected").val());
+                loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten option:selected").val());
             } else {
                 $(".laka_lantas_suplesi_container").fadeOut();
+
+                $("#txt_bpjs_laka_suplesi_provinsi option").remove();
+                $("#txt_bpjs_laka_suplesi_kabupaten option").remove();
+                $("#txt_bpjs_laka_suplesi_kecamatan option").remove();
             }
         });
 
@@ -764,10 +772,6 @@
 
             if (__BPJS_MODE__ > 0) {
                 //sini boskuh
-                loadProvinsi("#txt_bpjs_laka_suplesi_provinsi");
-                loadKabupaten("#txt_bpjs_laka_suplesi_kabupaten", $("#txt_bpjs_laka_suplesi_provinsi option:selected").val());
-                loadKecamatan("#txt_bpjs_laka_suplesi_kecamatan", $("#txt_bpjs_laka_suplesi_kabupaten option:selected").val());
-
 
                 loadSpesialistik("#txt_bpjs_dpjp_spesialistik");
 
@@ -1556,6 +1560,8 @@
         });
 
         $("#btnProsesSEP").click(function() {
+            var btn_proses = $(this);
+
             Swal.fire({
                 title: 'Data sudah benar?',
                 showDenyButton: true,
@@ -1563,10 +1569,13 @@
                 denyButtonText: `Belum`,
             }).then((result) => {
                 if (result.isConfirmed) {
+                    btn_proses.html('Proses...').attr('disabled', true);
+
                     var asal_rujukan = "";
                     var tanggal_rujukan = "";
                     var nomor_rujukan = "";
                     var ppk_rujukan = "";
+
                     if ($("input[type=\"radio\"][name=\"radio_tipe_rujukan\"]:checked").val() == 0) {
                         asal_rujukan = $("#txt_bpjs_jenis_asal_rujukan").val();
                         tanggal_rujukan = new Date($("#txt_bpjs_tanggal_rujukan").datepicker("getDate"));
@@ -1598,27 +1607,27 @@
                     dataSetSEP = {
                         "request": {
                             "t_sep": {
-                                "noKartu": $("#txt_bpjs_nomor").val(),
+                                "noKartu": ($("#txt_bpjs_nomor").val()) ? $("#txt_bpjs_nomor").val() : "",
                                 "tglSep": tglSekarang,
-                                "ppkPelayanan": $("#txt_bpjs_faskes").val(),
-                                "jnsPelayanan": $("#txt_bpjs_jenis_layanan option:selected").val(),
+                                "ppkPelayanan": ($("#txt_bpjs_faskes").val()) ? $("#txt_bpjs_faskes").val() : "",
+                                "jnsPelayanan": $("#txt_bpjs_jenis_layanan").val(),
                                 "klsRawat": {
                                     "klsRawatHak": kelas_rawat_parse,
-                                    "klsRawatNaik": $("#txt_bpjs_kelas_rawat_naik option:selected").val(),
-                                    "pembiayaan": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").val(),
-                                    "penanggungJawab": $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").text()
+                                    "klsRawatNaik": ($("#txt_bpjs_kelas_rawat_naik").val()) ? $("#txt_bpjs_kelas_rawat_naik").val() : "",
+                                    "pembiayaan": ($("#txt_bpjs_kelas_rawat_naik_pembiayaan").val()) ? $("#txt_bpjs_kelas_rawat_naik_pembiayaan").val() : "",
+                                    "penanggungJawab": ($("#txt_bpjs_kelas_rawat_naik_pembiayaan").val()) ? $("#txt_bpjs_kelas_rawat_naik_pembiayaan option:selected").text() : ""
                                 },
                                 "noMR": $("#txt_bpjs_rm").val().replace(new RegExp(/-/g), ""),
                                 "rujukan": {
                                     "asalRujukan": asal_rujukan,
                                     "tglRujukan": parse_tanggal_rujukan,
-                                    "noRujukan": nomor_rujukan,
-                                    "ppkRujukan": ppk_rujukan,
+                                    "noRujukan": (nomor_rujukan) ? nomor_rujukan : "",
+                                    "ppkRujukan": (ppk_rujukan) ? ppk_rujukan : "",
                                 },
                                 "catatan": $("#txt_bpjs_catatan").val(),
-                                "diagAwal": $("#txt_bpjs_diagnosa_awal").val(),
+                                "diagAwal": ($("#txt_bpjs_diagnosa_awal").val()) ? $("#txt_bpjs_diagnosa_awal").val() : "",
                                 "poli": {
-                                    "tujuan": $("#txt_bpjs_poli_tujuan").val(),
+                                    "tujuan": ($("#txt_bpjs_poli_tujuan").val()) ? $("#txt_bpjs_poli_tujuan").val() : "",
                                     "eksekutif": $("input[type=\"radio\"][name=\"txt_bpjs_poli_eksekutif\"]:checked").val()
                                 },
                                 "cob": {
@@ -1628,18 +1637,18 @@
                                     "katarak": $("input[type=\"radio\"][name=\"txt_bpjs_katarak\"]:checked").val()
                                 },
                                 "jaminan": {
-                                    "lakaLantas": $("#txt_bpjs_laka option:selected").val(),
-                                    "noLP": $("#txt_bpjs_laka_no_lp").val(),
+                                    "lakaLantas": $("#txt_bpjs_laka").val(),
+                                    "noLP": ($("#txt_bpjs_laka_no_lp").val()) ? $("#txt_bpjs_laka_no_lp").val() : "",
                                     "penjamin": {
                                         "tglKejadian": parse_tanggal_laka,
                                         "keterangan": $("#txt_bpjs_laka_keterangan").val(),
                                         "suplesi": {
                                             "suplesi": $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]:checked").val(),
-                                            "noSepSuplesi": $("#txt_bpjs_laka_suplesi_nomor").val(),
+                                            "noSepSuplesi": ($("#txt_bpjs_laka_suplesi_nomor").val()) ? $("#txt_bpjs_laka_suplesi_nomor").val() : "",
                                             "lokasiLaka": {
-                                                "kdPropinsi": $("#txt_bpjs_laka_suplesi_provinsi").val(),
-                                                "kdKabupaten": $("#txt_bpjs_laka_suplesi_kabupaten").val(),
-                                                "kdKecamatan": $("#txt_bpjs_laka_suplesi_kecamatan").val()
+                                                "kdPropinsi": ($("#txt_bpjs_laka_suplesi_provinsi").val()) ? $("#txt_bpjs_laka_suplesi_provinsi").val() : "",
+                                                "kdKabupaten": ($("#txt_bpjs_laka_suplesi_kabupaten").val()) ? $("#txt_bpjs_laka_suplesi_kabupaten").val() : "",
+                                                "kdKecamatan": ($("#txt_bpjs_laka_suplesi_kecamatan").val()) ? $("#txt_bpjs_laka_suplesi_kecamatan").val() : ""
                                             }
                                         }
                                     }
@@ -1649,10 +1658,10 @@
                                 "kdPenunjang": $("#txt_bpjs_kode_penunjang").val(),
                                 "assesmentPel": $("#txt_bpjs_asesmen_pelayanan").val(),
                                 "skdp": {
-                                    "noSurat": $("#txt_bpjs_skdp").val(),
-                                    "kodeDPJP": $("#txt_bpjs_dpjp").val(),
+                                    "noSurat": ($("#txt_bpjs_skdp").val()) ? $("#txt_bpjs_skdp").val() : "",
+                                    "kodeDPJP": ($("#txt_bpjs_dpjp").val()) ? $("#txt_bpjs_dpjp").val() : "",
                                 },
-                                "dpjpLayan": $("#txt_bpjs_dpjp").val(),
+                                "dpjpLayan": ($("#txt_bpjs_jenis_layanan").val() === '2') ? "000002" : "",
                                 "noTelp": $("#txt_bpjs_telepon").val(),
                                 "user": __MY_NAME__
                             }
@@ -1667,15 +1676,15 @@
                         crossDomain: true,
                         beforeSend: async function(request) {
                             request.setRequestHeader("Accept", "application/json");
-                            request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                            request.setRequestHeader("Content-Type", "application/json");
                             request.setRequestHeader("x-token", bpjs_token);
                         },
                         success: function(response) {
                             console.log(response.metadata.code);
                             if (parseInt(response.metadata.code) === 200) {
                                 Swal.fire(
-                                    "Pembuatan SEP Berhasil!",
-                                    "SEP telah dibuat",
+                                    "BPJS SEP",
+                                    "SEP Berhasil Disimpan!",
                                     "success"
                                 ).then((result) => {
                                     push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning").then(function() {
@@ -1685,23 +1694,28 @@
                                         $("#modal-sep-new").modal("hide");
 
                                         printSEP(response.response.sep.noSep);
+                                        btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                                     });
                                 });
                             } else {
                                 Swal.fire(
-                                    "Gagal buat SEP",
+                                    "BPJS SEP",
                                     response.metadata.message,
-                                    "warning"
-                                ).then((result) => {
+                                    "error"
+                                );
+                                btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
 
-                                    //$("#modal-sep-new").modal("hide");
-                                    /*tableAntrian.ajax.reload();
-                                    tableAntrianIGD.ajax.reload();
-                                    tableAntrianRI.ajax.reload();*/
-                                });
                             }
                         },
                         error: function(response) {
+                            Swal.fire(
+                                "BPJS SEP",
+                                response.responseJSON.metadata.message,
+                                "error"
+                            );
+                            btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
+
                             console.clear();
                             console.log(response);
                         }
@@ -3115,11 +3129,12 @@
                                             <div class="col-12 col-md-12 mb-12 form-group group_txt_bpjs_asesmen_pelayanan">
                                                 <label for="">Asesmen Pelayanan</label>
                                                 <select class="form-control uppercase sep" id="txt_bpjs_asesmen_pelayanan">
+                                                    <option value=""></option>
                                                     <option value="1">Poli Spesialis tidak tersedia pada hari sebelumnya</option>
                                                     <option value="2">Jam Poli telah berakhir pada hari sebelumnya</option>
                                                     <option value="3">Dokter Spesialis yang dimaksud tidak praktek pada hari sebelumnya</option>
-                                                    <option value="5">Tujuan Kontrol</option>
                                                     <option value="4">Atas Instruksi RS</option>
+                                                    <option value="5">Tujuan Kontrol</option>
                                                 </select>
                                             </div>
                                             <div class="col-12 col-md-12 form-group" id="group_diagnosa">

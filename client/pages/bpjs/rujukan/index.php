@@ -128,20 +128,22 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-rujukan-peserta">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No.Rujukan</th>
-                                        <th>Nama - No. Kartu</th>
-                                        <th>NIK</th>
-                                        <th>Tgl.Rujukan</th>
-                                        <th>PPK Perujuk</th>
-                                        <th>Sub/Spesialis</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-rujukan-peserta">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No.Rujukan</th>
+                                            <th>Nama - No. Kartu</th>
+                                            <th>NIK</th>
+                                            <th>Tgl.Rujukan</th>
+                                            <th>PPK Perujuk</th>
+                                            <th>Sub/Spesialis</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -179,20 +181,22 @@
                             </button>
                         </div>
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-rujukan">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. Rujukan</th>
-                                        <th>Nama - No. Kartu</th>
-                                        <th>Tgl. Rujukan</th>
-                                        <th>No. SEP</th>
-                                        <th>Jenis Pelayanan</th>
-                                        <th>PPK Dirujuk</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-rujukan">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. Rujukan</th>
+                                            <th>Nama - No. Kartu</th>
+                                            <th>Tgl. Rujukan</th>
+                                            <th>No. SEP</th>
+                                            <th>Jenis Pelayanan</th>
+                                            <th>PPK Dirujuk</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -226,21 +230,23 @@
                             </button>
                         </div>
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-rujukan-khusus">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>Id Rujukan</th>
-                                        <th>No. Rujukan</th>
-                                        <th>Tgl. Rujukan Awal</th>
-                                        <th>Tgl. Rujukan Berakhir</th>
-                                        <th>NOKAPST</th>
-                                        <th>NMPST</th>
-                                        <th>Diagnosa PPK</th>
-                                        <th class="text-center">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-rujukan-khusus">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Id Rujukan</th>
+                                            <th>No. Rujukan</th>
+                                            <th>Tgl. Rujukan Awal</th>
+                                            <th>Tgl. Rujukan Berakhir</th>
+                                            <th>NOKAPST</th>
+                                            <th>NMPST</th>
+                                            <th>Diagnosa PPK</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -280,18 +286,20 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-ListSpesialistikRujukan">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>Nama Spesialis</th>
-                                        <th>Kode Spesialis</th>
-                                        <th>Kapasitas</th>
-                                        <th>Jumlah Rujukan</th>
-                                        <th>Persentase</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-ListSpesialistikRujukan">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Nama Spesialis</th>
+                                            <th>Kode Spesialis</th>
+                                            <th>Kapasitas</th>
+                                            <th>Jumlah Rujukan</th>
+                                            <th>Persentase</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -327,15 +335,17 @@
                     </div>
                     <div class="card">
                         <div class="card-body">
-                            <table class="table table-bordered table-striped largeDataType" id="table-ListSaranaRujukan">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>Kode Sarana</th>
-                                        <th>Nama Sarana</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped largeDataType" id="table-ListSaranaRujukan">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Kode Sarana</th>
+                                            <th>Nama Sarana</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

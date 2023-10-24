@@ -23,9 +23,9 @@
                         <button class="btn btn-sm btn-info pull-right" id="btnTambahPRB">
                             <i class="fa fa-plus"></i> Tambah PRB
                         </button>
-                        <button class="btn btn-sm btn-warning pull-right mr-1" id="btnTestEdit">
+                        <!-- <button class="btn btn-sm btn-warning pull-right mr-1" id="btnTestEdit">
                             Test Edit
-                        </button>
+                        </button> -->
                     </h5>
                 </div>
                 <div class="card-header card-header-tabs-basic nav" role="tablist">
@@ -95,20 +95,22 @@
                         <div class="alert alert-danger" id="alert-prb"></div>
                     </div>
                     <div class="card card-body">
-                        <table class="table table-bordered table-striped largeDataType" id="table-prb">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>No. SRB</th>
-                                    <th>No. SEP</th>
-                                    <th>Tgl. SRB</th>
-                                    <th>Nama - No.Kartu</th>
-                                    <th>Program PRB</th>
-                                    <th>DPJP</th>
-                                    <th class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped largeDataType" id="table-prb">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>No. SRB</th>
+                                        <th>No. SEP</th>
+                                        <th>Tgl. SRB</th>
+                                        <th>Nama - No.Kartu</th>
+                                        <th>Program PRB</th>
+                                        <th>DPJP</th>
+                                        <th class="text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
