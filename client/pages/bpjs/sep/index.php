@@ -142,7 +142,6 @@
                                         <th>Nama</th>
                                         <th>No. Kartu</th>
                                         <th>No. Rujukan</th>
-                                        <th>Layanan</th>
                                         <th>Poli</th>
                                         <th>Diagnosa</th>
                                         <th>Tgl. Plg SEP</th>

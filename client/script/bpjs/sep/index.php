@@ -239,12 +239,6 @@
                 {
                     "data": null,
                     render: function(data, type, row, meta) {
-                        return (row.jnsPelayanan === "1") ? "Rawat Inap" : "Rawat Jalan";
-                    }
-                },
-                {
-                    "data": null,
-                    render: function(data, type, row, meta) {
                         return row.poli;
                     }
                 },
@@ -2524,11 +2518,11 @@
                                     "SEP Berhasil Diedit",
                                     "success"
                                 ).then((result) => {
-                                    ListMonitoringSep.ajax.reload();
-                                    SepInduk.ajax.reload();
                                     $("#modal-sep").modal("hide");
                                     btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
                                 });
+                                ListMonitoringSep.ajax.reload();
+                                SepInduk.ajax.reload();
                             } else {
                                 Swal.fire(
                                     "BPJS Edit SEP",
@@ -2906,7 +2900,8 @@
                                                     <option value="4">Kelas 2</option>
                                                     <option value="5">Kelas 3</option>
                                                     <option value="6">ICCU</option>
-                                                    <option value="7">Diatas Kelas 1</option>
+                                                    <option value="7">ICU</option>
+                                                    <option value="8">Diatas Kelas 1</option>
                                                 </select>
                                             </div>
                                             <div class="col-12 mb-9 form-group" id="group_kelas_rawat_naik">

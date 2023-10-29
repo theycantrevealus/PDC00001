@@ -13,18 +13,28 @@
         var selectedSKDP = "";
         var selectedPasien = "";
 
-        $("#txt_bpjs_tanggal_rujukan").datepicker({
-            dateFormat: "DD, dd MM yy",
-            autoclose: true,
-            beforeShow: function(i) {
-                if ($(i).attr('readonly')) {
-                    return false;
-                }
-            }
-        });
+        // $("#txt_bpjs_tanggal_rujukan").datepicker({
+        //     dateFormat: "DD, dd MM yy",
+        //     autoclose: true,
+        //     beforeShow: function(i) {
+        //         if ($(i).attr('readonly')) {
+        //             return false;
+        //         }
+        //     }
+        // });
 
-        $("#txt_bpjs_tanggal_rujukan_manualigd").datepicker({
-            dateFormat: "DD, dd MM yy",
+        // $("#txt_bpjs_tanggal_rujukan_manualigd").datepicker({
+        //     dateFormat: "DD, dd MM yy",
+        //     autoclose: true,
+        //     beforeShow: function(i) {
+        //         if ($(i).attr('readonly')) {
+        //             return false;
+        //         }
+        //     }
+        // }).datepicker("setDate", new Date());
+
+        $("#txt_bpjs_tgl_sep").datepicker({
+            dateFormat: "yy-mm-dd",
             autoclose: true,
             beforeShow: function(i) {
                 if ($(i).attr('readonly')) {
@@ -33,8 +43,13 @@
             }
         }).datepicker("setDate", new Date());
 
+        $("#txt_bpjs_tanggal_rujukan_manualigd").datepicker({
+            dateFormat: "yy-mm-dd",
+            autoclose: true
+        }).datepicker("setDate", new Date());
+
         $("#txt_bpjs_laka_tanggal").datepicker({
-            dateFormat: "DD, dd MM yy",
+            dateFormat: "yy-mm-dd",
             autoclose: true
         }).datepicker("setDate", new Date());
 
@@ -662,59 +677,6 @@
 
         var isRujukan = false;
 
-        // $("#txt_bpjs_dpjp").select2({
-        //     minimumInputLength: 2,
-        //     "language": {
-        //         "noResults": function() {
-        //             return "DPJP tidak ditemukan";
-        //         }
-        //     },
-        //     dropdownParent: $("#group_dpjp"),
-        //     ajax: {
-        //         dataType: "json",
-        //         headers: {
-        //             "Authorization": "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>,
-        //             "Content-Type": "application/json",
-        //         },
-        //         url: __HOSTAPI__ + "/BPJS/get_dpjp/",
-        //         type: "GET",
-        //         data: function(term) {
-        //             return {
-        //                 search: term.term,
-        //                 jenis: $("#txt_bpjs_jenis_asal_rujukan").val(),
-        //                 spesialistik: $("#txt_bpjs_dpjp_spesialistik").val()
-        //             };
-        //         },
-        //         cache: true,
-        //         processResults: function(response) {
-
-        //             console.clear();
-
-        //             console.log("Jenis " + $("#txt_bpjs_jenis_asal_rujukan").val());
-        //             console.log("Spesialistik " + $("#txt_bpjs_dpjp_spesialistik").val());
-
-
-        //             console.log(response.response_package.data);
-
-        //             if (response.response_package.data === null) {
-        //                 $("#txt_bpjs_dpjp").trigger("change.select2");
-        //             } else {
-        //                 var data = response.response_package.data.list;
-        //                 return {
-        //                     results: $.map(data, function(item) {
-        //                         return {
-        //                             text: item.nama,
-        //                             id: item.kode
-        //                         }
-        //                     })
-        //                 };
-        //             }
-        //         }
-        //     }
-        // }).addClass("form-control").on("select2:select", function(e) {
-        //     //
-        // });
-
         $("body").on("click", ".daftar_sep", function() {
             var id = $(this).attr("id").split("_");
             id = id[id.length - 1];
@@ -794,7 +756,12 @@
                 });
 
                 $("#txt_bpjs_dpjp").select2({
-                    dropdownParent: $("#group_dpjp")
+                    dropdownParent: $("#group_dpjp"),
+                    "language": {
+                        "noResults": function() {
+                            return 'DPJP tidak ditemukan'
+                        }
+                    }
                 });
 
                 $("#txt_bpjs_laka_suplesi_kabupaten").select2({
@@ -1578,16 +1545,15 @@
 
                     if ($("input[type=\"radio\"][name=\"radio_tipe_rujukan\"]:checked").val() == 0) {
                         asal_rujukan = $("#txt_bpjs_jenis_asal_rujukan").val();
-                        tanggal_rujukan = new Date($("#txt_bpjs_tanggal_rujukan").datepicker("getDate"));
+                        tanggal_rujukan = $("#txt_bpjs_tanggal_rujukan").val();
                         nomor_rujukan = $("#txt_bpjs_nomor_rujukan").val();
                         ppk_rujukan = $("#txt_bpjs_asal_rujukan").val();
                     } else {
                         asal_rujukan = $("#txt_bpjs_jenis_asal_rujukan_manualigd").val();
-                        tanggal_rujukan = new Date($("#txt_bpjs_tanggal_rujukan_manualigd").datepicker("getDate"));
+                        tanggal_rujukan = $("#txt_bpjs_tanggal_rujukan_manualigd").val();
                         nomor_rujukan = $("#txt_bpjs_nomor_rujukan_manualigd").val();
                         ppk_rujukan = $("#txt_bpjs_asal_rujukan_manualigd").val();
                     }
-                    var parse_tanggal_rujukan = tanggal_rujukan.getFullYear() + "-" + str_pad(2, tanggal_rujukan.getMonth() + 1) + "-" + str_pad(2, tanggal_rujukan.getDate());
 
                     var kelas_rawat_parse = "";
                     if ($("#txt_bpjs_kelas_rawat option:selected").text() === 'Kelas 1') {
@@ -1597,9 +1563,6 @@
                     } else if ($("#txt_bpjs_kelas_rawat option:selected").text() === 'Kelas 3') {
                         kelas_rawat_parse = "3";
                     }
-
-                    var tanggal_laka = new Date($("#txt_bpjs_laka_tanggal").datepicker("getDate"));
-                    var parse_tanggal_laka = tanggal_laka.getFullYear() + "-" + str_pad(2, tanggal_laka.getMonth() + 1) + "-" + str_pad(2, tanggal_laka.getDate());
 
                     var dateNow = new Date();
                     var tglSekarang = dateNow.getFullYear() + "-" + str_pad(2, dateNow.getMonth() + 1) + "-" + str_pad(2, dateNow.getDate());
@@ -1620,7 +1583,7 @@
                                 "noMR": $("#txt_bpjs_rm").val().replace(new RegExp(/-/g), ""),
                                 "rujukan": {
                                     "asalRujukan": asal_rujukan,
-                                    "tglRujukan": parse_tanggal_rujukan,
+                                    "tglRujukan": tanggal_rujukan,
                                     "noRujukan": (nomor_rujukan) ? nomor_rujukan : "",
                                     "ppkRujukan": (ppk_rujukan) ? ppk_rujukan : "",
                                 },
@@ -1640,7 +1603,7 @@
                                     "lakaLantas": $("#txt_bpjs_laka").val(),
                                     "noLP": ($("#txt_bpjs_laka_no_lp").val()) ? $("#txt_bpjs_laka_no_lp").val() : "",
                                     "penjamin": {
-                                        "tglKejadian": parse_tanggal_laka,
+                                        "tglKejadian": $("#txt_bpjs_laka_tanggal").val(),
                                         "keterangan": $("#txt_bpjs_laka_keterangan").val(),
                                         "suplesi": {
                                             "suplesi": $("input[type=\"radio\"][name=\"txt_bpjs_laka_suplesi\"]:checked").val(),
@@ -1682,9 +1645,10 @@
                         success: function(response) {
                             console.log(response.metadata.code);
                             if (parseInt(response.metadata.code) === 200) {
+                                var data = response.response;
                                 Swal.fire(
-                                    "BPJS SEP",
                                     "SEP Berhasil Disimpan!",
+                                    "No.SEP " + data.noSep,
                                     "success"
                                 ).then((result) => {
                                     push_socket(__ME__, "antrian_poli_baru", "*", "Antrian pasien a/n. " + $("#nama").val(), "warning").then(function() {
@@ -1693,7 +1657,7 @@
                                         tableAntrianRI.ajax.reload();
                                         $("#modal-sep-new").modal("hide");
 
-                                        printSEP(response.response.sep.noSep);
+                                        printSEP(data.noSep);
                                         btn_proses.html('<i class="fa fa-check"></i> Proses').attr('disabled', false);
 
                                     });
@@ -2075,14 +2039,7 @@
                 success: function(response) {
                     $(target + " option").remove();
                     if (parseInt(response.metadata.code) !== 200) {
-                        $("#txt_bpjs_dpjp").select2({
-                            "language": {
-                                "noResults": function() {
-                                    return 'DPJP tidak ditemukan'
-                                }
-                            }
-                        });
-                        $("#txt_bpjs_dpjp").trigger("change.select2");
+                        return [];
                     } else {
                         var data = response.response;
                         for (var a = 0; a < data.length; a++) {
@@ -2530,7 +2487,7 @@
                     $("#sep_penjamin").html(dataSEP.penjamin);
 
                     $.ajax({
-                        url: __BPJS_SERVICE_URL__ + "rc/sync.sh/carisep/?nomorsep=" + no_sep,
+                        url: __BPJS_SERVICE_URL__ + "rc/sync.sh/carisep/?nomorsep=" + target,
                         type: "GET",
                         dataType: "json",
                         crossDomain: true,
@@ -2872,7 +2829,7 @@
 
                                         <div class="col-12 form-group">
                                             <label for="">Tanggal SEP</label>
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tgl_sep" readonly value="<?php echo date('d F Y'); ?>">
+                                            <input type="text" autocomplete="off" class="form-control uppercase" id="txt_bpjs_tgl_sep" readonly>
                                         </div>
                                         <div class="col-12 form-group">
                                             <label for="">Faskes</label>
@@ -2928,7 +2885,8 @@
                                                     <option value="4">Kelas 2</option>
                                                     <option value="5">Kelas 3</option>
                                                     <option value="6">ICCU</option>
-                                                    <option value="7">Diatas Kelas 1</option>
+                                                    <option value="7">ICU</option>
+                                                    <option value="8">Diatas Kelas 1</option>
                                                 </select>
                                             </div>
                                             <div class="col-12 mb-9 form-group" id="group_kelas_rawat_naik">
@@ -3157,7 +3115,7 @@
                                                     </div>
                                                     <div class="col-6 form-group" id="group_dpjp">
                                                         <label for="">DPJP</label>
-                                                        <select class="form-control sep" id="txt_bpjs_dpjp"></select>
+                                                        <select class="form-control" id="txt_bpjs_dpjp"></select>
                                                     </div>
                                                 </div>
                                             </div>
