@@ -82,8 +82,8 @@
             autoclose: true
         }).datepicker("setDate", new Date());
 
-        var getUrlListUpdateTglPlg = __BPJS_SERVICE_URL__ + "sep/sync.sh/listupdatetglplng?bulan=1&tahun=2022&filter=";
         var parse_tgl_ListUpdateTglPlg = new Date($("#tgl_ListUpdateTglPlg").datepicker("getDate"));
+        var getUrlListUpdateTglPlg = __BPJS_SERVICE_URL__ + "sep/sync.sh/listupdatetglplng?bulan=" + str_pad(2, parse_tgl_ListUpdateTglPlg.getMonth() + 1) + "&tahun=" + parse_tgl_ListUpdateTglPlg.getFullYear() + "&filter=";
         $("#btn_search_ListUpdateTglPlg").click(function() {
             $('#alert-ListUpdateTglPlg-container').fadeOut();
 
@@ -1401,7 +1401,7 @@
             var btn_detail = $(this);
             btn_detail.html("Memuat...").removeClass("btn-info").addClass("btn-warning");
 
-            $("#detail_dataupdatetglplg_noSep").html(nosep);
+            $("#detail_dataupdatetglplg_noSep").html(noSep);
             $("#detail_dataupdatetglplg_noSepUpdating").html(noSepUpdating);
             $("#detail_dataupdatetglplg_nama").html(nama);
             $("#detail_dataupdatetglplg_noKartu").html(noKartu);
@@ -1409,6 +1409,7 @@
             $("#detail_dataupdatetglplg_jnsPelayanan").html(jnsPelayanan);
             $("#detail_dataupdatetglplg_ppkTujuan").html(ppkTujuan);
             $("#detail_dataupdatetglplg_tglPulang").html(tglPulang);
+            $("#detail_dataupdatetglplg_status").html((status) ? status : "-");
             $("#detail_dataupdatetglplg_tglMeninggal").html((tglMeninggal) ? tglMeninggal : "-");
             $("#detail_dataupdatetglplg_noSurat").html((noSurat) ? noSurat : "-");
             $("#detail_dataupdatetglplg_keterangan").html(keterangan);
@@ -3733,7 +3734,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="col-lg-8 offset-sm-3">
+                <div class="col-lg-8 offset-sm-2">
                     <h5 class="modal-title" id="modal-large-title">
                         <img src="<?php echo __HOSTNAME__;  ?>/template/assets/images/bpjs.png" class="img-responsive" width="275" height="45" style="margin-right: 50px" /> <span>Detail Data Update Tanggal Pulang SEP</span>
                     </h5>
@@ -3744,7 +3745,7 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-4 offset-sm-3">
+                    <div class="col-4 offset-sm-2">
                         <table class="table form-mode">
                             <tr>
                                 <td style="width: 150px;">No. SEP</td>

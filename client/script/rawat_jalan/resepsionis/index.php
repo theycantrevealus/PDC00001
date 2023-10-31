@@ -722,6 +722,7 @@
                                     selectedSEPNoKartu = metaDataBPJS.data.peserta.noKartu;
                                     $("#txt_bpjs_nomor").val(metaDataBPJS.data.peserta.noKartu);
                                     // loadKelasRawat(metaDataBPJS.data.peserta.hakKelas.keterangan);
+                                    $("#txt_bpjs_kelas_rawat").val(metaDataBPJS.data.peserta.hakKelas.kode).trigger("change");
                                 }
                             }
                         }
@@ -1176,7 +1177,7 @@
                                 return {
                                     results: $.map(data, function(item) {
                                         return {
-                                            text: item.nama,
+                                            text: item.kode + " - " + item.nama,
                                             id: item.kode
                                         }
                                     })
@@ -1225,7 +1226,7 @@
                                 return {
                                     results: $.map(data, function(item) {
                                         return {
-                                            text: item.kode + " - " + item.nama,
+                                            text: item.nama,
                                             id: item.kode
                                         }
                                     })
