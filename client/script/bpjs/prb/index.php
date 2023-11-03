@@ -364,6 +364,10 @@
                     $("#txt_bpjs_prb_program").prop("disabled", true);
                     $("#txt_bpjs_prb_program").trigger("change");
 
+                    $("#txt_bpjs_prb_spesialistik_dpjp option").remove();
+                    $("#txt_bpjs_prb_dpjp option").remove();
+
+
                     $("#txt_bpjs_prb_dpjp").append("<option value='" + data.DPJP.kode + "'>" + data.DPJP.nama + "</option>");
                     $("#txt_bpjs_prb_dpjp").select2("data", {
                         id: data.DPJP.kode,
@@ -428,7 +432,6 @@
             loadProgramPRB("#txt_bpjs_prb_program");
             $("#txt_bpjs_prb_program").prop("disabled", false);
             $("#txt_bpjs_prb_program").trigger("change");
-            loadSpesialistik("#txt_bpjs_prb_spesialistik_dpjp");
 
             $("#list-obat tbody tr").remove();
             initRowAdd();
@@ -552,67 +555,60 @@
 
         $("#txt_bpjs_prb_jenis_layan_dpjp").change(function() {
             loadDPJPSpesialis("#txt_bpjs_prb_dpjp");
-            $("txt_bpjs_prb_dpjp option").remove();
         });
 
         $("#txt_bpjs_prb_spesialistik_dpjp").select2().on("select2:select", function(e) {
             loadDPJPSpesialis("#txt_bpjs_prb_dpjp");
         });
 
+
         $("#txt_bpjs_prb_spesialistik_dpjp").select2({
+            minimumInputLength: 2,
             "language": {
                 "noResults": function() {
-                    return "Spesialistik tidak ditemukan";
+                    return "Spesialis/Subspesialis tidak ditemukan";
                 }
             },
-            dropdownParent: $("#col_spesialistik")
-        });
-
-        loadSpesialistik("#txt_bpjs_prb_spesialistik_dpjp");
-
-        function loadSpesialistik(target, selected) {
-            $('#loader-search-spesialistik').attr('hidden', false);
-            $.ajax({
-                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getspesialis`,
+            dropdownParent: $("#col_spesialistik"),
+            ajax: {
+                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getpoli`,
                 type: "GET",
                 dataType: "json",
                 crossDomain: true,
                 beforeSend: async function(request) {
-                    refreshToken().then((test) => {
-                        bpjs_token = test;
-                    })
-
                     request.setRequestHeader("Accept", "application/json");
                     request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     request.setRequestHeader("x-token", bpjs_token);
                 },
-                success: function(response) {
-                    $('#loader-search-spesialistik').attr('hidden', true);
-                    $(target + " option").remove();
+                data: function(term) {
+                    return {
+                        kode: term.term
+                    };
+                },
+                processResults: function(response) {
                     if (parseInt(response.metadata.code) !== 200) {
                         return [];
                     } else {
                         var data = response.response;
-                        for (var a = 0; a < data.length; a++) {
-                            var selection = document.createElement("OPTION");
-                            if (data[a].kode === selected) {
-                                $(selection).attr({
-                                    "selected": "selected"
-                                });
-                            }
-                            $(selection).attr("value", data[a].kode).html(data[a].nama);
-                            $(target).append(selection);
-                        }
-                        if (MODE === "ADD") {
-                            loadDPJPSpesialis("#txt_bpjs_prb_dpjp");
-                        }
+                        console.log(data);
+                        return {
+                            results: $.map(data, function(item) {
+                                return {
+                                    text: item.kode + " - " + item.nama,
+                                    id: item.kode
+                                }
+                            })
+                        };
                     }
                 },
-                error: function(response) {
-                    console.log(response);
+                error: function(error) {
+                    console.clear();
+                    console.log(error);
                 }
-            });
-        }
+            }
+        }).addClass("form-control").on("select2:select", function(e) {
+            loadDPJPSpesialis("#txt_bpjs_dpjp");
+        });
 
         $("#txt_bpjs_prb_dpjp").select2({
             "language": {
@@ -1027,7 +1023,7 @@
                                     </div>
                                     <div class="col-12 form-group" id="col_spesialistik">
                                         <div class="col-12 row">
-                                            <label for="">Spesialistik</label>
+                                            <label for="">Spesialis/Subspesialis DPJP</label>
                                             <div class="loader loader-lg loader-primary ml-2" id="loader-search-spesialistik" hidden></div>
                                         </div>
                                         <select class="form-control uppercase" id="txt_bpjs_prb_spesialistik_dpjp"></select>

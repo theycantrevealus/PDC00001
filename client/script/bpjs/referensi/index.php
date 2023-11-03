@@ -1307,27 +1307,34 @@
         $("#dpjp_text_search_jns").select2();
 
         $("#dpjp_text_search_spesialis").select2({
+            minimumInputLength: 2,
+            "language": {
+                "noResults": function() {
+                    return "Spesialis/Subspesialis tidak ditemukan";
+                }
+            },
             dropdownParent: $("#group_dpjp_text_search_spesialis"),
             ajax: {
-                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getspesialis`,
-                type: "POST",
+                url: `${__BPJS_SERVICE_URL__}ref/sync.sh/getpoli`,
+                type: "GET",
                 dataType: "json",
                 crossDomain: true,
                 beforeSend: async function(request) {
-                    refreshToken().then((test) => {
-                        bpjs_token = test;
-                    })
-
                     request.setRequestHeader("Accept", "application/json");
                     request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                     request.setRequestHeader("x-token", bpjs_token);
                 },
+                data: function(term) {
+                    return {
+                        kode: term.term
+                    };
+                },
                 processResults: function(response) {
-                    console.log(response);
-                    if (response.metadata.code === null) {
-                        $("#dpjp_text_search_spesialis").trigger("change.select2");
+                    if (parseInt(response.metadata.code) !== 200) {
+                        return [];
                     } else {
                         var data = response.response;
+                        console.log(data);
                         return {
                             results: $.map(data, function(item) {
                                 return {
@@ -1337,6 +1344,10 @@
                             })
                         };
                     }
+                },
+                error: function(error) {
+                    console.clear();
+                    console.log(error);
                 }
             }
         }).addClass("form-control").on("select2:select", function(e) {
