@@ -253,6 +253,7 @@
 				totalRequest += parseFloat(currentCount);
 
 				for(var bKey in metaData[selectedItem].batch) {
+				    console.log('Check ' + metaData[selectedItem].batch[bKey].gudang.uid + ' dengan ' + __GUDANG_UTAMA__)
 					if(metaData[selectedItem].batch[bKey].gudang.uid == __GUDANG_UTAMA__) {
 						if(metaData[selectedItem].batch[bKey].batch == currentBatch) {
 							if(metaData[selectedItem].batch[bKey].disetujui == undefined) {
