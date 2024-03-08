@@ -5163,7 +5163,9 @@ class Inventori extends Utility
       }
     }
 
-    return $worker;
+    return array('worker' => $worker, 'plus' => $plus_stock, 'minus' => $minus_stock);
+
+    // return $worker;
   }
 
 
