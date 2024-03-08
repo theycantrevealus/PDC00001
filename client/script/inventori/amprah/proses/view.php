@@ -335,7 +335,7 @@
 		    for(var a in metaData) {
 		        var newTerkini = [];
 		        for(var b in metaData[a].batch) {
-		            if(metaData[a].batch[b].stok_terkini <= 0 && metaData[a].batch[b].disetujui <= 0) {
+		            if(metaData[a].batch[b].stok_terkini <= 0 || metaData[a].batch[b].disetujui <= 0) {
 		                delete metaData[a].batch[b];
 		            } else {
 		                newTerkini.push(metaData[a].batch[b]);
