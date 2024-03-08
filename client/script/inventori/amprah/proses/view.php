@@ -329,13 +329,13 @@
         });
 
 		$("#btnSubmitProsesAmprah").click(function() {
-		    for(var a in metaData) {
-		        for(var b in metaData[a].batch) {
-		            if(metaData[a].batch[b].stok_terkini <= 0 && metaData[a].batch[b].disetujui <= 0) {
-		                delete metaData[a].batch[b];
-		            }
-		        }
-		    }
+// 		    for(var a in metaData) {
+// 		        for(var b in metaData[a].batch) {
+// 		            if(metaData[a].batch[b].stok_terkini <= 0 && metaData[a].batch[b].disetujui <= 0) {
+// 		                delete metaData[a].batch[b];
+// 		            }
+// 		        }
+// 		    }
 		    console.log(metaData);
 			var conf = confirm("Proses Amprah?");
 			if(conf) {
