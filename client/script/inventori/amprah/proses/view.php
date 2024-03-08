@@ -255,13 +255,13 @@
 				for(var bKey in metaData[selectedItem].batch) {
 					if(metaData[selectedItem].batch[bKey].gudang.uid == __GUDANG_UTAMA__) {
 						if(metaData[selectedItem].batch[bKey].batch == currentBatch) {
-						    console.log('Batch ditemukan')
+						    console.log('Batch ditemukan');
 							if(metaData[selectedItem].batch[bKey].disetujui == undefined) {
 								metaData[selectedItem].batch[bKey].disetujui = 0;
 							}
 							
 							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
-							console.log('Target batch ditemukan')
+							console.log('Target batch ditemukan' + metaData[selectedItem].batch[bKey].disetujui);
 						} else {
 						  console.log('Bukan batch terkini')
 						}
