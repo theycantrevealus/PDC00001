@@ -188,7 +188,6 @@
 				for(var key in metaData[id].batch) {
 					var targetDisetujui = (metaData[selectedItem].batch[key].disetujui == undefined) ? 0 : metaData[selectedItem].batch[key].disetujui;
 					if(metaData[id].batch[key].gudang != null && metaData[id].batch[key].gudang.uid == __GUDANG_UTAMA__ && metaData[id].batch[key].stok_terkini > 0) {
-						console.log(metaData[id].batch[key]);
 						var batchRow = document.createElement("TR");
 						$(batchRow).attr({
 							"id":"batch_" + metaData[id].batch[key].batch
@@ -263,7 +262,7 @@
 							    metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
                                 console.log('Target batch ditemukan' + metaData[selectedItem].batch[bKey].disetujui);
 							} else {
-							    metaData[selectedItem].batch[bKey];
+							    delete metaData[selectedItem].batch[bKey];
 							}
 						}
 					} else {
@@ -276,7 +275,6 @@
 
 			if(parseFloat(totalRequest) != parseFloat(targetJumlahAmprah)) {
 				if($("#keterangan_per_item").val() != "") {
-					console.log('Waw');
 					$("ol#item_batch_" + selectedItem + " li").remove();
 					for(var bKey in metaData[selectedItem].batch) {
 						var newListBatch = document.createElement("LI");
@@ -292,14 +290,10 @@
 					$("#qty_disetujui_" + selectedItem).html(totalRequest);
 					$("#form-batch-barang").modal("hide");
 				} else {
-					console.log('Waw');
 					$("#keterangan_per_item").focus();
 					notification ("danger", "Jumlah tidak memenuhi permintaan. Wajib isi keterangan", 3000, "proceed_amprah");
 				}
 			} else {
-				console.log("Total Request : " + totalRequest);
-				console.log("Amprah Request : " + targetJumlahAmprah);
-				
                 $("ol#item_batch_" + selectedItem + " li").remove();
                 for(var bKey in metaData[selectedItem].batch) {
                     var newListBatch = document.createElement("LI");
@@ -338,13 +332,13 @@
         });
 
 		$("#btnSubmitProsesAmprah").click(function() {
-// 		    for(var a in metaData) {
-// 		        for(var b in metaData[a].batch) {
-// 		            if(metaData[a].batch[b].stok_terkini <= 0 && metaData[a].batch[b].disetujui <= 0) {
-// 		                delete metaData[a].batch[b];
-// 		            }
-// 		        }
-// 		    }
+		    for(var a in metaData) {
+		        for(var b in metaData[a].batch) {
+		            if(metaData[a].batch[b].stok_terkini <= 0 && metaData[a].batch[b].disetujui <= 0) {
+		                delete metaData[a].batch[b];
+		            }
+		        }
+		    }
 		    console.log(metaData);
 			var conf = confirm("Proses Amprah?");
 			if(conf) {
