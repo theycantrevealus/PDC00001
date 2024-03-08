@@ -4942,6 +4942,8 @@ class Inventori extends Utility
 
       $kodeAmprah = str_pad(count($lastID['response_data']) + 1, 5, '0', STR_PAD_LEFT) . '/' . $UserData['data']->unit_kode . '/AMP-OUT/' . date('m') . '/' . date('Y');
 
+      $checked_value = array();
+
       $worker = self::$query->insert('inventori_amprah_proses', array(
         'uid' => $uid,
         'kode' => $kodeAmprah,
@@ -4977,8 +4979,6 @@ class Inventori extends Utility
           ),
           'class' => __CLASS__
         ));
-
-        $checked_value = array();
 
         //Save Detail
         foreach ($parameter['data'] as $key => $value) {
