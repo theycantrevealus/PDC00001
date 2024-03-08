@@ -260,9 +260,15 @@
 							}
 							
 							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
+						} else {
+						  console.log('Bukan batch terkini')
 						}
+					} else {
+					  console.log('Bukan gudang utama')
 					}
 				}
+
+				console.log(metaData[selectedItem]);
 			});
 
 			if(parseFloat(totalRequest) != parseFloat(targetJumlahAmprah)) {
