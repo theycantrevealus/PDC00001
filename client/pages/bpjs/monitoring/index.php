@@ -38,7 +38,7 @@ $tomorrow->modify("+1 day");
                             <span class="nav-link__count">
                                 02
                             </span>
-                            Data History Pelayanan
+                            Data History Pelayanan Peserta
                         </a>
                     </li>
                     <li class="nav-item">
@@ -88,23 +88,25 @@ $tomorrow->modify("+1 day");
                             <div class="text-center" id="alert-datakunjungan-container">
                                 <div class="alert alert-danger" id="alert-datakunjungan"></div>
                             </div>
-                            <table class="table table-bordered largeDataType" id="bpjs_table_datakunjungan">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. SEP</th>
-                                        <th>Tgl. SEP</th>
-                                        <th>Nama</th>
-                                        <th>No. Kartu</th>
-                                        <th>No. Rujukan</th>
-                                        <th>Layanan</th>
-                                        <th>K. Rawat</th>
-                                        <th>Poli</th>
-                                        <th>Diagnosa</th>
-                                        <th>Tgl. Plg SEP</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered largeDataType" id="bpjs_table_datakunjungan">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. SEP</th>
+                                            <th>Tgl. SEP</th>
+                                            <th>Nama</th>
+                                            <th>No. Kartu</th>
+                                            <th>No. Rujukan</th>
+                                            <th>Layanan</th>
+                                            <th>Poli</th>
+                                            <th>Diagnosa</th>
+                                            <th>Tgl. Plg SEP</th>
+                                            <th class="wrap_content text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -137,23 +139,26 @@ $tomorrow->modify("+1 day");
                             <div class="text-center" id="alert-datahistorypelayanan-container">
                                 <div class="alert alert-danger" id="alert-datahistorypelayanan"></div>
                             </div>
-                            <table class="table table-bordered largeDataType" id="bpjs_table_datahistorypelayanan">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. SEP</th>
-                                        <th>Tgl. SEP</th>
-                                        <th>Nama</th>
-                                        <th>No. Kartu</th>
-                                        <th>No. Rujukan</th>
-                                        <th>Layanan</th>
-                                        <th>K. Rawat</th>
-                                        <th>Poli</th>
-                                        <th>Diagnosa</th>
-                                        <th>Tgl. Plg SEP</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered largeDataType" id="bpjs_table_datahistorypelayanan">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. SEP</th>
+                                            <th>Tgl. SEP</th>
+                                            <th>Nama</th>
+                                            <th>No. Kartu</th>
+                                            <th>No. Rujukan</th>
+                                            <th>Layanan</th>
+                                            <th>Kelas Rawat</th>
+                                            <th>Poli</th>
+                                            <th>Diagnosa</th>
+                                            <th>Tgl. Plg SEP</th>
+                                            <th>PPK Pelayanan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -193,22 +198,24 @@ $tomorrow->modify("+1 day");
                             <div class="text-center" id="alert-dataklaim-container">
                                 <div class="alert alert-danger" id="alert-dataklaim"></div>
                             </div>
-                            <table class="table table-bordered largeDataType" id="bpjs_table_dataklaim">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. SEP</th>
-                                        <th>Tanggal</th>
-                                        <th>Nama</th>
-                                        <th>No. Kartu</th>
-                                        <th>K. Rawat</th>
-                                        <th>Status Verifikasi</th>
-                                        <th>Inacbg</th>
-                                        <th>Biaya</th>
-                                        <th>Disetujui</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered largeDataType" id="bpjs_table_dataklaim">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No. SEP</th>
+                                            <th>Nama - No.Kartu</th>
+                                            <th>Tgl. SEP</th>
+                                            <th>Tgl. Pulang</th>
+                                            <th>Kls. Rawat</th>
+                                            <th>INACBG</th>
+                                            <th>Poli</th>
+                                            <th>Status Klaim</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -244,19 +251,24 @@ $tomorrow->modify("+1 day");
                             <div class="text-center" id="alert-dataklaimjasaraharja-container">
                                 <div class="alert alert-danger" id="alert-dataklaimjasaraharja"></div>
                             </div>
-                            <table class="table table-bordered largeDataType" id="bpjs_table_dataklaimjasaraharja">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>No. SEP</th>
-                                        <th>Pasien</th>
-                                        <th>Tanggal</th>
-                                        <th>Status</th>
-                                        <th>Biaya</th>
-                                        <th>Hasil</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                            <div class="table-responsive">
+                                <table class="table table-bordered largeDataType" id="bpjs_table_dataklaimjasaraharja">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>No.SEP</th>
+                                            <th>Nama - No.Kartu</th>
+                                            <th>Tgl.SEP</th>
+                                            <th>Tgl.Plg SEP</th>
+                                            <th>Poli</th>
+                                            <th>Diagnosa</th>
+                                            <th>No.Register</th>
+                                            <th>Tgl. Kejadian</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

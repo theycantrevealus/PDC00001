@@ -28,44 +28,53 @@
                     <div class="card-body tab-content">
                         <div class="tab-pane active show fade" id="search_no_srb">
                             <div class="card-group">
-                                <div class="card card-body">
-                                    <div class="d-flex flex-row">
-                                        <div class="col-md-5">
-                                            No. Kartu
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="bynokartu_text_search_no_kartu">
-                                        </div>
-                                        <div class="col-md-5">
-                                            Tanggal Pelayanan/SEP
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="bynokartu_text_search_tgl">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <br>
-                                            <button class="btn btn-info" id="btn_search_bynokartu">
-                                                <i class="fa fa-search"></i> Cari Data
-                                            </button>
+                                <div class="card">
+                                    <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                        <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> No. Kartu Peserta</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex flex-row">
+                                            <div class="col-md-5">
+                                                No. Kartu
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="bynokartu_text_search_no_kartu">
+                                            </div>
+                                            <div class="col-md-5">
+                                                Tanggal Pelayanan/SEP
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="bynokartu_text_search_tgl">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <br>
+                                                <button class="btn btn-info" id="btn_search_bynokartu">
+                                                    <i class="fa fa-search"></i> Cari Data
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
                         <div class="tab-pane show fade" id="search_tgl_prb">
                             <div class="card-group">
-                                <div class="card card-body">
-                                    <div class="d-flex flex-row">
-                                        <div class="col-md-5">
-                                            NIK
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="bynik_text_search_nik">
-                                        </div>
-                                        <div class="col-md-5">
-                                            Tanggal Pelayanan/SEP
-                                            <input type="text" autocomplete="off" class="form-control uppercase" id="bynik_text_search_tgl">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <br>
-                                            <button class="btn btn-info" id="btn_search_bynik">
-                                                <i class="fa fa-search"></i> Cari Data
-                                            </button>
+                                <div class="card">
+                                    <div class="card-header card-header-large bg-white d-flex align-items-center">
+                                        <h5 class="card-header__title flex m-0"><i class="fa fa-hashtag"></i> NIK Peserta</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex flex-row">
+                                            <div class="col-md-5">
+                                                NIK
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="bynik_text_search_nik">
+                                            </div>
+                                            <div class="col-md-5">
+                                                Tanggal Pelayanan/SEP
+                                                <input type="text" autocomplete="off" class="form-control uppercase" id="bynik_text_search_tgl">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <br>
+                                                <button class="btn btn-info" id="btn_search_bynik">
+                                                    <i class="fa fa-search"></i> Cari Data
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

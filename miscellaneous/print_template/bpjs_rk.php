@@ -161,7 +161,26 @@
                         <?php echo $_POST['html_data_kanan']; ?>
                     </td>
                 </tr>
+                <tr>
+                    <td style="vertical-align: top" colspan="2">
+                        <table>
+                            <tr>
+                                <td style="padding-right: 50px; vertical-align: top;width:65%">
+                                    Demikian atas bantuannya diucapkan banyak terima kasih
+                                </td>
+                                <td>
+                                    <div style="border-bottom: solid 1px #000; height: 100px; margin: 10px;">
+                                        Mengetahui
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
             </table>
+            <div>
+                <?php echo $_POST['tgl_cetak_tgl_entri']; ?>
+            </div>
         </div>
     </div>
 </body>
