@@ -5168,14 +5168,14 @@ class Inventori extends Utility
       }
     }
 
-    return array(
-      'worker' => $worker,
-      'plus' => $plus_stock,
-      'minus' => $minus_stock,
-      'checker' => $checked_value
-    );
+//     return array(
+//       'worker' => $worker,
+//       'plus' => $plus_stock,
+//       'minus' => $minus_stock,
+//       'checker' => $checked_value
+//     );
 
-    // return $worker;
+    return $worker;
   }
 
 
