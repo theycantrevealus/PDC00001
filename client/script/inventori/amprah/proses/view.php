@@ -255,17 +255,17 @@
 				for(var bKey in metaData[selectedItem].batch) {
 				    console.log('Check ' + metaData[selectedItem].batch[bKey].gudang.uid + ' dengan ' + __GUDANG_UTAMA__)
 					if(metaData[selectedItem].batch[bKey].gudang.uid == __GUDANG_UTAMA__) {
+					    console.log('Check batch ' + metaData[selectedItem].batch[bKey].batch + ' dengan ' + currentBatch);
 						if(metaData[selectedItem].batch[bKey].batch == currentBatch) {
 							if(metaData[selectedItem].batch[bKey].disetujui == undefined) {
 								metaData[selectedItem].batch[bKey].disetujui = 0;
 							}
 							
 							metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
+							console.log('Target batch ditemukan')
 						} else {
 						  console.log('Bukan batch terkini')
 						}
-					} else {
-					  console.log('Bukan gudang utama')
 					}
 				}
 
