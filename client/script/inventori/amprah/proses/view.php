@@ -262,8 +262,12 @@
 							if(parseFloat(currentCount) > 0) {
 							    metaData[selectedItem].batch[bKey].disetujui = parseFloat(currentCount);
                                 console.log('Target batch ditemukan' + metaData[selectedItem].batch[bKey].disetujui);
+							} else {
+							    metaData[selectedItem].batch[bKey];
 							}
 						}
+					} else {
+					 delete metaData[selectedItem].batch[bKey];
 					}
 				}
 
