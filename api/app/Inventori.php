@@ -4984,10 +4984,7 @@ class Inventori extends Utility
         foreach ($parameter['data'] as $key => $value) {
           foreach ($value['batch'] as $BKey => $BValue) {
 
-            array_push($checked_value, array(
-              'allow_process' => floatval($BValue['disetujui']) > 0,
-              'data' => $BValue
-            );
+            array_push($checked_value, $BValue);
 
             if (floatval($BValue['disetujui']) > 0) { //Yg 0 ngapain catat bambang
               $amprah_proses_detail = self::$query->insert('inventori_amprah_proses_detail', array(
@@ -5171,7 +5168,12 @@ class Inventori extends Utility
       }
     }
 
-    return array('worker' => $worker, 'plus' => $plus_stock, 'minus' => $minus_stock, 'value_checker' => $checked_value);
+    return array(
+      'worker' => $worker,
+      'plus' => $plus_stock,
+      'minus' => $minus_stock,
+      'checker' => $checked_value
+    );
 
     // return $worker;
   }
