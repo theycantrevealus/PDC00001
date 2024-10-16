@@ -8,7 +8,7 @@
 					<li class="breadcrumb-item active" aria-current="page" id="mode_item">Tambah</li>
 				</ol>
 			</nav>
-			<h4><span id="nama-departemen"></span>Tambah Inventori</h4>
+			<h4><span id="nama-departemen"></span>Tambah Master Item</h4>
 		</div>
 	</div>
 </div>
@@ -37,33 +37,33 @@
 							Satuan
 						</a>
 					</li>
-					<li class="nav-item">
-						<a href="#tab-penjamin" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								<i class="fa fa-cash-register"></i>
-								<b class="inv-tab-status text-success" id="status-penjamin"><i class="fa fa-check-circle"></i></b>
-							</span>
-							Harga Penjamin
-						</a>
-					</li>
-					<li class="nav-item">
-						<a href="#tab-lokasi" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								<i class="fa fa-clipboard-list"></i>
-								<b class="inv-tab-status text-success" id="status-lokasi"><i class="fa fa-check-circle"></i></b>
-							</span>
-							Lokasi Simpan
-						</a>
-					</li>
-					<li class="nav-item">
-						<a href="#tab-monitoring" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">
-							<span class="nav-link__count">
-								<i class="fa fa-eye"></i>
-								<b class="inv-tab-status text-success" id="status-monitoring"><i class="fa fa-check-circle"></i></b>
-							</span>
-							Monitoring
-						</a>
-					</li>
+<!--					<li class="nav-item">-->
+<!--						<a href="#tab-penjamin" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">-->
+<!--							<span class="nav-link__count">-->
+<!--								<i class="fa fa-cash-register"></i>-->
+<!--								<b class="inv-tab-status text-success" id="status-penjamin"><i class="fa fa-check-circle"></i></b>-->
+<!--							</span>-->
+<!--							Harga Penjamin-->
+<!--						</a>-->
+<!--					</li>-->
+<!--					<li class="nav-item">-->
+<!--						<a href="#tab-lokasi" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">-->
+<!--							<span class="nav-link__count">-->
+<!--								<i class="fa fa-clipboard-list"></i>-->
+<!--								<b class="inv-tab-status text-success" id="status-lokasi"><i class="fa fa-check-circle"></i></b>-->
+<!--							</span>-->
+<!--							Lokasi Simpan-->
+<!--						</a>-->
+<!--					</li>-->
+<!--					<li class="nav-item">-->
+<!--						<a href="#tab-monitoring" class="nav-link" data-toggle="tab" role="tab" aria-selected="false">-->
+<!--							<span class="nav-link__count">-->
+<!--								<i class="fa fa-eye"></i>-->
+<!--								<b class="inv-tab-status text-success" id="status-monitoring"><i class="fa fa-check-circle"></i></b>-->
+<!--							</span>-->
+<!--							Monitoring-->
+<!--						</a>-->
+<!--					</li>-->
 				</ul>
 				<div class="card card-body tab-content">
 					<div class="tab-pane active show fade" id="tab-informasi">

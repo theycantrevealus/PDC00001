@@ -3058,7 +3058,7 @@ class BPJS extends Utility {
                         'asalRujukan' => ($parameter['poli'] === 'IGD') ? '2' : ((empty($parameter['asal_rujukan'])) ? '2' : $parameter['asal_rujukan']),
                         'tglRujukan' => ($parameter['poli'] === 'IGD') ? '' : strval(date('Y-m-d')),
                         'noRujukan' => ($parameter['poli'] === 'IGD') ? '' : ((isset($parameter['fktp'])) ? '-' : $parameter['no_rujukan']),
-                        'ppkRujukan' => ($parameter['poli'] === 'IGD') ? '' : ((isset($parameter['ppk_rujukan']) && !empty($parameter['ppk_rujukan']) && $parameter['ppk_rujukan'] != '') ? $parameter['ppk_rujukan'] : $parameter['fktp'])
+                        'ppkRujukan' => ($parameter['poli'] === 'IGD') ? __KODE_PPK__ : ((isset($parameter['ppk_rujukan']) && !empty($parameter['ppk_rujukan']) && $parameter['ppk_rujukan'] != '') ? $parameter['ppk_rujukan'] : $parameter['fktp'])
                     ),
                     'catatan' => $parameter['catatan'],
                     'diagAwal' => $parameter['diagnosa_awal'],
@@ -3072,9 +3072,9 @@ class BPJS extends Utility {
                     'katarak' => array(
                         'katarak' => $parameter['katarak']
                     ),
-                    'tujuanKunj' => $parameter['tujuan_kunjungan'],
-                    'flagProcedure' => (intval($parameter['tujuan_kunjungan']) === 0) ? '' : $parameter['flag_procedure'],
-                    'kdPenunjang' => (intval($parameter['tujuan_kunjungan']) === 0) ? '' : $parameter['kode_penunjang'],
+                    'tujuanKunj' => ($parameter['poli'] === 'IGD') ? '2' : $parameter['tujuan_kunjungan'],
+                    'flagProcedure' => (intval($parameter['tujuan_kunjungan']) === 0) ? '' : (($parameter['poli'] === 'IGD') ? '' : $parameter['flag_procedure']),
+                    'kdPenunjang' => (intval($parameter['tujuan_kunjungan']) === 0) ? '' : (($parameter['poli'] === 'IGD') ? '' : $parameter['kode_penunjang']),
                     'assesmentPel' => (isset($parameter['fktp'])) ? '' : (intval($parameter['tujuan_kunjungan']) === 0 || intval($parameter['tujuan_kunjungan']) === 2) ? $parameter['asesmen_pelayanan'] : '',
                     'jaminan' => array(
                         'lakaLantas' => $parameter['laka_lantas'],

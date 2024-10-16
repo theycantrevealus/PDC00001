@@ -87,12 +87,12 @@
 		<div class="layout-login__form" data-simplebar>
 			<div class="d-flex justify-content-center mt-2 mb-5 navbar-light">
 				<a href="<?php echo __HOSTNAME__; ?>/" class="navbar-brand" style="min-width: 0">
-					<img class="navbar-brand-icon img-fluid px-5" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.png" alt="<?php echo __PC_CUSTOMER__; ?>">
+					<img class="navbar-brand-icon img-fluid px-5" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo_center.png" alt="<?php echo __PC_CUSTOMER__; ?>">
                     <!--<img class="navbar-brand-icon" src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/logo-text-black.png" width="180" height="180" alt="<?php echo __PC_CUSTOMER__; ?>">-->
 				</a>
 			</div>
             <h4 class="m-0"><?php echo __PC_CUSTOMER__; ?></h4>
-			<p class="mb-5 text-muted">Hospital Information Management System</p>
+			<p class="mb-5 text-muted">Sales Management System</p>
 
 
 
@@ -136,17 +136,14 @@
 					Don't have an account? <a class="text-body text-underline" href="<?php echo __HOSTNAME__; ?>/template/signup.html">Sign up!</a> -->
 				</div>
 			</form>
-			<div class="copyright-panel">
-                <small class="text-secondary">Powered By</small><br />
-                <div class="row">
-                    <!--<div class="col-6">
-                        <img src="<?php /*echo __HOSTNAME__; */?>/template/assets/images/icon.jpg" width="60" />
-                    </div>-->
-                    <div class="col-6" style="padding-top: 10px;">
-					<img class="navbar-brand-icon" src="<?php echo __HOSTNAME__; ?>/template/assets/images/clients/logo-icon-<?php echo __PC_IDENT__; ?>.png" width="120" height="40" alt="<?php echo __PC_CUSTOMER__; ?>">
-                    </div>
-                </div>
-			</div>
+<!--			<div class="copyright-panel">-->
+<!--                <small class="text-secondary">Powered By</small><br />-->
+<!--                <div class="row">-->
+<!--                    <div class="col-6" style="padding-top: 10px;">-->
+<!--					<img class="navbar-brand-icon" src="--><?php //echo __HOSTNAME__; ?><!--/template/assets/images/clients/logo-icon---><?php //echo __PC_IDENT__; ?><!--.png" width="120" height="40" alt="--><?php //echo __PC_CUSTOMER__; ?><!--">-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--			</div>-->
 		</div>
         <style type="text/css">
             form {
@@ -208,8 +205,8 @@
 					"left": "0"
 				}, 1500);
 
-				$("form").submit(function() {
-				    $("#btnLogin").removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i> Validating</span>").attr({
+				$("form").submit(function(e) {
+                    $("#btnLogin").removeClass("btn-info").addClass("btn-warning").html("<span><i class=\"fa fa-hourglass-half\"></i> Validating</span>").attr({
                         "disabled": "disabled"
                     });
 					var email = $("#email_2").val();
@@ -240,6 +237,7 @@
 					} else {
 						$("#error_message").html("Email tidak boleh kosong")
 					}
+                    e.preventDefault();
 					return false;
 				});
 			});

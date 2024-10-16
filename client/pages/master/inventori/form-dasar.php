@@ -5,9 +5,9 @@
 				<h5 class="card-header__title flex m-0">Informasi Dasar</h5>
 			</div>
 			<div class="card-header card-header-tabs-basic nav" role="tablist">
-				<a href="#info-dasar-1" class="active" data-toggle="tab" role="tab" aria-controls="asesmen-kerja" aria-selected="true">Umum</a>
-				<a href="#info-dasar-2" data-toggle="tab" role="tab" aria-selected="false">Kategori Obat</a>
-                <a href="#info-dasar-3" data-toggle="tab" role="tab" aria-selected="false">Kandungan Obat</a>
+				<a href="#info-dasar-1" class="active" data-toggle="tab" role="tab" aria-controls="asesmen-kerja" aria-selected="true">Informasi Umum</a>
+<!--				<a href="#info-dasar-2" data-toggle="tab" role="tab" aria-selected="false">Kategori Obat</a>-->
+<!--                <a href="#info-dasar-3" data-toggle="tab" role="tab" aria-selected="false">Kandungan Obat</a>-->
 			</div>
 			<div class="card-body tab-content">
 				<div class="tab-pane show fade active" id="info-dasar-1">
@@ -45,8 +45,8 @@
 								</div>
 								<div class="col-md-6">
 									<div class="form-group">
-										<label for="txt_manufacture">Manufacture:</label>
-										<select class="form-control" id="txt_manufacture"></select>
+										<label for="txt_supplier">Divisi:</label>
+										<select class="form-control" id="txt_supplier"></select>
 									</div>
 								</div>
 								<div class="col-md-12">

@@ -29,6 +29,7 @@
           } else {
             returnedData = response.response_package.response_data;
           }
+          console.log(returnedData);
 
           response.draw = parseInt(response.response_package.response_draw);
           response.recordsTotal = response.response_package.recordsTotal;
@@ -42,65 +43,89 @@
         search: "",
         searchPlaceholder: "Cari Nama Barang"
       },
-      "columns": [{
-          "data": null,
-          render: function(data, type, row, meta) {
-            return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
-          }
-        },
-        {
-          "data": null,
-          render: function(data, type, row, meta) {
-            var kategoriObat = "";
-            for (var kategoriObatKey in row["kategori_obat"]) {
-              if (row["kategori_obat"][kategoriObatKey].kategori != null) {
-                kategoriObat += "<span style=\"margin: 5px;\" class=\"badge badge-custom-caption badge-outline-info\"><i class=\"fa fa-tag\"></i> " + row["kategori_obat"][kategoriObatKey].kategori + "</span>";
+      "columns": [
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
+                  return "<h5 class=\"autonum\">" + row.autonum + "</h5>";
               }
-            }
+          },
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
+                  return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
+                      "<a href=\"" + __HOSTNAME__ + "/master/inventori/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm\">" +
+                      "<i class=\"fa fa-pencil-alt\"></i> Edit" +
+                      "</a>" +
+                      "<button id=\"gudang_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-gudang\">" +
+                      "<i class=\"fa fa-trash\"></i> Hapus" +
+                      "</button>" +
+                      "</div>";
+              }
+          },
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
+                  return "<b><i>" + ((row["kode_barang"] == undefined) ? "[KODE_BARANG]" : row["kode_barang"].toUpperCase()) + "</i></b><br />";
+              }
+          },
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
 
-            return "<div class=\"row\">" +
-              "<div class=\"col-md-2\">" +
-              "<center><img style=\"border-radius: 5px;\" src=\"" + __HOST__ + row.image + "\" width=\"60\" height=\"60\" /></center>" +
-              "</div>" +
-              "<div class=\"col-md-10\">" +
-              "<b><i>" + ((row["kode_barang"] == undefined) ? "[KODE_BARANG]" : row["kode_barang"].toUpperCase()) + "</i></b><br />" +
-              "<strong style=\"display: block\">" + row["nama"].toUpperCase() + "</strong>" +
-              kategoriObat +
-              "</div>" +
-              "</div>";
-          }
-        },
+                    // return "<div class=\"row\">" +
+                    //   "<div class=\"col-md-2\">" +
+                    //   "<center><img style=\"border-radius: 5px;\" src=\"" + __HOST__ + row.image + "\" width=\"60\" height=\"60\" /></center>" +
+                    //   "</div>" +
+                    //   "<div class=\"col-md-10\">" +
+                    //   "<b><i>" + ((row["kode_barang"] == undefined) ? "[KODE_BARANG]" : row["kode_barang"].toUpperCase()) + "</i></b><br />" +
+                    //   "<strong style=\"display: block\">" + row["nama"].toUpperCase() + "</strong>" +
+                    //   kategoriObat +
+                    //   "</div>" +
+                    //   "</div>";
+
+                    return "<strong style=\"display: block\">" + row["nama"].toUpperCase() + "</strong>";
+              }
+          },
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
+                  if (row["kategori"] == undefined) {
+                      return "-";
+                  } else {
+                      return "<span id=\"kategori_" + row["uid"] + "\">" + row["kategori"].nama.toUpperCase() + "</span>";
+                  }
+              }
+          },
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
+                  var meta = row["satuan"].reduce((a, v) => ({ ...a, [v["type"]]: v}), {});
+                  return "<center><h5>" + meta["besar"]?.nilai + "</h5>" + meta["besar"]?.nama + "</center>";
+              }
+          },
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
+                  var meta = row["satuan"].reduce((a, v) => ({ ...a, [v["type"]]: v}), {});
+                  return "<center><h5>" + meta["tengah"]?.nilai + "</h5>" + meta["tengah"]?.nama + "</center>";
+              }
+          },
+          {
+              "data": null,
+              render: function(data, type, row, meta) {
+                  var meta = row["satuan"].reduce((a, v) => ({ ...a, [v["type"]]: v}), {});
+                  return "<center><h5>" + meta["kecil"]?.nilai + "</h5>" + meta["kecil"]?.nama + "</center>";
+              }
+          },
         {
           "data": null,
           render: function(data, type, row, meta) {
-            if (row["kategori"] == undefined) {
+            if (row["supplier"] == undefined) {
               return "-";
             } else {
-              return "<span id=\"nama_" + row["uid"] + "\">" + row["kategori"].nama.toUpperCase() + "</span>";
+              return "<span id=\"brand_" + row["uid"] + "\">" + row["supplier"].nama + "</span>";
             }
-          }
-        },
-        {
-          "data": null,
-          render: function(data, type, row, meta) {
-            if (row["manufacture"] == undefined) {
-              return "-";
-            } else {
-              return "<span id=\"nama_" + row["uid"] + "\">" + row["manufacture"].nama + "</span>";
-            }
-          }
-        },
-        {
-          "data": null,
-          render: function(data, type, row, meta) {
-            return "<div class=\"btn-group wrap_content\" role=\"group\" aria-label=\"Basic example\">" +
-              "<a href=\"" + __HOSTNAME__ + "/master/inventori/edit/" + row["uid"] + "\" class=\"btn btn-info btn-sm\">" +
-              "<i class=\"fa fa-pencil-alt\"></i> Edit" +
-              "</a>" +
-              "<button id=\"gudang_delete_" + row['uid'] + "\" class=\"btn btn-danger btn-sm btn-delete-gudang\">" +
-              "<i class=\"fa fa-trash\"></i> Hapus" +
-              "</button>" +
-              "</div>";
           }
         }
       ]
@@ -190,15 +215,7 @@
               $(failedResult).addClass("table").append("<thead class=\"thead-dark\">" +
                 "<tr>" +
                 "<th>Nama</th>" +
-                "<th>Kategori</th>" +
-                "<th>Satuan</th>" +
-                "<th>Nama Generik</th>" +
-                "<th>Nama RKO</th>" +
-                "<th>Generik</th>" +
-                "<th>Antibiotik</th>" +
-                "<th>Narkotika</th>" +
-                "<th>Psikotropika</th>" +
-                "<th>Fornas</th></tr></thead><tbody></tbody>");
+                "<th>Kategori</th>/tr></thead><tbody></tbody>");
 
               $("#csv_file_data").html(html).append(failedResult);
               $(failedResult).DataTable({
@@ -209,30 +226,6 @@
                   {
                     data: "kategori"
                   },
-                  {
-                    data: "satuan"
-                  },
-                  {
-                    data: "nama_generik"
-                  },
-                  {
-                    data: "nama_rko"
-                  },
-                  {
-                    data: "generik"
-                  },
-                  {
-                    data: "antibiotik"
-                  },
-                  {
-                    data: "narkotika"
-                  },
-                  {
-                    data: "psikotropika"
-                  },
-                  {
-                    data: "fornas"
-                  }
                 ]
               });
 
@@ -362,7 +355,7 @@
               </div>
               <div class="card-body tab-content">
                 <div class="tab-pane active show fade">
-                  <div id="csv_file_data"></div>
+                  <div id="csv_file_data" style="min-height: 200px"></div>
                 </div>
               </div>
             </div>

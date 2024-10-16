@@ -40,10 +40,14 @@
                                         <thead class="thead-dark">
                                         <tr>
                                             <th class="wrap_content">No</th>
+                                            <th class="wrap_content">Aksi</th>
+                                            <th style="width: 10%;">Kode</th>
                                             <th style="width: 50%;">Item</th>
                                             <th>Kategori</th>
-                                            <th>Manufacture</th>
-                                            <th class="wrap_content">Aksi</th>
+                                            <th>Besar</th>
+                                            <th>Tengah</th>
+                                            <th>Kecil</th>
+                                            <th>Divisi</th>
                                         </tr>
                                         </thead>
                                         <tbody></tbody>

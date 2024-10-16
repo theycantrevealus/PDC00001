@@ -732,268 +732,59 @@
 			var nama = $("#txt_nama").val();
 			var kode = $("#txt_kode").val();
 			if(nama != "" && kode != "") {
-				if(currentTab == "#tab-informasi" || currentTab == "#info-dasar-1") {
-					basic.croppie('result', {
-						type: 'canvas',
-						size: 'viewport'
-					}).then(function (image) {
+                basic.croppie('result', {
+                    type: 'canvas',
+                    size: 'viewport'
+                }).then(function (image) {
 
-						var kategori = $("#txt_kategori").val();
-						var manufacture = $("#txt_manufacture").val();
-						var keterangan = editorKeterangan.getData();
-						var satuan_terkecil = $("#txt_satuan_terkecil").val();
-						var listKategoriObat = selectedKategoriObat;
-						
-						var satuanKonversi = [];
-						//Satuan
-						$("#table-konversi-satuan tbody tr").each(function(){
-							var dari = $(this).find("td:eq(1) select").val();
-							var ke = $(this).find("td:eq(2) select").val();
-							var rasio = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
-							if(parseFloat(rasio) > 0 && dari != ke) {
-								satuanKonversi.push({
-									dari:dari,
-									ke:ke,
-									rasio: parseFloat(rasio)
-								});
-							}
-						});
+                    var kategori = $("#txt_kategori").val();
+                    var divisi = $("#txt_supplier").val();
+                    var keterangan = editorKeterangan.getData();
+                    var satuan_besar = $("#txt_satuan_besar").val();
+                    var satuan_tengah = $("#txt_satuan_tengah").val();
+                    var satuan_kecil = $("#txt_satuan_kecil").val();
 
-						var penjaminList = [];
-						//Penjamin
-						$("#table-penjamin tbody tr").each(function(){
-							var id = $(this).attr("id").split("_");
-							id = id[id.length - 1];
-							var marginType = $(this).find("td:eq(2) select").val();
-							var marginValue = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
-							if(parseFloat(marginValue) > 0) {
-								penjaminList.push({
-									penjamin:id,
-									marginType:marginType,
-									marginValue:marginValue
-								});
-							}
-						});
-
-						var gudangMeta = [];
-						//Rak Gudang
-						$("#table-lokasi-gudang tbody tr").each(function(){
-							var id = $(this).attr("id").split("_");
-							id = id[id.length - 1];
-							var lokasiRak = $(this).find("td:eq(2) input").val();
-							gudangMeta.push({
-								"gudang": id,
-								"lokasi": lokasiRak
-							});
-						});
-
-						var monitoring = [];
-						//Monitoring
-						$("#table-monitoring tbody tr").each(function(){
-							var id = $(this).attr("id").split("_");
-							id = id[id.length - 1];
-
-							var min = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
-							var max = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
-
-							if(parseFloat(min) > 0 && parseFloat(max) > 0) {
-								monitoring.push({
-									gudang:id,
-									min:min,
-									max:max
-								});
-							}
-						});
-
-                        var kandungan = [];
-                        $("#load-kandungan-obat tbody tr").each(function() {
-                            if(
-                                !$(this).hasClass("last_kandungan") &&
-                                $(this).find("td:eq(1) input").val() !== ""
-                            ) {
-                                kandungan.push({
-                                    kandungan: $(this).find("td:eq(1) input").val(),
-                                    keterangan: $(this).find("td:eq(2) input").val()
-                                });
+                    $.ajax({
+                        url:__HOSTAPI__ + "/Inventori",
+                        async:false,
+                        beforeSend: function(request) {
+                            request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+                        },
+                        data:{
+                            request:"tambah_item",
+                            kode:kode,
+                            nama:nama,
+                            image:image,
+                            kategori:kategori,
+                            keterangan:keterangan,
+                            supplier:divisi,
+                            satuan_besar: satuan_besar,
+                            satuan_tengah: satuan_tengah,
+                            satuan_kecil: satuan_kecil
+                        },
+                        type:"POST",
+                        success:function(response) {
+                            console.log(response);
+                            if(response.response_package.response_result > 0) {
+                                notification("success", "Data berhasil diproses", 3000, "hasil_tambah");
+                                location.href = __HOSTNAME__ + "/master/inventori";
+                            } else {
+                                if (response.response_package.response_message == "Duplicate data detected") {
+                                    notification("danger", "Duplicate data detected", 3000, "hasil_tambah");
+                                } else if (response.response_package.response_message == "Kandungan Wajib Diisi") {
+                                    notification ("danger", "Duplicate data detected", 3000, "hasil_tambah");
+                                } else {
+                                    notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
+                                }
                             }
-                        });
-
-						if (kandungan == "") {
-							notification ("danger", "Kandungan Wajib Diisi", 3000, "hasil_tambah");
-						} else {
-							$.ajax({
-								url:__HOSTAPI__ + "/Inventori",
-								async:false,
-								beforeSend: function(request) {
-									request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-								},
-								data:{
-									request:"tambah_item",
-									kode:kode,
-									nama:nama,
-									image:image,
-									kategori:kategori,
-									keterangan:keterangan,
-									manufacture:manufacture,
-									kandungan: kandungan,
-									satuan_terkecil:satuan_terkecil,
-									listKategoriObat:listKategoriObat,
-									satuanKonversi:satuanKonversi,
-									penjaminList:penjaminList,
-									gudangMeta:gudangMeta,
-									monitoring:monitoring
-								},
-								type:"POST",
-								success:function(response) {
-									console.log(response);
-									if(response.response_package.response_result > 0) {
-										notification("success", "Data berhasil diproses", 3000, "hasil_tambah");
-										location.href = __HOSTNAME__ + "/master/inventori";	
-									} else {
-										if (response.response_package.response_message == "Duplicate data detected") {
-											notification("danger", "Duplicate data detected", 3000, "hasil_tambah");
-										} else if (response.response_package.response_message == "Kandungan Wajib Diisi") {
-											notification ("danger", "Duplicate data detected", 3000, "hasil_tambah");
-										} else {
-											notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
-										}
-									}
-								},
-								error: function(response) {
-									console.clear();
-									console.log(response);
-								}
-							});
-						}
-
-					});
-				} else {
-					var kategori = $("#txt_kategori").val();
-					var manufacture = $("#txt_manufacture").val();
-					var keterangan = editorKeterangan.getData();
-					var satuan_terkecil = $("#txt_satuan_terkecil").val();
-					var listKategoriObat = selectedKategoriObat;
-					
-					var satuanKonversi = [];
-					//Satuan
-					$("#table-konversi-satuan tbody tr").each(function(){
-						var dari = $(this).find("td:eq(1) select").val();
-						var ke = $(this).find("td:eq(2) select").val();
-						var rasio = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
-						if(parseFloat(rasio) > 0 && dari != ke) {
-							satuanKonversi.push({
-								dari:dari,
-								ke:ke,
-								rasio: parseFloat(rasio)
-							});
-						}
-					});
-
-					var penjaminList = [];
-					//Penjamin
-					$("#table-penjamin tbody tr").each(function(){
-						var id = $(this).attr("id").split("_");
-						id = id[id.length - 1];
-						var marginType = $(this).find("td:eq(2) select").val();
-						var marginValue = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
-						if(parseFloat(marginValue) > 0) {
-							penjaminList.push({
-								penjamin:id,
-								marginType:marginType,
-								marginValue:marginValue
-							});
-						}
-					});
-
-					var gudangMeta = [];
-					//Rak Gudang
-					$("#table-lokasi-gudang tbody tr").each(function(){
-						var id = $(this).attr("id").split("_");
-						id = id[id.length - 1];
-						var lokasiRak = $(this).find("td:eq(2) input").val();
-						gudangMeta.push({
-							"gudang": id,
-							"lokasi": lokasiRak
-						});
-					});
-
-					var monitoring = [];
-					//Monitoring
-					$("#table-monitoring tbody tr").each(function(){
-						var id = $(this).attr("id").split("_");
-						id = id[id.length - 1];
-
-						var min = $(this).find("td:eq(2) input").inputmask("unmaskedvalue");
-						var max = $(this).find("td:eq(3) input").inputmask("unmaskedvalue");
-
-						if(parseFloat(min) > 0 && parseFloat(max) > 0) {
-							monitoring.push({
-								gudang:id,
-								min:min,
-								max:max
-							});
-						}
-					});
-
-                    var kandungan = [];
-                    $("#load-kandungan-obat tbody tr").each(function() {
-                        if(
-                            !$(this).hasClass("last_kandungan") &&
-                            $(this).find("td:eq(1) input").val() !== ""
-                        ) {
-                            kandungan.push({
-                                kandungan: $(this).find("td:eq(1) input").val(),
-                                keterangan: $(this).find("td:eq(2) input").val()
-                            });
+                        },
+                        error: function(response) {
+                            console.clear();
+                            console.log(response);
                         }
                     });
-					if (kandungan == "") {
-						notification ("danger", "Kandungan Wajib Diisi", 3000, "hasil_tambah");
-					} else {
-						$.ajax({
-							url:__HOSTAPI__ + "/Inventori",
-							async:false,
-							beforeSend: function(request) {
-								request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-							},
-							data:{
-								request:"tambah_item",
-								kode:kode,
-								nama:nama,
-								image:settedImage,
-								kategori:kategori,
-								keterangan:keterangan,
-								kandungan: kandungan,
-								manufacture:manufacture,
-								satuan_terkecil:satuan_terkecil,
-								listKategoriObat:listKategoriObat,
-								satuanKonversi:satuanKonversi,
-								penjaminList:penjaminList,
-								gudangMeta:gudangMeta,
-								monitoring:monitoring
-							},
-							type:"POST",
-							success:function(response) {
-								if(response.response_package.response_result > 0) {
-									notification("success", "Data berhasil diproses", 3000, "hasil_tambah");
-									location.href = __HOSTNAME__ + "/master/inventori";	
-								} else {
-									if (response.response_package.response_message == "Duplicate data detected") {
-										notification("danger", "Duplicate data detected", 3000, "hasil_tambah");
-									} else if (response.response_package.response_message == "Kandungan Wajib Diisi") {
-										notification ("danger", "Duplicate data detected", 3000, "hasil_tambah");
-									} else {
-										notification ("danger", "Data gagal diproses", 3000, "hasil_tambah");
-									}
-								}
-							},
-							error: function(response) {
-								console.clear();
-								console.log(response);
-							}
-						});
-					}
-				}
+
+                });
 			}
 		});
 

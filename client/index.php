@@ -1,6 +1,6 @@
 <?php
 	require '../config.php';
-	define('__PAGES__', explode('/', $_GET['pondokcoder_simrs']));
+	define('__PAGES__', explode('/', $_GET['pondokcoder_simrs'] ?? ''));
     $day=new DateTime('last day of this month');
 
 
@@ -9,7 +9,7 @@
 <script type="text/javascript">
     var currentLoggedInState = localStorage.getItem("currentLoggedInState");
     var __CURRENT_DATE__ = <?php echo json_encode(date('Y-m-d')); ?>;
-    var __AD_DOKTER_COUNT__ = <?php echo json_encode(__AD_DOKTER_COUNT__); ?>;
+    //var __AD_DOKTER_COUNT__ = <?php //echo json_encode(__AD_DOKTER_COUNT__); ?>//;
     var __PC_CUSTOMER__ = <?php echo json_encode(__PC_CUSTOMER__); ?>;
     var __PC_CUSTOMER_GROUP__ = <?php echo json_encode(__PC_CUSTOMER_GROUP__); ?>;
     var __PC_CUSTOMER_ADDRESS_SHORT__ = <?php echo json_encode(__PC_CUSTOMER_ADDRESS_SHORT__); ?>;
@@ -32,7 +32,6 @@
 	var __UNIT__ = <?php echo json_encode($_SESSION['unit']); ?>;
     var __UNIT_MULTI__ = <?php echo json_encode($_SESSION['unit_multi']); ?>;
     var __POLI__ = <?php echo json_encode($_SESSION['poli']); ?>;
-
     if(__UNIT__ === null) {
         if(__UNIT_MULTI__ !== null) {
             __UNIT__ = __UNIT_MULTI__[0]['response_data'][0];
@@ -46,6 +45,7 @@
 	var __GUDANG_APOTEK__ = <?php echo json_encode(__GUDANG_APOTEK__); ?>;
 	var __GUDANG_UTAMA__ = <?php echo json_encode(__GUDANG_UTAMA__); ?>;
     var __GUDANG_DEPO_OK__ = <?php echo json_encode(__GUDANG_DEPO_OK__); ?>;
+
 
 
     var __UIDADMIN__ = <?php echo json_encode(__UIDADMIN__); ?>;
@@ -69,10 +69,10 @@
 
     var __PRIORITY_HIGH__ = <?php echo json_encode(__PRIORITY_HIGH__); ?>;
     var __STATUS_OPNAME__ = <?php echo json_encode(__STATUS_OPNAME__); ?>;
-    var __AMPRAH_OPNAME_IN__ = <?php echo json_encode(__AMPRAH_OPNAME_IN__); ?>;
-    var __AMPRAH_OPNAME_OUT__ = <?php echo json_encode(__AMPRAH_OPNAME_OUT__); ?>;
-    var __STATUS_BARANG_MASUK_OPNAME__ = <?php echo json_encode(__STATUS_BARANG_MASUK_OPNAME__); ?>;
-    var __STATUS_BARANG_KELUAR_OPNAME__ = <?php echo json_encode(__STATUS_BARANG_KELUAR_OPNAME__); ?>;
+    //var __AMPRAH_OPNAME_IN__ = <?php //echo json_encode(__AMPRAH_OPNAME_IN__); ?>//;
+    //var __AMPRAH_OPNAME_OUT__ = <?php //echo json_encode(__AMPRAH_OPNAME_OUT__); ?>//;
+    //var __STATUS_BARANG_MASUK_OPNAME__ = <?php //echo json_encode(__STATUS_BARANG_MASUK_OPNAME__); ?>//;
+    //var __STATUS_BARANG_KELUAR_OPNAME__ = <?php //echo json_encode(__STATUS_BARANG_KELUAR_OPNAME__); ?>//;
 
     //Gudang
     var __ANTRIAN_KHUSUS__ = <?php echo json_encode(__ANTRIAN_KHUSUS__); ?>;
@@ -94,7 +94,6 @@
 </script>
 
 <?php
-
 	if(
 		isset($_SESSION['token']) ||
 		__PAGES__[0] == 'anjungan' ||
@@ -112,7 +111,7 @@
 		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         require 'builder.php';
 	} else {
-		require 'pages/system/login.php';	
+		require 'pages/system/login.php';
 	}
 
 ?>

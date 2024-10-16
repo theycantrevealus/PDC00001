@@ -1044,81 +1044,83 @@ $lastExist = '';
         //var Sync = new WebSocket(serverTarget);
         //console.log(protocolLib);
         //Sync = SocketCheck(serverTarget, protocolLib, tm);
-        Sync = io.connect(serverTarget);
-
-        Sync.on('message', data => {
-          console.log(data);
-          var audio;
-          var signalData = data;
-          var command = signalData.protocols;
-          var type = signalData.type;
-          var sender = signalData.sender;
-          var receiver = signalData.receiver;
-          var time = signalData.time;
-          var parameter = signalData.parameter;
 
 
-          if (command !== undefined && command !== null && command !== "") {
-
-            if (protocolLib[command] !== undefined) {
-              if (command === "anjungan_kunjungan_panggil") {
-                if (audio !== undefined && audio.audio !== undefined) {
-                  if (!audio.paused) {
-                    audio.audio.pause();
-                    audio.audio.currentTime = 0;
-                  } else {
-                    //alert();
-                  }
-                }
-                audio = protocolLib[command](command, type, parameter, sender, receiver, time);
-              } else if (command === "reset_password") {
-                if (receiver === __ME__) {
-                  protocolLib[command](command, type, parameter, sender, receiver, time);
-                }
-              } else {
-                if (receiver === __ME__ || sender === __ME__ || receiver === "*" || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
-                  if (receiver === __ME__ || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
-                    var audio = new Audio(),
-                      i = 0;
-                    audio.volume = 0.5;
-                    audio.playbackRate = 0.1;
-                    audio.loop = false;
-                    var playlist = [
-                      __HOST__ + "/audio/notif.mp3"
-                    ];
-                    var currentLength = 0;
-
-                    audio.addEventListener('ended', function() {
-                      i++;
-                      if (i == playlist.length) {
-                        audio.pause();
-                        audio.currentTime = 0;
-                        i = 0;
-                        console.log("Finished");
-                      } else {
-                        console.log("Playing : " + playlist[i]);
-                        audio.src = playlist[i];
-                        audio.play();
-                      }
-                    });
-
-                    audio.src = playlist[0];
-                    audio.currentTime = 0;
-                    audio.volume = 0.5;
-                    audio.playbackRate = 1;
-                    audio.loop = false;
-                    audio.play();
-                  }
-                  protocolLib[command](command, type, parameter, sender, receiver, time);
-                  //console.log("Sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
-                } else {
-                  protocolLib[command](command, type, parameter, sender, receiver, time);
-                  //console.log("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
-                }
-              }
-            }
-          }
-        });
+        // Sync = io.connect(serverTarget);
+        //
+        // Sync.on('message', data => {
+        //   console.log(data);
+        //   var audio;
+        //   var signalData = data;
+        //   var command = signalData.protocols;
+        //   var type = signalData.type;
+        //   var sender = signalData.sender;
+        //   var receiver = signalData.receiver;
+        //   var time = signalData.time;
+        //   var parameter = signalData.parameter;
+        //
+        //
+        //   if (command !== undefined && command !== null && command !== "") {
+        //
+        //     if (protocolLib[command] !== undefined) {
+        //       if (command === "anjungan_kunjungan_panggil") {
+        //         if (audio !== undefined && audio.audio !== undefined) {
+        //           if (!audio.paused) {
+        //             audio.audio.pause();
+        //             audio.audio.currentTime = 0;
+        //           } else {
+        //             //alert();
+        //           }
+        //         }
+        //         audio = protocolLib[command](command, type, parameter, sender, receiver, time);
+        //       } else if (command === "reset_password") {
+        //         if (receiver === __ME__) {
+        //           protocolLib[command](command, type, parameter, sender, receiver, time);
+        //         }
+        //       } else {
+        //         if (receiver === __ME__ || sender === __ME__ || receiver === "*" || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+        //           if (receiver === __ME__ || receiver === __MY_PRIVILEGES__.response_data[0]["uid"]) {
+        //             var audio = new Audio(),
+        //               i = 0;
+        //             audio.volume = 0.5;
+        //             audio.playbackRate = 0.1;
+        //             audio.loop = false;
+        //             var playlist = [
+        //               __HOST__ + "/audio/notif.mp3"
+        //             ];
+        //             var currentLength = 0;
+        //
+        //             audio.addEventListener('ended', function() {
+        //               i++;
+        //               if (i == playlist.length) {
+        //                 audio.pause();
+        //                 audio.currentTime = 0;
+        //                 i = 0;
+        //                 console.log("Finished");
+        //               } else {
+        //                 console.log("Playing : " + playlist[i]);
+        //                 audio.src = playlist[i];
+        //                 audio.play();
+        //               }
+        //             });
+        //
+        //             audio.src = playlist[0];
+        //             audio.currentTime = 0;
+        //             audio.volume = 0.5;
+        //             audio.playbackRate = 1;
+        //             audio.loop = false;
+        //             audio.play();
+        //           }
+        //           protocolLib[command](command, type, parameter, sender, receiver, time);
+        //           //console.log("Sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+        //         } else {
+        //           protocolLib[command](command, type, parameter, sender, receiver, time);
+        //           //console.log("Tidak sesuai " + __MY_PRIVILEGES__.response_data[0]["uid"]);
+        //         }
+        //       }
+        //     }
+        //   }
+        // });
 
       } else {
         console.log("WebSocket Not Supported");
@@ -1486,25 +1488,42 @@ $lastExist = '';
       monthName[11] = "Desember";
 
       $("#logoutButton").click(function() {
-        push_socket("system", "loggedOut", "*", "User logged out", "info").then(function() {
-          $.ajax({
-            url: __HOSTAPI__ + "/Pegawai",
-            type: "POST",
-            data: {
-              request: "logged_out"
-            },
-            beforeSend: function(request) {
-              request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
-            },
-            success: function(response) {
-              localStorage.removeItem("currentLoggedInState");
-              location.href = __HOSTNAME__;
-            },
-            error: function(response) {
-              console.log(response);
-            }
-          });
-        });
+            $.ajax({
+              url: __HOSTAPI__ + "/Pegawai",
+              type: "POST",
+              data: {
+                request: "logged_out"
+              },
+              beforeSend: function(request) {
+                request.setRequestHeader("Authorization", "Bearer " + <?php echo json_encode($_SESSION["token"]); ?>);
+              },
+              success: function(response) {
+                localStorage.removeItem("currentLoggedInState");
+                location.href = __HOSTNAME__;
+              },
+              error: function(response) {
+                console.log(response);
+              }
+            });
+        //push_socket("system", "loggedOut", "*", "User logged out", "info").then(function() {
+        //  $.ajax({
+        //    url: __HOSTAPI__ + "/Pegawai",
+        //    type: "POST",
+        //    data: {
+        //      request: "logged_out"
+        //    },
+        //    beforeSend: function(request) {
+        //      request.setRequestHeader("Authorization", "Bearer " + <?php //echo json_encode($_SESSION["token"]); ?>//);
+        //    },
+        //    success: function(response) {
+        //      localStorage.removeItem("currentLoggedInState");
+        //      location.href = __HOSTNAME__;
+        //    },
+        //    error: function(response) {
+        //      console.log(response);
+        //    }
+        //  });
+        //});
         return false;
       });
     });
